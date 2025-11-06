@@ -6,7 +6,8 @@
     "build": "spago build",
     "bundle": "spago bundle-app --main Main --to dist/app.js",
     "dev": "spago build --watch",
-    "serve": "python3 -m http.server 8000"
+    "serve": "http-server dist -p 8000 -o",
+    "start": "npm run bundle && npm run serve"
   },
   "keywords": [
     "purescript",
@@ -15,6 +16,7 @@
   "license": "MIT",
   "devDependencies": {
     "esbuild": "^0.25.12",
+    "http-server": "^14.1.1",
     "purescript": "^0.15.15",
     "spago": "^0.21.0"
   }

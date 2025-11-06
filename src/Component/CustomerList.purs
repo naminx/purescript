@@ -3,18 +3,27 @@ module Component.CustomerList where
 import Prelude
 
 import Component.Icons as Icons
-import Data.Array (snoc, sortBy, (!!))
+import Data.Array (drop, findIndex, length, slice, snoc, sortBy, take, (!!))
+import Data.Int (floor, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Ord (compare)
 import Data.String (toLower)
 import Database.Types (Customer, DatabaseInterface)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Web.Event.Event (Event)
+import Halogen.Query.HalogenM (HalogenM)
+import Effect (Effect)
+import Web.Event.Event (Event, EventType(..))
 import Web.Event.Event as Event
+import Web.HTML.HTMLElement (HTMLElement)
+import Web.HTML.HTMLElement as HTMLElement
+import Web.DOM.ParentNode (QuerySelector(..), querySelector)
+import Web.HTML.HTMLElement as HTMLElem
+import Web.DOM.Element as Element
+import Web.UIEvent.MouseEvent (MouseEvent)
 
 data SortField = SortById | SortByName
 
@@ -39,6 +48,8 @@ type State =
   , editingName :: String
   , newCustomerName :: String
   , sortState :: SortState
+  , scrollTop :: Number
+  , containerHeight :: Number
   }
 
 data Action
@@ -52,6 +63,8 @@ data Action
   | AddCustomer Event
   | DeleteCustomer Int
   | SortBy SortField
+  | HandleScroll Event
+  | ScrollToCustomer String
 
 type Output = Void
 
@@ -68,7 +81,9 @@ component db =
         , editingId: Nothing
         , editingName: ""
         , newCustomerName: ""
-        , sortState: { field: Nothing, direction: Ascending }
+        , sortState: { field: Just SortByName, direction: Ascending }
+        , scrollTop: 0.0
+        , containerHeight: 600.0
         }
     , render: render
     , eval: H.mkEval $ H.defaultEval
@@ -76,6 +91,35 @@ component db =
         , initialize = Just Initialize
         }
     }
+
+-- Virtual scrolling constants
+rowHeight :: Number
+rowHeight = 57.0 -- Height of each customer row in pixels
+
+overscan :: Int
+overscan = 5 -- Number of extra rows to render above and below visible area
+
+-- Calculate which rows should be rendered based on scroll position
+calculateVisibleRange :: State -> { start :: Int, end :: Int, totalHeight :: Number }
+calculateVisibleRange state =
+  let
+    sortedCustomers = applySorting state.sortState state.customers
+    totalRows = length sortedCustomers
+    totalHeight = toNumber totalRows * rowHeight
+    
+    -- Use a minimum container height to ensure initial render
+    effectiveHeight = max state.containerHeight 600.0
+    
+    -- Calculate visible range
+    startIndex = floor (state.scrollTop / rowHeight) - overscan
+    visibleRows = floor (effectiveHeight / rowHeight) + 1
+    endIndex = startIndex + visibleRows + (overscan * 2)
+    
+    -- Clamp to valid range
+    start = max 0 startIndex
+    end = min totalRows endIndex
+  in
+    { start, end, totalHeight }
 
 -- | Apply sorting to customer list
 applySorting :: SortState -> Array Customer -> Array Customer
@@ -99,18 +143,39 @@ render :: forall m. State -> H.ComponentHTML Action Slots m
 render state =
   let
     sortedCustomers = applySorting state.sortState state.customers
+    { start, end, totalHeight } = calculateVisibleRange state
+    visibleCustomers = slice start end sortedCustomers
+    offsetTop = toNumber start * rowHeight
   in
     HH.div
       [ HP.class_ (HH.ClassName "customer-app") ]
-      [ HH.h1_ [ HH.text "Customer Management" ]
+      [ HH.h1
+          [ HP.class_ (HH.ClassName "app-title") ] 
+          [ HH.text "Customer Management"
+          , HH.span 
+              [ HP.class_ (HH.ClassName "customer-count") ]
+              [ HH.text $ " (" <> show (length sortedCustomers) <> " customers)" ]
+          ]
       , HH.div
           [ HP.class_ (HH.ClassName "customer-list-container") ]
           [ renderTableHeader state.sortState
           , HH.div
-              [ HP.class_ (HH.ClassName "customer-list") ]
-              (map (renderCustomerRow state) sortedCustomers)
+              [ HP.class_ (HH.ClassName "customer-list")
+              , HE.onScroll HandleScroll
+              ]
+              [ HH.div
+                  [ HP.class_ (HH.ClassName "scroll-spacer")
+                  , HP.attr (HH.AttrName "style") $ "height: " <> show totalHeight <> "px"
+                  ]
+                  []
+              , HH.div
+                  [ HP.class_ (HH.ClassName "visible-rows")
+                  , HP.attr (HH.AttrName "style") $ "transform: translateY(" <> show offsetTop <> "px)"
+                  ]
+                  (map (renderCustomerRow state) visibleCustomers)
+              ]
+          , renderTableFooter state
           ]
-      , renderAddForm state
       , renderStyles
       ]
 
@@ -198,28 +263,27 @@ renderCustomerRow state customer =
           ]
       ]
 
-renderAddForm :: forall m. State -> H.ComponentHTML Action Slots m
-renderAddForm state =
-  HH.form
-    [ HP.class_ (HH.ClassName "add-customer-form")
-    , HE.onSubmit AddCustomer
-    ]
-    [ HH.input
-        [ HP.type_ HP.InputText
-        , HP.class_ (HH.ClassName "new-customer-input")
-        , HP.placeholder "New Customer Name"
-        , HP.value state.newCustomerName
-        , HE.onValueInput UpdateNewName
+renderTableFooter :: forall m. State -> H.ComponentHTML Action Slots m
+renderTableFooter state =
+  HH.div
+    [ HP.class_ (HH.ClassName "table-footer") ]
+    [ HH.form
+        [ HP.class_ (HH.ClassName "add-customer-form")
+        , HE.onSubmit AddCustomer
         ]
-    , HH.button
-        [ HP.type_ HP.ButtonSubmit
-        , HP.class_ (HH.ClassName "btn btn-add")
-        , HP.title "Add Customer"
-        ]
-        [ Icons.addIcon
-        , HH.span
-            [ HP.class_ (HH.ClassName "btn-text") ]
-            [ HH.text " Add" ]
+        [ HH.input
+            [ HP.type_ HP.InputText
+            , HP.class_ (HH.ClassName "new-customer-input")
+            , HP.placeholder "New Customer Name"
+            , HP.value state.newCustomerName
+            , HE.onValueInput UpdateNewName
+            ]
+        , HH.button
+            [ HP.type_ HP.ButtonSubmit
+            , HP.class_ (HH.ClassName "btn btn-add")
+            , HP.title "Add Customer"
+            ]
+            [ Icons.addIcon ]
         ]
     ]
 
@@ -244,7 +308,6 @@ renderStyles =
         max-width: 900px;
         margin: 0 auto;
         padding: 20px;
-        padding-bottom: 100px;
       }
       
       h1 {
@@ -306,10 +369,37 @@ renderStyles =
         color: #007bff;
       }
       
+      .app-title {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+      
+      .customer-count {
+        font-size: 16px;
+        color: #666;
+        font-weight: normal;
+      }
+      
       .customer-list {
-        max-height: 80vh;
+        max-height: calc(80vh - 120px);
+        min-height: 400px;
         overflow-y: auto;
         background-color: #fff;
+        position: relative;
+      }
+      
+      .scroll-spacer {
+        width: 100%;
+        pointer-events: none;
+      }
+      
+      .visible-rows {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        will-change: transform;
       }
       
       .customer-row {
@@ -318,6 +408,8 @@ renderStyles =
         padding: 15px;
         border-bottom: 1px solid #eee;
         gap: 15px;
+        min-height: 57px;
+        box-sizing: border-box;
       }
       
       .customer-row:last-child {
@@ -337,6 +429,9 @@ renderStyles =
       .customer-name {
         flex: 1;
         color: #333;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
       }
       
       .customer-name-input {
@@ -407,15 +502,19 @@ renderStyles =
         background-color: #c82333;
       }
       
-      .add-customer-form {
+      .table-footer {
+        background-color: #f8f9fa;
+        border-top: 2px solid #dee2e6;
         position: sticky;
         bottom: 0;
-        background-color: white;
-        padding: 20px;
-        border-top: 2px solid #ddd;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+      }
+      
+      .add-customer-form {
         display: flex;
         gap: 10px;
+        padding: 15px;
+        align-items: center;
       }
       
       .new-customer-input {
@@ -434,25 +533,25 @@ renderStyles =
       .btn-add {
         background-color: #28a745;
         color: white;
-        padding: 10px 20px;
+        padding: 10px 12px;
+        min-width: 44px;
       }
       
       .btn-add:hover {
         background-color: #218838;
-      }
-      
-      .btn-text {
-        font-weight: 500;
       }
     """ ]
 
 handleAction :: forall m. MonadAff m => DatabaseInterface m -> Action -> ComponentM m Unit
 handleAction db = case _ of
   Initialize -> do
+    log "Initialize action triggered"
     handleAction db LoadCustomers
   
   LoadCustomers -> do
+    log "LoadCustomers action triggered"
     customers <- H.lift $ db.getAllCustomers
+    log $ "Loaded " <> show (length customers) <> " customers"
     H.modify_ _ { customers = customers }
   
   StartEdit id name -> do
@@ -486,9 +585,11 @@ handleAction db = case _ of
     H.liftEffect $ Event.preventDefault event
     state <- H.get
     when (state.newCustomerName /= "") do
-      H.lift $ db.addNewCustomer state.newCustomerName
+      let customerName = state.newCustomerName
+      H.lift $ db.addNewCustomer customerName
       H.modify_ _ { newCustomerName = "" }
       handleAction db LoadCustomers
+      handleAction db (ScrollToCustomer customerName)
   
   DeleteCustomer id -> do
     H.lift $ db.deleteCustomer id
@@ -505,3 +606,30 @@ handleAction db = case _ of
           -- Different field or no field, start with ascending
           { field: Just field, direction: Ascending }
     H.modify_ _ { sortState = newSortState }
+  
+  HandleScroll event -> do
+    let mbTarget = Event.target event
+    case mbTarget >>= HTMLElement.fromEventTarget of
+      Just element -> do
+        scrollTop <- H.liftEffect $ getScrollTop element
+        clientHeight <- H.liftEffect $ getClientHeight element
+        H.modify_ _ 
+          { scrollTop = scrollTop
+          , containerHeight = clientHeight
+          }
+      Nothing -> pure unit
+  
+  ScrollToCustomer name -> do
+    state <- H.get
+    let sortedCustomers = applySorting state.sortState state.customers
+    case findIndex (\c -> c.name == name) sortedCustomers of
+      Just index -> do
+        -- Calculate scroll position to show customer just above footer
+        let targetScrollTop = max 0.0 (toNumber index * rowHeight - state.containerHeight + rowHeight + 60.0)
+        H.liftEffect $ scrollToPosition targetScrollTop
+      Nothing -> pure unit
+
+-- FFI helpers for getting scroll properties
+foreign import getScrollTop :: HTMLElement -> Effect Number
+foreign import getClientHeight :: HTMLElement -> Effect Number
+foreign import scrollToPosition :: Number -> Effect Unit

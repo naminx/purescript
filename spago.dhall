@@ -11,11 +11,15 @@ You can edit this file as you like.
   , "either"
   , "halogen"
   , "halogen-svg-elems"
+  , "integers"
   , "maybe"
+  , "numbers"
   , "prelude"
   , "refs"
   , "strings"
+  , "web-dom"
   , "web-events"
+  , "web-html"
   , "web-uievents"
   ]
 , packages = ./packages.dhall

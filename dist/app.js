@@ -1,4 +1,27 @@
 (() => {
+  // output/Component.CustomerList/foreign.js
+  var getScrollTop = function(element4) {
+    return function() {
+      return element4.scrollTop;
+    };
+  };
+  var getClientHeight = function(element4) {
+    return function() {
+      return element4.clientHeight;
+    };
+  };
+  var scrollToPosition = function(scrollTop2) {
+    return function() {
+      const listElement = document.querySelector(".customer-list");
+      if (listElement) {
+        listElement.scrollTo({
+          top: scrollTop2,
+          behavior: "smooth"
+        });
+      }
+    };
+  };
+
   // output/Control.Semigroupoid/index.js
   var semigroupoidFn = {
     compose: function(f) {
@@ -203,11 +226,15 @@
     };
   };
   var eqIntImpl = refEq;
+  var eqNumberImpl = refEq;
   var eqStringImpl = refEq;
 
   // output/Data.Eq/index.js
   var eqString = {
     eq: eqStringImpl
+  };
+  var eqNumber = {
+    eq: eqNumberImpl
   };
   var eqInt = {
     eq: eqIntImpl
@@ -229,6 +256,7 @@
     };
   };
   var ordIntImpl = unsafeCompareImpl;
+  var ordNumberImpl = unsafeCompareImpl;
   var ordStringImpl = unsafeCompareImpl;
 
   // output/Data.Ord/index.js
@@ -237,6 +265,14 @@
       compare: ordStringImpl(LT.value)(EQ.value)(GT.value),
       Eq0: function() {
         return eqString;
+      }
+    };
+  })();
+  var ordNumber = /* @__PURE__ */ (function() {
+    return {
+      compare: ordNumberImpl(LT.value)(EQ.value)(GT.value),
+      Eq0: function() {
+        return eqNumber;
       }
     };
   })();
@@ -250,6 +286,48 @@
   })();
   var compare = function(dict) {
     return dict.compare;
+  };
+  var max = function(dictOrd) {
+    var compare3 = compare(dictOrd);
+    return function(x) {
+      return function(y) {
+        var v2 = compare3(x)(y);
+        if (v2 instanceof LT) {
+          return y;
+        }
+        ;
+        if (v2 instanceof EQ) {
+          return x;
+        }
+        ;
+        if (v2 instanceof GT) {
+          return x;
+        }
+        ;
+        throw new Error("Failed pattern match at Data.Ord (line 181, column 3 - line 184, column 12): " + [v2.constructor.name]);
+      };
+    };
+  };
+  var min = function(dictOrd) {
+    var compare3 = compare(dictOrd);
+    return function(x) {
+      return function(y) {
+        var v2 = compare3(x)(y);
+        if (v2 instanceof LT) {
+          return x;
+        }
+        ;
+        if (v2 instanceof EQ) {
+          return x;
+        }
+        ;
+        if (v2 instanceof GT) {
+          return y;
+        }
+        ;
+        throw new Error("Failed pattern match at Data.Ord (line 172, column 3 - line 175, column 12): " + [v2.constructor.name]);
+      };
+    };
   };
 
   // output/Data.Show/foreign.js
@@ -636,10 +714,27 @@
   };
 
   // output/Data.Bounded/foreign.js
+  var topInt = 2147483647;
+  var bottomInt = -2147483648;
   var topChar = String.fromCharCode(65535);
   var bottomChar = String.fromCharCode(0);
   var topNumber = Number.POSITIVE_INFINITY;
   var bottomNumber = Number.NEGATIVE_INFINITY;
+
+  // output/Data.Bounded/index.js
+  var top = function(dict) {
+    return dict.top;
+  };
+  var boundedInt = {
+    top: topInt,
+    bottom: bottomInt,
+    Ord0: function() {
+      return ordInt;
+    }
+  };
+  var bottom = function(dict) {
+    return dict.bottom;
+  };
 
   // output/Data.Maybe/index.js
   var identity3 = /* @__PURE__ */ identity(categoryFn);
@@ -972,6 +1067,9 @@
       return out;
     };
   })();
+  var sliceImpl = function(s2, e, l2) {
+    return l2.slice(s2, e);
+  };
 
   // output/Control.Bind/index.js
   var discard = function(dict) {
@@ -994,11 +1092,11 @@
     };
   };
   var composeKleisli = function(dictBind) {
-    var bind15 = bind(dictBind);
+    var bind16 = bind(dictBind);
     return function(f) {
       return function(g) {
         return function(a3) {
-          return bind15(f(a3))(g);
+          return bind16(f(a3))(g);
         };
       };
     };
@@ -1023,12 +1121,12 @@
   };
   var ap = function(dictMonad) {
     var bind7 = bind(dictMonad.Bind1());
-    var pure10 = pure(dictMonad.Applicative0());
+    var pure11 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a3) {
         return bind7(f)(function(f$prime) {
           return bind7(a3)(function(a$prime) {
-            return pure10(f$prime(a$prime));
+            return pure11(f$prime(a$prime));
           });
         });
       };
@@ -1338,13 +1436,13 @@
   };
   var traverse_ = function(dictApplicative) {
     var applySecond2 = applySecond(dictApplicative.Apply0());
-    var pure10 = pure(dictApplicative);
+    var pure11 = pure(dictApplicative);
     return function(dictFoldable) {
       var foldr22 = foldr(dictFoldable);
       return function(f) {
         return foldr22(function($454) {
           return applySecond2(f($454));
-        })(pure10(unit));
+        })(pure11(unit));
       };
     };
   };
@@ -1480,6 +1578,7 @@
       return withArray(push(x))(xs)();
     };
   };
+  var slice = /* @__PURE__ */ runFn3(sliceImpl);
   var findIndex = /* @__PURE__ */ (function() {
     return runFn4(findIndexImpl)(Just.create)(Nothing.value);
   })();
@@ -2205,10 +2304,10 @@
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
     var map23 = map(Monad0.Bind1().Apply0().Functor0());
-    var pure10 = pure(Monad0.Applicative0());
+    var pure11 = pure(Monad0.Applicative0());
     return function(a3) {
       return catchError1(map23(Right.create)(a3))(function($52) {
-        return pure10(Left.create($52));
+        return pure11(Left.create($52));
       });
     };
   };
@@ -2280,12 +2379,12 @@
   };
   var bindExceptT = function(dictMonad) {
     var bind7 = bind(dictMonad.Bind1());
-    var pure10 = pure(dictMonad.Applicative0());
+    var pure11 = pure(dictMonad.Applicative0());
     return {
       bind: function(v2) {
         return function(k) {
           return bind7(v2)(either(function($187) {
-            return pure10(Left.create($187));
+            return pure11(Left.create($187));
           })(function(a3) {
             var v1 = k(a3);
             return v1;
@@ -2332,6 +2431,51 @@
         return monadExceptT1;
       }
     };
+  };
+
+  // output/Data.Int/foreign.js
+  var fromNumberImpl = function(just) {
+    return function(nothing) {
+      return function(n) {
+        return (n | 0) === n ? just(n) : nothing;
+      };
+    };
+  };
+  var toNumber = function(n) {
+    return n;
+  };
+
+  // output/Data.Number/foreign.js
+  var isFiniteImpl = isFinite;
+  var floor = Math.floor;
+
+  // output/Data.Int/index.js
+  var top2 = /* @__PURE__ */ top(boundedInt);
+  var bottom2 = /* @__PURE__ */ bottom(boundedInt);
+  var fromNumber = /* @__PURE__ */ (function() {
+    return fromNumberImpl(Just.create)(Nothing.value);
+  })();
+  var unsafeClamp = function(x) {
+    if (!isFiniteImpl(x)) {
+      return 0;
+    }
+    ;
+    if (x >= toNumber(top2)) {
+      return top2;
+    }
+    ;
+    if (x <= toNumber(bottom2)) {
+      return bottom2;
+    }
+    ;
+    if (otherwise) {
+      return fromMaybe(0)(fromNumber(x));
+    }
+    ;
+    throw new Error("Failed pattern match at Data.Int (line 72, column 1 - line 72, column 29): " + [x.constructor.name]);
+  };
+  var floor2 = function($39) {
+    return unsafeClamp(floor($39));
   };
 
   // output/Data.NonEmpty/index.js
@@ -3114,7 +3258,6 @@
   })();
   var form = /* @__PURE__ */ element2("form");
   var h1 = /* @__PURE__ */ element2("h1");
-  var h1_ = /* @__PURE__ */ h1([]);
   var input = function(props) {
     return element2("input")(props)([]);
   };
@@ -3145,6 +3288,26 @@
   var editIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ path([/* @__PURE__ */ attr2("d")("M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")]), /* @__PURE__ */ path([/* @__PURE__ */ attr2("d")("M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")])]);
   var deleteIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("3 6 5 6 21 6")]), /* @__PURE__ */ path([/* @__PURE__ */ attr2("d")("M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")]), /* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("10"), /* @__PURE__ */ attr2("y1")("11"), /* @__PURE__ */ attr2("x2")("10"), /* @__PURE__ */ attr2("y2")("17")]), /* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("14"), /* @__PURE__ */ attr2("y1")("11"), /* @__PURE__ */ attr2("x2")("14"), /* @__PURE__ */ attr2("y2")("17")])]);
   var addIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("12"), /* @__PURE__ */ attr2("y1")("5"), /* @__PURE__ */ attr2("x2")("12"), /* @__PURE__ */ attr2("y2")("19")]), /* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("5"), /* @__PURE__ */ attr2("y1")("12"), /* @__PURE__ */ attr2("x2")("19"), /* @__PURE__ */ attr2("y2")("12")])]);
+
+  // output/Effect.Console/foreign.js
+  var log2 = function(s2) {
+    return function() {
+      console.log(s2);
+    };
+  };
+  var warn = function(s2) {
+    return function() {
+      console.warn(s2);
+    };
+  };
+
+  // output/Effect.Class.Console/index.js
+  var log3 = function(dictMonadEffect) {
+    var $67 = liftEffect(dictMonadEffect);
+    return function($68) {
+      return $67(log2($68));
+    };
+  };
 
   // output/Data.Exists/index.js
   var runExists = unsafeCoerce2;
@@ -3671,7 +3834,7 @@
     return Lift.create;
   })();
   var goLeft = function(dictApplicative) {
-    var pure10 = pure(dictApplicative);
+    var pure11 = pure(dictApplicative);
     return function(fStack) {
       return function(valStack) {
         return function(nat) {
@@ -3679,7 +3842,7 @@
             return function(count) {
               if (func instanceof Pure) {
                 return new Tuple(new Cons({
-                  func: pure10(func.value0),
+                  func: pure11(func.value0),
                   count
                 }, fStack), valStack);
               }
@@ -3750,7 +3913,7 @@
   };
   var foldFreeAp = function(dictApplicative) {
     var goApply1 = goApply(dictApplicative);
-    var pure10 = pure(dictApplicative);
+    var pure11 = pure(dictApplicative);
     var goLeft1 = goLeft(dictApplicative);
     return function(nat) {
       return function(z2) {
@@ -3759,7 +3922,7 @@
           var $tco_result;
           function $tco_loop(v2) {
             if (v2.value1.value0 instanceof Pure) {
-              var v1 = goApply1(v2.value0)(v2.value1.value1)(pure10(v2.value1.value0.value0));
+              var v1 = goApply1(v2.value0)(v2.value1.value1)(pure11(v2.value1.value0.value0));
               if (v1 instanceof Left) {
                 $tco_done = true;
                 return v1.value0;
@@ -5798,10 +5961,10 @@
   // output/Foreign.Index/index.js
   var unsafeReadProp = function(dictMonad) {
     var fail2 = fail(dictMonad);
-    var pure10 = pure(applicativeExceptT(dictMonad));
+    var pure11 = pure(applicativeExceptT(dictMonad));
     return function(k) {
       return function(value14) {
-        return unsafeReadPropImpl(fail2(new TypeMismatch("object", typeOf(value14))), pure10, k, value14);
+        return unsafeReadPropImpl(fail2(new TypeMismatch("object", typeOf(value14))), pure11, k, value14);
       };
     };
   };
@@ -5813,6 +5976,9 @@
   function _currentTarget(e) {
     return e.currentTarget;
   }
+  function _target(e) {
+    return e.target;
+  }
   function preventDefault(e) {
     return function() {
       return e.preventDefault();
@@ -5820,6 +5986,9 @@
   }
 
   // output/Web.Event.Event/index.js
+  var target = function($3) {
+    return toMaybe(_target($3));
+  };
   var currentTarget = function($5) {
     return toMaybe(_currentTarget($5));
   };
@@ -5858,6 +6027,7 @@
       return $15(mouseHandler($16));
     };
   })();
+  var onScroll = /* @__PURE__ */ handler2("scroll");
   var onSubmit = /* @__PURE__ */ handler2("submit");
   var addForeignPropHandler = function(key) {
     return function(prop3) {
@@ -5877,20 +6047,45 @@
   };
   var onValueInput = /* @__PURE__ */ addForeignPropHandler(input2)("value")(readString2);
 
+  // output/Web.HTML.HTMLElement/foreign.js
+  function _read(nothing, just, value14) {
+    var tag = Object.prototype.toString.call(value14);
+    if (tag.indexOf("[object HTML") === 0 && tag.indexOf("Element]") === tag.length - 8) {
+      return just(value14);
+    } else {
+      return nothing;
+    }
+  }
+
+  // output/Web.HTML.HTMLElement/index.js
+  var toNode2 = unsafeCoerce2;
+  var fromEventTarget2 = function(x) {
+    return _read(Nothing.value, Just.create, x);
+  };
+  var fromElement = function(x) {
+    return _read(Nothing.value, Just.create, x);
+  };
+
   // output/Component.CustomerList/index.js
-  var eq2 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
-  var show3 = /* @__PURE__ */ show(showInt);
   var type_4 = /* @__PURE__ */ type_(isPropInputType);
   var value3 = /* @__PURE__ */ value(isPropString);
   var type_1 = /* @__PURE__ */ type_(isPropButtonType);
+  var eq2 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
+  var show3 = /* @__PURE__ */ show(showInt);
+  var compare2 = /* @__PURE__ */ compare(ordInt);
+  var compare12 = /* @__PURE__ */ compare(ordString);
+  var max4 = /* @__PURE__ */ max(ordInt);
+  var max1 = /* @__PURE__ */ max(ordNumber);
+  var min4 = /* @__PURE__ */ min(ordInt);
+  var discard2 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind3 = /* @__PURE__ */ bind(bindHalogenM);
   var lift3 = /* @__PURE__ */ lift(monadTransHalogenM);
   var modify_3 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get2 = /* @__PURE__ */ get(monadStateHalogenM);
-  var discard2 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var when2 = /* @__PURE__ */ when(applicativeHalogenM);
-  var compare2 = /* @__PURE__ */ compare(ordInt);
-  var compare12 = /* @__PURE__ */ compare(ordString);
+  var bind12 = /* @__PURE__ */ bind(bindMaybe);
+  var pure6 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var show1 = /* @__PURE__ */ show(showNumber);
   var map11 = /* @__PURE__ */ map(functorArray);
   var SortById = /* @__PURE__ */ (function() {
     function SortById2() {
@@ -6014,6 +6209,26 @@
     };
     return SortBy2;
   })();
+  var HandleScroll = /* @__PURE__ */ (function() {
+    function HandleScroll2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    HandleScroll2.create = function(value0) {
+      return new HandleScroll2(value0);
+    };
+    return HandleScroll2;
+  })();
+  var ScrollToCustomer = /* @__PURE__ */ (function() {
+    function ScrollToCustomer2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ScrollToCustomer2.create = function(value0) {
+      return new ScrollToCustomer2(value0);
+    };
+    return ScrollToCustomer2;
+  })();
   var toggleDirection = function(v2) {
     if (v2 instanceof Ascending) {
       return Descending.value;
@@ -6023,9 +6238,13 @@
       return Ascending.value;
     }
     ;
-    throw new Error("Failed pattern match at Component.CustomerList (line 27, column 1 - line 27, column 50): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at Component.CustomerList (line 36, column 1 - line 36, column 50): " + [v2.constructor.name]);
   };
-  var renderStyles = /* @__PURE__ */ style_([/* @__PURE__ */ text("\n      * {\n        box-sizing: border-box;\n      }\n      \n      body {\n        margin: 0;\n        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',\n          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',\n          sans-serif;\n        -webkit-font-smoothing: antialiased;\n        -moz-osx-font-smoothing: grayscale;\n      }\n      \n      .customer-app {\n        max-width: 900px;\n        margin: 0 auto;\n        padding: 20px;\n        padding-bottom: 100px;\n      }\n      \n      h1 {\n        color: #333;\n        margin-bottom: 20px;\n      }\n      \n      .customer-list-container {\n        border: 1px solid #ddd;\n        border-radius: 8px;\n        overflow: hidden;\n        margin-bottom: 20px;\n      }\n      \n      .table-header {\n        display: flex;\n        align-items: center;\n        padding: 12px 15px;\n        background-color: #f8f9fa;\n        border-bottom: 2px solid #dee2e6;\n        font-weight: 600;\n        color: #495057;\n        gap: 15px;\n      }\n      \n      .header-cell {\n        display: flex;\n        align-items: center;\n      }\n      \n      .header-id {\n        min-width: 60px;\n      }\n      \n      .header-name {\n        flex: 1;\n      }\n      \n      .header-actions {\n        min-width: 120px;\n        justify-content: center;\n      }\n      \n      .sort-button {\n        background: none;\n        border: none;\n        cursor: pointer;\n        padding: 4px 8px;\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        color: #495057;\n        font-weight: 600;\n        font-size: 14px;\n        transition: color 0.2s;\n      }\n      \n      .sort-button:hover {\n        color: #007bff;\n      }\n      \n      .customer-list {\n        max-height: 80vh;\n        overflow-y: auto;\n        background-color: #fff;\n      }\n      \n      .customer-row {\n        display: flex;\n        align-items: center;\n        padding: 15px;\n        border-bottom: 1px solid #eee;\n        gap: 15px;\n      }\n      \n      .customer-row:last-child {\n        border-bottom: none;\n      }\n      \n      .customer-row:hover {\n        background-color: #f8f9fa;\n      }\n      \n      .customer-id {\n        font-weight: bold;\n        color: #666;\n        min-width: 60px;\n      }\n      \n      .customer-name {\n        flex: 1;\n        color: #333;\n      }\n      \n      .customer-name-input {\n        flex: 1;\n        padding: 8px 12px;\n        border: 2px solid #007bff;\n        border-radius: 4px;\n        font-size: 14px;\n      }\n      \n      .customer-name-input:focus {\n        outline: none;\n        border-color: #0056b3;\n      }\n      \n      .customer-actions {\n        display: flex;\n        gap: 8px;\n        min-width: 120px;\n        justify-content: flex-end;\n      }\n      \n      .btn {\n        padding: 8px 12px;\n        border: none;\n        border-radius: 4px;\n        cursor: pointer;\n        font-size: 14px;\n        font-weight: 500;\n        transition: all 0.2s;\n        display: flex;\n        align-items: center;\n        gap: 6px;\n      }\n      \n      .btn:hover {\n        transform: translateY(-1px);\n        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n      }\n      \n      .btn-edit {\n        background-color: #007bff;\n        color: white;\n        padding: 6px 10px;\n      }\n      \n      .btn-edit:hover {\n        background-color: #0056b3;\n      }\n      \n      .btn-save {\n        background-color: #28a745;\n        color: white;\n        padding: 6px 10px;\n      }\n      \n      .btn-save:hover {\n        background-color: #218838;\n      }\n      \n      .btn-delete {\n        background-color: #dc3545;\n        color: white;\n        padding: 6px 10px;\n      }\n      \n      .btn-delete:hover {\n        background-color: #c82333;\n      }\n      \n      .add-customer-form {\n        position: sticky;\n        bottom: 0;\n        background-color: white;\n        padding: 20px;\n        border-top: 2px solid #ddd;\n        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);\n        display: flex;\n        gap: 10px;\n      }\n      \n      .new-customer-input {\n        flex: 1;\n        padding: 10px 15px;\n        border: 2px solid #ddd;\n        border-radius: 4px;\n        font-size: 14px;\n      }\n      \n      .new-customer-input:focus {\n        outline: none;\n        border-color: #007bff;\n      }\n      \n      .btn-add {\n        background-color: #28a745;\n        color: white;\n        padding: 10px 20px;\n      }\n      \n      .btn-add:hover {\n        background-color: #218838;\n      }\n      \n      .btn-text {\n        font-weight: 500;\n      }\n    ")]);
+  var rowHeight = 57;
+  var renderTableFooter = function(state3) {
+    return div2([class_("table-footer")])([form([class_("add-customer-form"), onSubmit(AddCustomer.create)])([input([type_4(InputText.value), class_("new-customer-input"), placeholder("New Customer Name"), value3(state3.newCustomerName), onValueInput(UpdateNewName.create)]), button([type_1(ButtonSubmit.value), class_("btn btn-add"), title("Add Customer")])([addIcon])])]);
+  };
+  var renderStyles = /* @__PURE__ */ style_([/* @__PURE__ */ text("\n      * {\n        box-sizing: border-box;\n      }\n      \n      body {\n        margin: 0;\n        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',\n          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',\n          sans-serif;\n        -webkit-font-smoothing: antialiased;\n        -moz-osx-font-smoothing: grayscale;\n      }\n      \n      .customer-app {\n        max-width: 900px;\n        margin: 0 auto;\n        padding: 20px;\n      }\n      \n      h1 {\n        color: #333;\n        margin-bottom: 20px;\n      }\n      \n      .customer-list-container {\n        border: 1px solid #ddd;\n        border-radius: 8px;\n        overflow: hidden;\n        margin-bottom: 20px;\n      }\n      \n      .table-header {\n        display: flex;\n        align-items: center;\n        padding: 12px 15px;\n        background-color: #f8f9fa;\n        border-bottom: 2px solid #dee2e6;\n        font-weight: 600;\n        color: #495057;\n        gap: 15px;\n      }\n      \n      .header-cell {\n        display: flex;\n        align-items: center;\n      }\n      \n      .header-id {\n        min-width: 60px;\n      }\n      \n      .header-name {\n        flex: 1;\n      }\n      \n      .header-actions {\n        min-width: 120px;\n        justify-content: center;\n      }\n      \n      .sort-button {\n        background: none;\n        border: none;\n        cursor: pointer;\n        padding: 4px 8px;\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        color: #495057;\n        font-weight: 600;\n        font-size: 14px;\n        transition: color 0.2s;\n      }\n      \n      .sort-button:hover {\n        color: #007bff;\n      }\n      \n      .app-title {\n        display: flex;\n        align-items: baseline;\n        gap: 10px;\n      }\n      \n      .customer-count {\n        font-size: 16px;\n        color: #666;\n        font-weight: normal;\n      }\n      \n      .customer-list {\n        max-height: calc(80vh - 120px);\n        min-height: 400px;\n        overflow-y: auto;\n        background-color: #fff;\n        position: relative;\n      }\n      \n      .scroll-spacer {\n        width: 100%;\n        pointer-events: none;\n      }\n      \n      .visible-rows {\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        will-change: transform;\n      }\n      \n      .customer-row {\n        display: flex;\n        align-items: center;\n        padding: 15px;\n        border-bottom: 1px solid #eee;\n        gap: 15px;\n        min-height: 57px;\n        box-sizing: border-box;\n      }\n      \n      .customer-row:last-child {\n        border-bottom: none;\n      }\n      \n      .customer-row:hover {\n        background-color: #f8f9fa;\n      }\n      \n      .customer-id {\n        font-weight: bold;\n        color: #666;\n        min-width: 60px;\n      }\n      \n      .customer-name {\n        flex: 1;\n        color: #333;\n        word-wrap: break-word;\n        overflow-wrap: break-word;\n        hyphens: auto;\n      }\n      \n      .customer-name-input {\n        flex: 1;\n        padding: 8px 12px;\n        border: 2px solid #007bff;\n        border-radius: 4px;\n        font-size: 14px;\n      }\n      \n      .customer-name-input:focus {\n        outline: none;\n        border-color: #0056b3;\n      }\n      \n      .customer-actions {\n        display: flex;\n        gap: 8px;\n        min-width: 120px;\n        justify-content: flex-end;\n      }\n      \n      .btn {\n        padding: 8px 12px;\n        border: none;\n        border-radius: 4px;\n        cursor: pointer;\n        font-size: 14px;\n        font-weight: 500;\n        transition: all 0.2s;\n        display: flex;\n        align-items: center;\n        gap: 6px;\n      }\n      \n      .btn:hover {\n        transform: translateY(-1px);\n        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n      }\n      \n      .btn-edit {\n        background-color: #007bff;\n        color: white;\n        padding: 6px 10px;\n      }\n      \n      .btn-edit:hover {\n        background-color: #0056b3;\n      }\n      \n      .btn-save {\n        background-color: #28a745;\n        color: white;\n        padding: 6px 10px;\n      }\n      \n      .btn-save:hover {\n        background-color: #218838;\n      }\n      \n      .btn-delete {\n        background-color: #dc3545;\n        color: white;\n        padding: 6px 10px;\n      }\n      \n      .btn-delete:hover {\n        background-color: #c82333;\n      }\n      \n      .table-footer {\n        background-color: #f8f9fa;\n        border-top: 2px solid #dee2e6;\n        position: sticky;\n        bottom: 0;\n        z-index: 10;\n      }\n      \n      .add-customer-form {\n        display: flex;\n        gap: 10px;\n        padding: 15px;\n        align-items: center;\n      }\n      \n      .new-customer-input {\n        flex: 1;\n        padding: 10px 15px;\n        border: 2px solid #ddd;\n        border-radius: 4px;\n        font-size: 14px;\n      }\n      \n      .new-customer-input:focus {\n        outline: none;\n        border-color: #007bff;\n      }\n      \n      .btn-add {\n        background-color: #28a745;\n        color: white;\n        padding: 10px 12px;\n        min-width: 44px;\n      }\n      \n      .btn-add:hover {\n        background-color: #218838;\n      }\n    ")]);
   var renderCustomerRow = function(state3) {
     return function(customer) {
       var isEditing = eq2(state3.editingId)(new Just(customer.id));
@@ -6050,9 +6269,7 @@
       }), title("Delete")])([deleteIcon])])]);
     };
   };
-  var renderAddForm = function(state3) {
-    return form([class_("add-customer-form"), onSubmit(AddCustomer.create)])([input([type_4(InputText.value), class_("new-customer-input"), placeholder("New Customer Name"), value3(state3.newCustomerName), onValueInput(UpdateNewName.create)]), button([type_1(ButtonSubmit.value), class_("btn btn-add"), title("Add Customer")])([addIcon, span2([class_("btn-text")])([text(" Add")])])]);
-  };
+  var overscan = 5;
   var eqSortField = {
     eq: function(x) {
       return function(y) {
@@ -6068,187 +6285,10 @@
       };
     }
   };
-  var eq12 = /* @__PURE__ */ eq(eqSortField);
-  var handleAction = function(dictMonadAff) {
-    var MonadEffect0 = dictMonadAff.MonadEffect0();
-    var lift1 = lift3(MonadEffect0.Monad0());
-    var liftEffect7 = liftEffect(monadEffectHalogenM(MonadEffect0));
-    return function(db) {
-      return function(v2) {
-        if (v2 instanceof Initialize2) {
-          return handleAction(dictMonadAff)(db)(LoadCustomers.value);
-        }
-        ;
-        if (v2 instanceof LoadCustomers) {
-          return bind3(lift1(db.getAllCustomers))(function(customers) {
-            return modify_3(function(v1) {
-              var $56 = {};
-              for (var $57 in v1) {
-                if ({}.hasOwnProperty.call(v1, $57)) {
-                  $56[$57] = v1[$57];
-                }
-                ;
-              }
-              ;
-              $56.customers = customers;
-              return $56;
-            });
-          });
-        }
-        ;
-        if (v2 instanceof StartEdit) {
-          return modify_3(function(v1) {
-            var $59 = {};
-            for (var $60 in v1) {
-              if ({}.hasOwnProperty.call(v1, $60)) {
-                $59[$60] = v1[$60];
-              }
-              ;
-            }
-            ;
-            $59.editingId = new Just(v2.value0);
-            $59.editingName = v2.value1;
-            return $59;
-          });
-        }
-        ;
-        if (v2 instanceof UpdateEditName) {
-          return modify_3(function(v1) {
-            var $64 = {};
-            for (var $65 in v1) {
-              if ({}.hasOwnProperty.call(v1, $65)) {
-                $64[$65] = v1[$65];
-              }
-              ;
-            }
-            ;
-            $64.editingName = v2.value0;
-            return $64;
-          });
-        }
-        ;
-        if (v2 instanceof SaveEdit) {
-          return bind3(get2)(function(state3) {
-            return discard2(lift1(db.updateCustomerName({
-              id: v2.value0,
-              name: state3.editingName
-            })))(function() {
-              return discard2(modify_3(function(v1) {
-                var $68 = {};
-                for (var $69 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $69)) {
-                    $68[$69] = v1[$69];
-                  }
-                  ;
-                }
-                ;
-                $68.editingId = Nothing.value;
-                $68.editingName = "";
-                return $68;
-              }))(function() {
-                return handleAction(dictMonadAff)(db)(LoadCustomers.value);
-              });
-            });
-          });
-        }
-        ;
-        if (v2 instanceof CancelEdit) {
-          return modify_3(function(v1) {
-            var $72 = {};
-            for (var $73 in v1) {
-              if ({}.hasOwnProperty.call(v1, $73)) {
-                $72[$73] = v1[$73];
-              }
-              ;
-            }
-            ;
-            $72.editingId = Nothing.value;
-            $72.editingName = "";
-            return $72;
-          });
-        }
-        ;
-        if (v2 instanceof UpdateNewName) {
-          return modify_3(function(v1) {
-            var $75 = {};
-            for (var $76 in v1) {
-              if ({}.hasOwnProperty.call(v1, $76)) {
-                $75[$76] = v1[$76];
-              }
-              ;
-            }
-            ;
-            $75.newCustomerName = v2.value0;
-            return $75;
-          });
-        }
-        ;
-        if (v2 instanceof AddCustomer) {
-          return discard2(liftEffect7(preventDefault(v2.value0)))(function() {
-            return bind3(get2)(function(state3) {
-              return when2(state3.newCustomerName !== "")(discard2(lift1(db.addNewCustomer(state3.newCustomerName)))(function() {
-                return discard2(modify_3(function(v1) {
-                  var $79 = {};
-                  for (var $80 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $80)) {
-                      $79[$80] = v1[$80];
-                    }
-                    ;
-                  }
-                  ;
-                  $79.newCustomerName = "";
-                  return $79;
-                }))(function() {
-                  return handleAction(dictMonadAff)(db)(LoadCustomers.value);
-                });
-              }));
-            });
-          });
-        }
-        ;
-        if (v2 instanceof DeleteCustomer) {
-          return discard2(lift1(db.deleteCustomer(v2.value0)))(function() {
-            return handleAction(dictMonadAff)(db)(LoadCustomers.value);
-          });
-        }
-        ;
-        if (v2 instanceof SortBy) {
-          return bind3(get2)(function(state3) {
-            var newSortState = (function() {
-              if (state3.sortState.field instanceof Just && eq12(state3.sortState.field.value0)(v2.value0)) {
-                return {
-                  field: new Just(v2.value0),
-                  direction: toggleDirection(state3.sortState.direction)
-                };
-              }
-              ;
-              return {
-                field: new Just(v2.value0),
-                direction: Ascending.value
-              };
-            })();
-            return modify_3(function(v1) {
-              var $86 = {};
-              for (var $87 in v1) {
-                if ({}.hasOwnProperty.call(v1, $87)) {
-                  $86[$87] = v1[$87];
-                }
-                ;
-              }
-              ;
-              $86.sortState = newSortState;
-              return $86;
-            });
-          });
-        }
-        ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 450, column 19 - line 507, column 45): " + [v2.constructor.name]);
-      };
-    };
-  };
+  var eq22 = /* @__PURE__ */ eq(eqSortField);
   var renderSortIcon = function(field) {
     return function(v2) {
-      if (v2.field instanceof Just && eq12(v2.field.value0)(field)) {
+      if (v2.field instanceof Just && eq22(v2.field.value0)(field)) {
         if (v2.direction instanceof Ascending) {
           return sortAscIcon;
         }
@@ -6257,7 +6297,7 @@
           return sortDescIcon;
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 150, column 7 - line 152, column 41): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 215, column 7 - line 217, column 41): " + [v2.direction.constructor.name]);
       }
       ;
       return sortNeutralIcon;
@@ -6294,7 +6334,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 87, column 5 - line 89, column 65): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 131, column 5 - line 133, column 65): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByName) {
@@ -6315,15 +6355,270 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 94, column 5 - line 96, column 89): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 138, column 5 - line 140, column 89): " + [v2.direction.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Component.CustomerList (line 81, column 1 - line 81, column 62): " + [v2.constructor.name, v1.constructor.name]);
+      throw new Error("Failed pattern match at Component.CustomerList (line 125, column 1 - line 125, column 62): " + [v2.constructor.name, v1.constructor.name]);
+    };
+  };
+  var calculateVisibleRange = function(state3) {
+    var startIndex = floor2(state3.scrollTop / rowHeight) - overscan | 0;
+    var start2 = max4(0)(startIndex);
+    var sortedCustomers = applySorting(state3.sortState)(state3.customers);
+    var totalRows = length(sortedCustomers);
+    var totalHeight = toNumber(totalRows) * rowHeight;
+    var effectiveHeight = max1(state3.containerHeight)(600);
+    var visibleRows = floor2(effectiveHeight / rowHeight) + 1 | 0;
+    var endIndex = (startIndex + visibleRows | 0) + (overscan * 2 | 0) | 0;
+    var end = min4(totalRows)(endIndex);
+    return {
+      start: start2,
+      end,
+      totalHeight
+    };
+  };
+  var handleAction = function(dictMonadAff) {
+    var MonadEffect0 = dictMonadAff.MonadEffect0();
+    var monadEffectHalogenM2 = monadEffectHalogenM(MonadEffect0);
+    var log4 = log3(monadEffectHalogenM2);
+    var lift1 = lift3(MonadEffect0.Monad0());
+    var liftEffect7 = liftEffect(monadEffectHalogenM2);
+    return function(db) {
+      return function(v2) {
+        if (v2 instanceof Initialize2) {
+          return discard2(log4("Initialize action triggered"))(function() {
+            return handleAction(dictMonadAff)(db)(LoadCustomers.value);
+          });
+        }
+        ;
+        if (v2 instanceof LoadCustomers) {
+          return discard2(log4("LoadCustomers action triggered"))(function() {
+            return bind3(lift1(db.getAllCustomers))(function(customers) {
+              return discard2(log4("Loaded " + (show3(length(customers)) + " customers")))(function() {
+                return modify_3(function(v12) {
+                  var $96 = {};
+                  for (var $97 in v12) {
+                    if ({}.hasOwnProperty.call(v12, $97)) {
+                      $96[$97] = v12[$97];
+                    }
+                    ;
+                  }
+                  ;
+                  $96.customers = customers;
+                  return $96;
+                });
+              });
+            });
+          });
+        }
+        ;
+        if (v2 instanceof StartEdit) {
+          return modify_3(function(v12) {
+            var $99 = {};
+            for (var $100 in v12) {
+              if ({}.hasOwnProperty.call(v12, $100)) {
+                $99[$100] = v12[$100];
+              }
+              ;
+            }
+            ;
+            $99.editingId = new Just(v2.value0);
+            $99.editingName = v2.value1;
+            return $99;
+          });
+        }
+        ;
+        if (v2 instanceof UpdateEditName) {
+          return modify_3(function(v12) {
+            var $104 = {};
+            for (var $105 in v12) {
+              if ({}.hasOwnProperty.call(v12, $105)) {
+                $104[$105] = v12[$105];
+              }
+              ;
+            }
+            ;
+            $104.editingName = v2.value0;
+            return $104;
+          });
+        }
+        ;
+        if (v2 instanceof SaveEdit) {
+          return bind3(get2)(function(state3) {
+            return discard2(lift1(db.updateCustomerName({
+              id: v2.value0,
+              name: state3.editingName
+            })))(function() {
+              return discard2(modify_3(function(v12) {
+                var $108 = {};
+                for (var $109 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $109)) {
+                    $108[$109] = v12[$109];
+                  }
+                  ;
+                }
+                ;
+                $108.editingId = Nothing.value;
+                $108.editingName = "";
+                return $108;
+              }))(function() {
+                return handleAction(dictMonadAff)(db)(LoadCustomers.value);
+              });
+            });
+          });
+        }
+        ;
+        if (v2 instanceof CancelEdit) {
+          return modify_3(function(v12) {
+            var $112 = {};
+            for (var $113 in v12) {
+              if ({}.hasOwnProperty.call(v12, $113)) {
+                $112[$113] = v12[$113];
+              }
+              ;
+            }
+            ;
+            $112.editingId = Nothing.value;
+            $112.editingName = "";
+            return $112;
+          });
+        }
+        ;
+        if (v2 instanceof UpdateNewName) {
+          return modify_3(function(v12) {
+            var $115 = {};
+            for (var $116 in v12) {
+              if ({}.hasOwnProperty.call(v12, $116)) {
+                $115[$116] = v12[$116];
+              }
+              ;
+            }
+            ;
+            $115.newCustomerName = v2.value0;
+            return $115;
+          });
+        }
+        ;
+        if (v2 instanceof AddCustomer) {
+          return discard2(liftEffect7(preventDefault(v2.value0)))(function() {
+            return bind3(get2)(function(state3) {
+              return when2(state3.newCustomerName !== "")(discard2(lift1(db.addNewCustomer(state3.newCustomerName)))(function() {
+                return discard2(modify_3(function(v12) {
+                  var $119 = {};
+                  for (var $120 in v12) {
+                    if ({}.hasOwnProperty.call(v12, $120)) {
+                      $119[$120] = v12[$120];
+                    }
+                    ;
+                  }
+                  ;
+                  $119.newCustomerName = "";
+                  return $119;
+                }))(function() {
+                  return discard2(handleAction(dictMonadAff)(db)(LoadCustomers.value))(function() {
+                    return handleAction(dictMonadAff)(db)(new ScrollToCustomer(state3.newCustomerName));
+                  });
+                });
+              }));
+            });
+          });
+        }
+        ;
+        if (v2 instanceof DeleteCustomer) {
+          return discard2(lift1(db.deleteCustomer(v2.value0)))(function() {
+            return handleAction(dictMonadAff)(db)(LoadCustomers.value);
+          });
+        }
+        ;
+        if (v2 instanceof SortBy) {
+          return bind3(get2)(function(state3) {
+            var newSortState = (function() {
+              if (state3.sortState.field instanceof Just && eq22(state3.sortState.field.value0)(v2.value0)) {
+                return {
+                  field: new Just(v2.value0),
+                  direction: toggleDirection(state3.sortState.direction)
+                };
+              }
+              ;
+              return {
+                field: new Just(v2.value0),
+                direction: Ascending.value
+              };
+            })();
+            return modify_3(function(v12) {
+              var $126 = {};
+              for (var $127 in v12) {
+                if ({}.hasOwnProperty.call(v12, $127)) {
+                  $126[$127] = v12[$127];
+                }
+                ;
+              }
+              ;
+              $126.sortState = newSortState;
+              return $126;
+            });
+          });
+        }
+        ;
+        if (v2 instanceof HandleScroll) {
+          var mbTarget = target(v2.value0);
+          var v1 = bind12(mbTarget)(fromEventTarget2);
+          if (v1 instanceof Just) {
+            return bind3(liftEffect7(getScrollTop(v1.value0)))(function(scrollTop2) {
+              return bind3(liftEffect7(getClientHeight(v1.value0)))(function(clientHeight2) {
+                return modify_3(function(v22) {
+                  var $131 = {};
+                  for (var $132 in v22) {
+                    if ({}.hasOwnProperty.call(v22, $132)) {
+                      $131[$132] = v22[$132];
+                    }
+                    ;
+                  }
+                  ;
+                  $131.scrollTop = scrollTop2;
+                  $131.containerHeight = clientHeight2;
+                  return $131;
+                });
+              });
+            });
+          }
+          ;
+          if (v1 instanceof Nothing) {
+            return pure6(unit);
+          }
+          ;
+          throw new Error("Failed pattern match at Component.CustomerList (line 612, column 5 - line 620, column 27): " + [v1.constructor.name]);
+        }
+        ;
+        if (v2 instanceof ScrollToCustomer) {
+          return bind3(get2)(function(state3) {
+            var sortedCustomers = applySorting(state3.sortState)(state3.customers);
+            var v12 = findIndex(function(c2) {
+              return c2.name === v2.value0;
+            })(sortedCustomers);
+            if (v12 instanceof Just) {
+              var targetScrollTop = max1(0)(toNumber(v12.value0) * rowHeight - state3.containerHeight + rowHeight + 60);
+              return liftEffect7(scrollToPosition(targetScrollTop));
+            }
+            ;
+            if (v12 instanceof Nothing) {
+              return pure6(unit);
+            }
+            ;
+            throw new Error("Failed pattern match at Component.CustomerList (line 625, column 5 - line 630, column 27): " + [v12.constructor.name]);
+          });
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 546, column 19 - line 630, column 27): " + [v2.constructor.name]);
+      };
     };
   };
   var render = function(state3) {
     var sortedCustomers = applySorting(state3.sortState)(state3.customers);
-    return div2([class_("customer-app")])([h1_([text("Customer Management")]), div2([class_("customer-list-container")])([renderTableHeader(state3.sortState), div2([class_("customer-list")])(map11(renderCustomerRow(state3))(sortedCustomers))]), renderAddForm(state3), renderStyles]);
+    var v2 = calculateVisibleRange(state3);
+    var visibleCustomers = slice(v2.start)(v2.end)(sortedCustomers);
+    var offsetTop2 = toNumber(v2.start) * rowHeight;
+    return div2([class_("customer-app")])([h1([class_("app-title")])([text("Customer Management"), span2([class_("customer-count")])([text(" (" + (show3(length(sortedCustomers)) + " customers)"))])]), div2([class_("customer-list-container")])([renderTableHeader(state3.sortState), div2([class_("customer-list"), onScroll(HandleScroll.create)])([div2([class_("scroll-spacer"), attr2("style")("height: " + (show1(v2.totalHeight) + "px"))])([]), div2([class_("visible-rows"), attr2("style")("transform: translateY(" + (show1(offsetTop2) + "px)"))])(map11(renderCustomerRow(state3))(visibleCustomers))]), renderTableFooter(state3)]), renderStyles]);
   };
   var component = function(dictMonadAff) {
     var handleAction1 = handleAction(dictMonadAff);
@@ -6336,9 +6631,11 @@
             editingName: "",
             newCustomerName: "",
             sortState: {
-              field: Nothing.value,
+              field: new Just(SortByName.value),
               direction: Ascending.value
-            }
+            },
+            scrollTop: 0,
+            containerHeight: 600
           };
         },
         render,
@@ -6364,12 +6661,306 @@
   }, {
     id: 3,
     name: "Charlie Brown"
+  }, {
+    id: 4,
+    name: "Diana Prince"
+  }, {
+    id: 5,
+    name: "Edward Norton"
+  }, {
+    id: 6,
+    name: "Fiona Apple"
+  }, {
+    id: 7,
+    name: "George Wilson"
+  }, {
+    id: 8,
+    name: "Hannah Montana"
+  }, {
+    id: 9,
+    name: "Isaac Newton"
+  }, {
+    id: 10,
+    name: "Julia Roberts"
+  }, {
+    id: 11,
+    name: "Kevin Hart"
+  }, {
+    id: 12,
+    name: "Laura Palmer"
+  }, {
+    id: 13,
+    name: "Michael Scott"
+  }, {
+    id: 14,
+    name: "Nancy Drew"
+  }, {
+    id: 15,
+    name: "Oliver Twist"
+  }, {
+    id: 16,
+    name: "Patricia Moore"
+  }, {
+    id: 17,
+    name: "Quincy Jones"
+  }, {
+    id: 18,
+    name: "Rachel Green"
+  }, {
+    id: 19,
+    name: "Samuel Jackson"
+  }, {
+    id: 20,
+    name: "Tina Turner"
+  }, {
+    id: 21,
+    name: "Uma Thurman"
+  }, {
+    id: 22,
+    name: "Victor Hugo"
+  }, {
+    id: 23,
+    name: "Wendy Williams"
+  }, {
+    id: 24,
+    name: "Xavier Woods"
+  }, {
+    id: 25,
+    name: "Yolanda Adams"
+  }, {
+    id: 26,
+    name: "Zachary Taylor"
+  }, {
+    id: 27,
+    name: "Amanda Bynes"
+  }, {
+    id: 28,
+    name: "Brandon Lee"
+  }, {
+    id: 29,
+    name: "Catherine Zeta"
+  }, {
+    id: 30,
+    name: "Daniel Craig"
+  }, {
+    id: 31,
+    name: "Emma Watson"
+  }, {
+    id: 32,
+    name: "Frank Sinatra"
+  }, {
+    id: 33,
+    name: "Grace Kelly"
+  }, {
+    id: 34,
+    name: "Henry Ford"
+  }, {
+    id: 35,
+    name: "Iris West"
+  }, {
+    id: 36,
+    name: "Jack Ryan"
+  }, {
+    id: 37,
+    name: "Karen Page"
+  }, {
+    id: 38,
+    name: "Leonard Cohen"
+  }, {
+    id: 39,
+    name: "Monica Geller"
+  }, {
+    id: 40,
+    name: "Nathan Drake"
+  }, {
+    id: 41,
+    name: "Olivia Pope"
+  }, {
+    id: 42,
+    name: "Peter Parker"
+  }, {
+    id: 43,
+    name: "Quinn Fabray"
+  }, {
+    id: 44,
+    name: "Ross Geller"
+  }, {
+    id: 45,
+    name: "Sarah Connor"
+  }, {
+    id: 46,
+    name: "Tony Stark"
+  }, {
+    id: 47,
+    name: "Ursula Buffay"
+  }, {
+    id: 48,
+    name: "Vincent Vega"
+  }, {
+    id: 49,
+    name: "Walter White"
+  }, {
+    id: 50,
+    name: "Xena Warrior"
+  }, {
+    id: 51,
+    name: "Yvonne Strahovski"
+  }, {
+    id: 52,
+    name: "Zoe Saldana"
+  }, {
+    id: 53,
+    name: "Aaron Paul"
+  }, {
+    id: 54,
+    name: "Bella Swan"
+  }, {
+    id: 55,
+    name: "Clark Kent"
+  }, {
+    id: 56,
+    name: "Daenerys Targaryen"
+  }, {
+    id: 57,
+    name: "Ethan Hunt"
+  }, {
+    id: 58,
+    name: "Felicity Smoak"
+  }, {
+    id: 59,
+    name: "Gandalf Grey"
+  }, {
+    id: 60,
+    name: "Hermione Granger"
+  }, {
+    id: 61,
+    name: "Indiana Jones"
+  }, {
+    id: 62,
+    name: "Jessica Jones"
+  }, {
+    id: 63,
+    name: "Katniss Everdeen"
+  }, {
+    id: 64,
+    name: "Luke Skywalker"
+  }, {
+    id: 65,
+    name: "Marty McFly"
+  }, {
+    id: 66,
+    name: "Neo Anderson"
+  }, {
+    id: 67,
+    name: "Optimus Prime"
+  }, {
+    id: 68,
+    name: "Princess Leia"
+  }, {
+    id: 69,
+    name: "Quentin Tarantino"
+  }, {
+    id: 70,
+    name: "Rick Grimes"
+  }, {
+    id: 71,
+    name: "Sherlock Holmes"
+  }, {
+    id: 72,
+    name: "Thor Odinson"
+  }, {
+    id: 73,
+    name: "Ulysses Grant"
+  }, {
+    id: 74,
+    name: "Violet Baudelaire"
+  }, {
+    id: 75,
+    name: "Wade Wilson"
+  }, {
+    id: 76,
+    name: "Xander Harris"
+  }, {
+    id: 77,
+    name: "Yoda Master"
+  }, {
+    id: 78,
+    name: "Zelda Princess"
+  }, {
+    id: 79,
+    name: "Arthur Dent"
+  }, {
+    id: 80,
+    name: "Bruce Wayne"
+  }, {
+    id: 81,
+    name: "Carol Danvers"
+  }, {
+    id: 82,
+    name: "David Bowie"
+  }, {
+    id: 83,
+    name: "Ellen Ripley"
+  }, {
+    id: 84,
+    name: "Frodo Baggins"
+  }, {
+    id: 85,
+    name: "Gwen Stacy"
+  }, {
+    id: 86,
+    name: "Harry Potter"
+  }, {
+    id: 87,
+    name: "Ilsa Lund"
+  }, {
+    id: 88,
+    name: "James Bond"
+  }, {
+    id: 89,
+    name: "Kara Danvers"
+  }, {
+    id: 90,
+    name: "Lara Croft"
+  }, {
+    id: 91,
+    name: "Mary Poppins"
+  }, {
+    id: 92,
+    name: "Nick Fury"
+  }, {
+    id: 93,
+    name: "Obi-Wan Kenobi"
+  }, {
+    id: 94,
+    name: "Phoebe Buffay"
+  }, {
+    id: 95,
+    name: "Qui-Gon Jinn"
+  }, {
+    id: 96,
+    name: "Rey Skywalker"
+  }, {
+    id: 97,
+    name: "Steve Rogers"
+  }, {
+    id: 98,
+    name: "Trinity Matrix"
+  }, {
+    id: 99,
+    name: "Uhura Nyota"
+  }, {
+    id: 100,
+    name: "Vito Corleone"
+  }, {
+    id: 101,
+    name: "The Association for Overseas Technical Cooperation and Sustainable Partnerships (AOTS)"
   }];
   var createMockDatabase = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(dictMonadEffect);
     return function __do3() {
       var customersRef = $$new(initialCustomers)();
-      var nextIdRef = $$new(4)();
+      var nextIdRef = $$new(102)();
       return {
         getAllCustomers: liftEffect7(read(customersRef)),
         addNewCustomer: function(name15) {
@@ -6477,24 +7068,8 @@
     });
   };
 
-  // output/Web.HTML.HTMLElement/foreign.js
-  function _read(nothing, just, value14) {
-    var tag = Object.prototype.toString.call(value14);
-    if (tag.indexOf("[object HTML") === 0 && tag.indexOf("Element]") === tag.length - 8) {
-      return just(value14);
-    } else {
-      return nothing;
-    }
-  }
-
-  // output/Web.HTML.HTMLElement/index.js
-  var toNode2 = unsafeCoerce2;
-  var fromElement = function(x) {
-    return _read(Nothing.value, Just.create, x);
-  };
-
   // output/Web.HTML.Window/foreign.js
-  function document(window2) {
+  function document2(window2) {
     return function() {
       return window2.document;
     };
@@ -6508,7 +7083,7 @@
   var liftEffect3 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var bindFlipped4 = /* @__PURE__ */ bindFlipped(bindEffect);
   var composeKleisliFlipped3 = /* @__PURE__ */ composeKleisliFlipped(bindEffect);
-  var pure6 = /* @__PURE__ */ pure(applicativeAff);
+  var pure7 = /* @__PURE__ */ pure(applicativeAff);
   var bindFlipped1 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var pure1 = /* @__PURE__ */ pure(applicativeEffect);
   var map15 = /* @__PURE__ */ map(functorEffect);
@@ -6520,14 +7095,14 @@
       return function($17) {
         return $16(toParentNode($17));
       };
-    })())(document))(windowImpl)))(function(mel) {
-      return pure6(bindFlipped1(fromElement)(mel));
+    })())(document2))(windowImpl)))(function(mel) {
+      return pure7(bindFlipped1(fromElement)(mel));
     });
   };
   var runHalogenAff = /* @__PURE__ */ runAff_(/* @__PURE__ */ either(throwException)(/* @__PURE__ */ $$const(/* @__PURE__ */ pure1(unit))));
   var awaitLoad = /* @__PURE__ */ makeAff(function(callback) {
     return function __do3() {
-      var rs = bindFlipped4(readyState)(bindFlipped4(document)(windowImpl))();
+      var rs = bindFlipped4(readyState)(bindFlipped4(document2)(windowImpl))();
       if (rs instanceof Loading) {
         var et = map15(toEventTarget)(windowImpl)();
         var listener = eventListener(function(v2) {
@@ -6543,7 +7118,7 @@
   });
   var awaitBody = /* @__PURE__ */ discard3(bindAff)(awaitLoad)(function() {
     return bind4(selectElement("body"))(function(body2) {
-      return maybe(throwError2(error("Could not find body")))(pure6)(body2);
+      return maybe(throwError2(error("Could not find body")))(pure7)(body2);
     });
   });
 
@@ -6561,13 +7136,6 @@
   };
   var fork = function(dict) {
     return dict.fork;
-  };
-
-  // output/Effect.Console/foreign.js
-  var warn = function(s2) {
-    return function() {
-      console.warn(s2);
-    };
   };
 
   // output/Halogen.Aff.Driver.State/index.js
@@ -6640,7 +7208,7 @@
   var traverse_4 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var bindFlipped5 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var lookup4 = /* @__PURE__ */ lookup2(ordSubscriptionId);
-  var bind12 = /* @__PURE__ */ bind(bindAff);
+  var bind13 = /* @__PURE__ */ bind(bindAff);
   var liftEffect4 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var discard4 = /* @__PURE__ */ discard(discardUnit);
   var discard1 = /* @__PURE__ */ discard4(bindAff);
@@ -6648,7 +7216,7 @@
   var traverse_22 = /* @__PURE__ */ traverse_12(foldableList);
   var fork3 = /* @__PURE__ */ fork(monadForkAff);
   var parSequence_2 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
-  var pure7 = /* @__PURE__ */ pure(applicativeAff);
+  var pure8 = /* @__PURE__ */ pure(applicativeAff);
   var map17 = /* @__PURE__ */ map(functorCoyoneda);
   var parallel3 = /* @__PURE__ */ parallel(parallelAff);
   var map18 = /* @__PURE__ */ map(functorAff);
@@ -6675,7 +7243,7 @@
   };
   var queueOrRun = function(ref2) {
     return function(au) {
-      return bind12(liftEffect4(read(ref2)))(function(v2) {
+      return bind13(liftEffect4(read(ref2)))(function(v2) {
         if (v2 instanceof Nothing) {
           return au;
         }
@@ -6694,11 +7262,11 @@
         initializers: Nil.value,
         finalizers: Nil.value
       })(lchs)))(function() {
-        return bind12(liftEffect4(f))(function(result) {
-          return bind12(liftEffect4(read(lchs)))(function(v2) {
+        return bind13(liftEffect4(f))(function(result) {
+          return bind13(liftEffect4(read(lchs)))(function(v2) {
             return discard1(traverse_22(fork3)(v2.finalizers))(function() {
               return discard1(parSequence_2(v2.initializers))(function() {
-                return pure7(result);
+                return pure8(result);
               });
             });
           });
@@ -6709,7 +7277,7 @@
   var handleAff = /* @__PURE__ */ runAff_(/* @__PURE__ */ either(throwException)(/* @__PURE__ */ $$const(/* @__PURE__ */ pure(applicativeEffect)(unit))));
   var fresh = function(f) {
     return function(ref2) {
-      return bind12(liftEffect4(read(ref2)))(function(v2) {
+      return bind13(liftEffect4(read(ref2)))(function(v2) {
         return liftEffect4(modify$prime(function(i2) {
           return {
             state: i2 + 1 | 0,
@@ -6722,7 +7290,7 @@
   var evalQ = function(render2) {
     return function(ref2) {
       return function(q3) {
-        return bind12(liftEffect4(read(ref2)))(function(v2) {
+        return bind13(liftEffect4(read(ref2)))(function(v2) {
           return evalM(render2)(ref2)(v2["component"]["eval"](new Query(map17(Just.create)(liftCoyoneda(q3)), $$const(Nothing.value))));
         });
       };
@@ -6733,10 +7301,10 @@
       return function(v2) {
         var evalChildQuery = function(ref2) {
           return function(cqb) {
-            return bind12(liftEffect4(read(ref2)))(function(v1) {
+            return bind13(liftEffect4(read(ref2)))(function(v1) {
               return unChildQueryBox(function(v22) {
                 var evalChild = function(v3) {
-                  return parallel3(bind12(liftEffect4(read(v3)))(function(dsx) {
+                  return parallel3(bind13(liftEffect4(read(v3)))(function(dsx) {
                     return unDriverStateX(function(ds) {
                       return evalQ(render2)(ds.selfRef)(v22.value1);
                     })(dsx);
@@ -6750,10 +7318,10 @@
         var go2 = function(ref2) {
           return function(v1) {
             if (v1 instanceof State) {
-              return bind12(liftEffect4(read(ref2)))(function(v22) {
+              return bind13(liftEffect4(read(ref2)))(function(v22) {
                 var v3 = v1.value0(v22.state);
                 if (unsafeRefEq(v22.state)(v3.value1)) {
-                  return pure7(v3.value0);
+                  return pure8(v3.value0);
                 }
                 ;
                 if (otherwise) {
@@ -6776,7 +7344,7 @@
                     state: v3.value1
                   })(ref2)))(function() {
                     return discard1(handleLifecycle(v22.lifecycleHandlers)(render2(v22.lifecycleHandlers)(ref2)))(function() {
-                      return pure7(v3.value0);
+                      return pure8(v3.value0);
                     });
                   });
                 }
@@ -6786,13 +7354,13 @@
             }
             ;
             if (v1 instanceof Subscribe) {
-              return bind12(fresh(SubscriptionId)(ref2))(function(sid) {
-                return bind12(liftEffect4(subscribe(v1.value0(sid))(function(act) {
+              return bind13(fresh(SubscriptionId)(ref2))(function(sid) {
+                return bind13(liftEffect4(subscribe(v1.value0(sid))(function(act) {
                   return handleAff(evalF(render2)(ref2)(new Action(act)));
                 })))(function(finalize) {
-                  return bind12(liftEffect4(read(ref2)))(function(v22) {
+                  return bind13(liftEffect4(read(ref2)))(function(v22) {
                     return discard1(liftEffect4(modify_(map22(insert3(sid)(finalize)))(v22.subscriptions)))(function() {
-                      return pure7(v1.value1(sid));
+                      return pure8(v1.value1(sid));
                     });
                   });
                 });
@@ -6801,7 +7369,7 @@
             ;
             if (v1 instanceof Unsubscribe) {
               return discard1(liftEffect4(unsubscribe3(v1.value0)(ref2)))(function() {
-                return pure7(v1.value1);
+                return pure8(v1.value1);
               });
             }
             ;
@@ -6814,10 +7382,10 @@
             }
             ;
             if (v1 instanceof Raise) {
-              return bind12(liftEffect4(read(ref2)))(function(v22) {
-                return bind12(liftEffect4(read(v22.handlerRef)))(function(handler3) {
+              return bind13(liftEffect4(read(ref2)))(function(v22) {
+                return bind13(liftEffect4(read(v22.handlerRef)))(function(handler3) {
                   return discard1(queueOrRun(v22.pendingOuts)(handler3(v1.value0)))(function() {
-                    return pure7(v1.value1);
+                    return pure8(v1.value1);
                   });
                 });
               });
@@ -6833,15 +7401,15 @@
             }
             ;
             if (v1 instanceof Fork) {
-              return bind12(fresh(ForkId)(ref2))(function(fid) {
-                return bind12(liftEffect4(read(ref2)))(function(v22) {
-                  return bind12(liftEffect4($$new(false)))(function(doneRef) {
-                    return bind12(fork3($$finally(liftEffect4(function __do3() {
+              return bind13(fresh(ForkId)(ref2))(function(fid) {
+                return bind13(liftEffect4(read(ref2)))(function(v22) {
+                  return bind13(liftEffect4($$new(false)))(function(doneRef) {
+                    return bind13(fork3($$finally(liftEffect4(function __do3() {
                       modify_($$delete2(fid))(v22.forks)();
                       return write(true)(doneRef)();
                     }))(evalM(render2)(ref2)(v1.value0))))(function(fiber) {
                       return discard1(liftEffect4(unlessM2(read(doneRef))(modify_(insert1(fid)(fiber))(v22.forks))))(function() {
-                        return pure7(v1.value1(fid));
+                        return pure8(v1.value1(fid));
                       });
                     });
                   });
@@ -6850,28 +7418,28 @@
             }
             ;
             if (v1 instanceof Join) {
-              return bind12(liftEffect4(read(ref2)))(function(v22) {
-                return bind12(liftEffect4(read(v22.forks)))(function(forkMap) {
+              return bind13(liftEffect4(read(ref2)))(function(v22) {
+                return bind13(liftEffect4(read(v22.forks)))(function(forkMap) {
                   return discard1(traverse_32(joinFiber)(lookup1(v1.value0)(forkMap)))(function() {
-                    return pure7(v1.value1);
+                    return pure8(v1.value1);
                   });
                 });
               });
             }
             ;
             if (v1 instanceof Kill) {
-              return bind12(liftEffect4(read(ref2)))(function(v22) {
-                return bind12(liftEffect4(read(v22.forks)))(function(forkMap) {
+              return bind13(liftEffect4(read(ref2)))(function(v22) {
+                return bind13(liftEffect4(read(v22.forks)))(function(forkMap) {
                   return discard1(traverse_32(killFiber(error("Cancelled")))(lookup1(v1.value0)(forkMap)))(function() {
-                    return pure7(v1.value1);
+                    return pure8(v1.value1);
                   });
                 });
               });
             }
             ;
             if (v1 instanceof GetRef) {
-              return bind12(liftEffect4(read(ref2)))(function(v22) {
-                return pure7(v1.value1(lookup22(v1.value0)(v22.refs)));
+              return bind13(liftEffect4(read(ref2)))(function(v22) {
+                return pure8(v1.value1(lookup22(v1.value0)(v22.refs)));
               });
             }
             ;
@@ -6909,7 +7477,7 @@
         }
         ;
         if (v2 instanceof Action) {
-          return bind12(liftEffect4(read(ref2)))(function(v1) {
+          return bind13(liftEffect4(read(ref2)))(function(v1) {
             return evalM(render2)(ref2)(v1["component"]["eval"](new Action2(v2.value0, unit)));
           });
         }
@@ -6932,7 +7500,7 @@
   var discard22 = /* @__PURE__ */ discard5(bindAff);
   var parSequence_3 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var liftEffect5 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var pure8 = /* @__PURE__ */ pure(applicativeEffect);
+  var pure9 = /* @__PURE__ */ pure(applicativeEffect);
   var map19 = /* @__PURE__ */ map(functorEffect);
   var pure12 = /* @__PURE__ */ pure(applicativeAff);
   var when3 = /* @__PURE__ */ when(applicativeEffect);
@@ -6942,7 +7510,7 @@
   var renderStateX_2 = /* @__PURE__ */ renderStateX_(applicativeEffect);
   var tailRecM3 = /* @__PURE__ */ tailRecM(monadRecEffect);
   var voidLeft3 = /* @__PURE__ */ voidLeft(functorEffect);
-  var bind13 = /* @__PURE__ */ bind(bindAff);
+  var bind14 = /* @__PURE__ */ bind(bindAff);
   var liftEffect1 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var newLifecycleHandlers = /* @__PURE__ */ (function() {
     return $$new({
@@ -7072,7 +7640,7 @@
                       }
                       ;
                       if (v2 instanceof Just) {
-                        return pure8(renderSpec2.renderChild(v2.value0));
+                        return pure9(renderSpec2.renderChild(v2.value0));
                       }
                       ;
                       throw new Error("Failed pattern match at Halogen.Aff.Driver (line 227, column 37 - line 229, column 50): " + [v2.constructor.name]);
@@ -7181,7 +7749,7 @@
         var evalDriver = function(disposed) {
           return function(ref2) {
             return function(q3) {
-              return bind13(liftEffect5(read(disposed)))(function(v2) {
+              return bind14(liftEffect5(read(disposed)))(function(v2) {
                 if (v2) {
                   return pure12(Nothing.value);
                 }
@@ -7212,8 +7780,8 @@
             };
           };
         };
-        return bind13(liftEffect5(newLifecycleHandlers))(function(lchs) {
-          return bind13(liftEffect5($$new(false)))(function(disposed) {
+        return bind14(liftEffect5(newLifecycleHandlers))(function(lchs) {
+          return bind14(liftEffect5($$new(false)))(function(disposed) {
             return handleLifecycle(lchs)(function __do3() {
               var sio = create();
               var dsx = bindFlipped6(read)(runComponent(lchs)((function() {
@@ -7223,7 +7791,7 @@
                 };
               })())(i2)(component3))();
               return unDriverStateX(function(st) {
-                return pure8({
+                return pure9({
                   query: evalDriver(disposed)(st.selfRef),
                   messages: sio.emitter,
                   dispose: dispose(disposed)(lchs)(dsx)
@@ -7308,13 +7876,13 @@
     };
   };
   var $$void6 = /* @__PURE__ */ $$void(functorEffect);
-  var pure9 = /* @__PURE__ */ pure(applicativeEffect);
+  var pure10 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_6 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var unwrap4 = /* @__PURE__ */ unwrap();
   var when4 = /* @__PURE__ */ when(applicativeEffect);
   var not2 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean)));
   var identity6 = /* @__PURE__ */ identity(categoryFn);
-  var bind14 = /* @__PURE__ */ bind(bindAff);
+  var bind15 = /* @__PURE__ */ bind(bindAff);
   var liftEffect6 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var map21 = /* @__PURE__ */ map(functorEffect);
   var bindFlipped7 = /* @__PURE__ */ bindFlipped(bindEffect);
@@ -7329,7 +7897,7 @@
           return $$void6(appendChild(v2)(v22.value0));
         }
         ;
-        return pure9(unit);
+        return pure10(unit);
       };
     };
   };
@@ -7343,7 +7911,7 @@
   };
   var mkSpec = function(handler3) {
     return function(renderChildRef) {
-      return function(document2) {
+      return function(document3) {
         var getNode = unRenderStateX(function(v2) {
           return v2.node;
         });
@@ -7406,12 +7974,12 @@
         return {
           buildWidget: buildWidget2,
           buildAttributes,
-          document: document2
+          document: document3
         };
       };
     };
   };
-  var renderSpec = function(document2) {
+  var renderSpec = function(document3) {
     return function(container) {
       var render2 = function(handler3) {
         return function(child) {
@@ -7420,7 +7988,7 @@
               if (v1 instanceof Nothing) {
                 return function __do3() {
                   var renderChildRef = $$new(child)();
-                  var spec = mkSpec(handler3)(renderChildRef)(document2);
+                  var spec = mkSpec(handler3)(renderChildRef)(document3);
                   var machine = buildVDom(spec)(v2);
                   var node = extract2(machine);
                   $$void6(appendChild(node)(toNode2(container)))();
@@ -7464,8 +8032,8 @@
   var runUI2 = function(component3) {
     return function(i2) {
       return function(element4) {
-        return bind14(liftEffect6(map21(toDocument)(bindFlipped7(document)(windowImpl))))(function(document2) {
-          return runUI(renderSpec(document2)(element4))(component3)(i2);
+        return bind15(liftEffect6(map21(toDocument)(bindFlipped7(document2)(windowImpl))))(function(document3) {
+          return runUI(renderSpec(document3)(element4))(component3)(i2);
         });
       };
     };

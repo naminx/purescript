@@ -4,10 +4,20 @@ A full-stack PureScript application for managing a customer list, built with Hal
 
 ## Features
 
-- **Scrollable Customer List**: Displays all customers with efficient scrolling for large datasets
-- **In-line Editing**: Click "Edit" to modify customer names directly in the list
+- **Virtual Scrolling (JIT Rendering)**: Renders only visible rows for optimal performance
+  - Handles thousands of customers without lag
+  - Constant rendering time regardless of dataset size
+  - Smooth 60 FPS scrolling
+- **Scrollable Customer List**: Displays customers with efficient scrolling
+- **In-line Editing**: Click edit icon to modify customer names directly in the list
+- **Delete Customers**: Remove customers with the delete icon button
+- **Sortable Columns**: Click column headers to sort by ID or Name
+  - Stable sorting: Apply multiple sort keys
+  - Toggle direction: Click same column to reverse sort order
+  - Visual indicators: Icons show current sort state (ascending/descending/neutral)
+- **Icon-based UI**: All actions use intuitive SVG icons (Edit, Delete, Add, Sort)
 - **Sticky Add Form**: Add new customers using the form at the bottom of the page
-- **Mock Database**: Fully functional in-memory database for development and testing
+- **Mock Database**: Fully functional in-memory database with 100 test customers
 - **PostgreSQL Ready**: Real database implementation ready to use when you have a live database
 
 ## Project Structure
@@ -16,10 +26,12 @@ A full-stack PureScript application for managing a customer list, built with Hal
 src/
 ├── Database/
 │   ├── Types.purs          # Database interface and Customer type
-│   ├── Mock.purs           # In-memory mock database implementation
+│   ├── Mock.purs           # In-memory mock database (100 test customers)
 │   └── Database.purs       # PostgreSQL database implementation (commented out)
 ├── Component/
-│   └── CustomerList.purs   # Main Halogen component with UI
+│   ├── CustomerList.purs   # Main Halogen component with virtual scrolling
+│   ├── CustomerList.js     # FFI for scroll position tracking
+│   └── Icons.purs          # SVG icon components
 └── Main.purs               # Application entry point
 
 dist/
@@ -56,16 +68,19 @@ npx spago install
 
 ```bash
 # Build the project
-npx spago build
+npm run build
 
 # Bundle for production
-npx spago bundle-app --main Main --to dist/app.js
+npm run bundle
 
 # Serve the application
-cd dist && python3 -m http.server 8000
+npm run serve
+
+# Or build and serve in one command
+npm start
 ```
 
-Then open your browser to [http://localhost:8000](http://localhost:8000)
+The application will be available at [http://localhost:8000](http://localhost:8000)
 
 ### Watch Mode
 
@@ -83,16 +98,21 @@ type DatabaseInterface m =
   { getAllCustomers :: m (Array Customer)
   , addNewCustomer :: String -> m Unit
   , updateCustomerName :: { id :: Int, name :: String } -> m Unit
+  , deleteCustomer :: Int -> m Unit
   }
 ```
 
 ### Mock Database
 
-The mock database (`Database.Mock`) uses an in-memory `Ref` to store customers. It comes pre-populated with test data:
+The mock database (`Database.Mock`) uses an in-memory `Ref` to store customers. It comes pre-populated with **100 test customers** including:
 
 - Alice Johnson (ID: 1)
 - Bob Smith (ID: 2)
 - Charlie Brown (ID: 3)
+- ... (97 more customers)
+- Vito Corleone (ID: 100)
+
+This allows testing the virtual scrolling performance with a realistic dataset.
 
 ### PostgreSQL Database
 
@@ -156,21 +176,36 @@ CREATE TABLE IF NOT EXISTS customer (
 
 ## UI Features
 
+### Table Header
+- Sortable columns for ID and Name
+- Click column header to sort
+- Visual indicators show sort direction:
+  - ↕️ Neutral (no sort applied)
+  - ↑ Ascending
+  - ↓ Descending
+- Clicking same column toggles direction
+- Stable sorting allows multiple sort keys
+
 ### Customer List
 - Scrollable container with `max-height: 80vh`
-- Each row shows customer ID (read-only) and name
+- Each row shows customer ID and name
 - Hover effect for better UX
+- Icon-based action buttons
 
 ### In-line Editing
-1. Click "Edit" button on any customer row
+1. Click edit icon (✏️) on any customer row
 2. Name field becomes an editable input
-3. "Edit" button changes to "Save"
-4. Click "Save" to update the customer name
+3. Edit icon changes to save icon (✓)
+4. Click save to update the customer name
+
+### Delete Customer
+- Click delete icon (🗑️) to remove a customer
+- Immediate deletion with list refresh
 
 ### Add Customer Form
 - Sticky positioned at the bottom of the page
 - Input field for new customer name
-- "Add Customer" button to submit
+- Add button with plus icon
 - Form clears automatically after submission
 
 ## Styling
