@@ -444,7 +444,7 @@ renderStyles =
       
       .customer-list {
         flex: 1;
-        overflow-y: auto;
+        overflow-y: scroll;
         background-color: #fff;
         position: relative;
         min-height: 0;
