@@ -245,11 +245,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq3) {
+    return function(eq4) {
       return function(gt) {
         return function(x) {
           return function(y) {
-            return x < y ? lt : x === y ? eq3 : gt;
+            return x < y ? lt : x === y ? eq4 : gt;
           };
         };
       };
@@ -797,7 +797,7 @@
     };
   };
   var eqMaybe = function(dictEq) {
-    var eq3 = eq(dictEq);
+    var eq4 = eq(dictEq);
     return {
       eq: function(x) {
         return function(y) {
@@ -806,7 +806,7 @@
           }
           ;
           if (x instanceof Just && y instanceof Just) {
-            return eq3(x.value0)(y.value0);
+            return eq4(x.value0)(y.value0);
           }
           ;
           return false;
@@ -1782,14 +1782,14 @@
   });
 
   // output/Halogen.VDom.Util/foreign.js
-  function unsafeGetAny(key, obj) {
-    return obj[key];
+  function unsafeGetAny(key2, obj) {
+    return obj[key2];
   }
-  function unsafeHasAny(key, obj) {
-    return obj.hasOwnProperty(key);
+  function unsafeHasAny(key2, obj) {
+    return obj.hasOwnProperty(key2);
   }
-  function unsafeSetAny(key, val, obj) {
-    obj[key] = val;
+  function unsafeSetAny(key2, val, obj) {
+    obj[key2] = val;
   }
   function forE2(a3, f) {
     var b2 = [];
@@ -2978,26 +2978,26 @@
   })();
   var unsafeGetProperty = unsafeGetAny;
   var setProperty = unsafeSetAny;
-  var removeProperty = function(key, el) {
-    var v2 = hasAttribute(nullImpl, key, el);
+  var removeProperty = function(key2, el) {
+    var v2 = hasAttribute(nullImpl, key2, el);
     if (v2) {
-      return removeAttribute(nullImpl, key, el);
+      return removeAttribute(nullImpl, key2, el);
     }
     ;
-    var v1 = typeOf(unsafeGetAny(key, el));
+    var v1 = typeOf(unsafeGetAny(key2, el));
     if (v1 === "string") {
-      return unsafeSetAny(key, "", el);
+      return unsafeSetAny(key2, "", el);
     }
     ;
-    if (key === "rowSpan") {
-      return unsafeSetAny(key, 1, el);
+    if (key2 === "rowSpan") {
+      return unsafeSetAny(key2, 1, el);
     }
     ;
-    if (key === "colSpan") {
-      return unsafeSetAny(key, 1, el);
+    if (key2 === "colSpan") {
+      return unsafeSetAny(key2, 1, el);
     }
     ;
-    return unsafeSetAny(key, jsUndefined, el);
+    return unsafeSetAny(key2, jsUndefined, el);
   };
   var propToStrKey = function(v2) {
     if (v2 instanceof Attribute && v2.value0 instanceof Just) {
@@ -5977,8 +5977,8 @@
   };
 
   // output/Foreign.Index/foreign.js
-  function unsafeReadPropImpl(f, s2, key, value14) {
-    return value14 == null ? f : s2(value14[key]);
+  function unsafeReadPropImpl(f, s2, key2, value14) {
+    return value14 == null ? f : s2(value14[key2]);
   }
 
   // output/Foreign.Index/index.js
@@ -6020,6 +6020,9 @@
   var input2 = "input";
   var domcontentloaded = "DOMContentLoaded";
 
+  // output/Web.UIEvent.KeyboardEvent.EventTypes/index.js
+  var keydown = "keydown";
+
   // output/Web.UIEvent.MouseEvent.EventTypes/index.js
   var click = "click";
 
@@ -6030,6 +6033,7 @@
   var readProp2 = /* @__PURE__ */ readProp(monadIdentity);
   var readString2 = /* @__PURE__ */ readString(monadIdentity);
   var mouseHandler = unsafeCoerce2;
+  var keyHandler = unsafeCoerce2;
   var handler$prime = function(et) {
     return function(f) {
       return handler(et)(function(ev) {
@@ -6050,16 +6054,22 @@
       return $15(mouseHandler($16));
     };
   })();
+  var onKeyDown = /* @__PURE__ */ (function() {
+    var $23 = handler2(keydown);
+    return function($24) {
+      return $23(keyHandler($24));
+    };
+  })();
   var onScroll = /* @__PURE__ */ handler2("scroll");
   var onSubmit = /* @__PURE__ */ handler2("submit");
-  var addForeignPropHandler = function(key) {
+  var addForeignPropHandler = function(key2) {
     return function(prop3) {
       return function(reader) {
         return function(f) {
           var go2 = function(a3) {
             return composeKleisliFlipped2(reader)(readProp2(prop3))(unsafeToForeign(a3));
           };
-          return handler$prime(key)(composeKleisli2(currentTarget)(function(e) {
+          return handler$prime(key2)(composeKleisli2(currentTarget)(function(e) {
             return either($$const(Nothing.value))(function($85) {
               return Just.create(f($85));
             })(runExcept(go2(e)));
@@ -6088,6 +6098,11 @@
   var fromElement = function(x) {
     return _read(Nothing.value, Just.create, x);
   };
+
+  // output/Web.UIEvent.KeyboardEvent/foreign.js
+  function key(e) {
+    return e.key;
+  }
 
   // output/Component.CustomerList/index.js
   var type_4 = /* @__PURE__ */ type_(isPropInputType);
@@ -6185,6 +6200,19 @@
     };
     return SaveEdit2;
   })();
+  var SaveEditOnEnter = /* @__PURE__ */ (function() {
+    function SaveEditOnEnter2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    SaveEditOnEnter2.create = function(value0) {
+      return function(value1) {
+        return new SaveEditOnEnter2(value0, value1);
+      };
+    };
+    return SaveEditOnEnter2;
+  })();
   var CancelEdit = /* @__PURE__ */ (function() {
     function CancelEdit2() {
     }
@@ -6252,6 +6280,16 @@
     };
     return ScrollToCustomer2;
   })();
+  var ScrollToCustomerId = /* @__PURE__ */ (function() {
+    function ScrollToCustomerId2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ScrollToCustomerId2.create = function(value0) {
+      return new ScrollToCustomerId2(value0);
+    };
+    return ScrollToCustomerId2;
+  })();
   var UpdateSearchQuery = /* @__PURE__ */ (function() {
     function UpdateSearchQuery2(value0) {
       this.value0 = value0;
@@ -6271,7 +6309,7 @@
       return Ascending.value;
     }
     ;
-    throw new Error("Failed pattern match at Component.CustomerList (line 36, column 1 - line 36, column 50): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at Component.CustomerList (line 39, column 1 - line 39, column 50): " + [v2.constructor.name]);
   };
   var rowHeight = 36;
   var renderTableFooter = function(state3) {
@@ -6283,7 +6321,9 @@
       var isEditing = eq2(state3.editingId)(new Just(customer.id));
       return div2([class_("customer-row")])([span2([class_("customer-id")])([text(show3(customer.id))]), (function() {
         if (isEditing) {
-          return input([type_4(InputText.value), class_("customer-name-input"), value3(state3.editingName), onValueInput(UpdateEditName.create)]);
+          return input([type_4(InputText.value), class_("customer-name-input"), value3(state3.editingName), onValueInput(UpdateEditName.create), onKeyDown(function(e) {
+            return new SaveEditOnEnter(customer.id, e);
+          })]);
         }
         ;
         return span2([class_("customer-name")])([text(customer.name)]);
@@ -6329,10 +6369,10 @@
       };
     }
   };
-  var eq22 = /* @__PURE__ */ eq(eqSortField);
+  var eq3 = /* @__PURE__ */ eq(eqSortField);
   var renderSortIcon = function(field) {
     return function(v2) {
-      if (v2.field instanceof Just && eq22(v2.field.value0)(field)) {
+      if (v2.field instanceof Just && eq3(v2.field.value0)(field)) {
         if (v2.direction instanceof Ascending) {
           return sortAscIcon;
         }
@@ -6341,7 +6381,7 @@
           return sortDescIcon;
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 243, column 7 - line 245, column 41): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 248, column 7 - line 250, column 41): " + [v2.direction.constructor.name]);
       }
       ;
       return sortNeutralIcon;
@@ -6397,7 +6437,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 148, column 5 - line 150, column 65): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 153, column 5 - line 155, column 65): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByName) {
@@ -6418,10 +6458,10 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 155, column 5 - line 157, column 89): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 160, column 5 - line 162, column 89): " + [v2.direction.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Component.CustomerList (line 142, column 1 - line 142, column 62): " + [v2.constructor.name, v1.constructor.name]);
+      throw new Error("Failed pattern match at Component.CustomerList (line 147, column 1 - line 147, column 62): " + [v2.constructor.name, v1.constructor.name]);
     };
   };
   var calculateVisibleRange = function(state3) {
@@ -6448,16 +6488,16 @@
             return bind3(lift1(db.getAllCustomers))(function(customers) {
               return discard2(log4("Loaded " + (show3(length(customers)) + " customers")))(function() {
                 return modify_3(function(v12) {
-                  var $101 = {};
-                  for (var $102 in v12) {
-                    if ({}.hasOwnProperty.call(v12, $102)) {
-                      $101[$102] = v12[$102];
+                  var $105 = {};
+                  for (var $106 in v12) {
+                    if ({}.hasOwnProperty.call(v12, $106)) {
+                      $105[$106] = v12[$106];
                     }
                     ;
                   }
                   ;
-                  $101.customers = customers;
-                  return $101;
+                  $105.customers = customers;
+                  return $105;
                 });
               });
             });
@@ -6466,88 +6506,129 @@
         ;
         if (v2 instanceof StartEdit) {
           return modify_3(function(v12) {
-            var $104 = {};
-            for (var $105 in v12) {
-              if ({}.hasOwnProperty.call(v12, $105)) {
-                $104[$105] = v12[$105];
+            var $108 = {};
+            for (var $109 in v12) {
+              if ({}.hasOwnProperty.call(v12, $109)) {
+                $108[$109] = v12[$109];
               }
               ;
             }
             ;
-            $104.editingId = new Just(v2.value0);
-            $104.editingName = v2.value1;
-            return $104;
+            $108.editingId = new Just(v2.value0);
+            $108.editingName = v2.value1;
+            return $108;
           });
         }
         ;
         if (v2 instanceof UpdateEditName) {
           return modify_3(function(v12) {
-            var $109 = {};
-            for (var $110 in v12) {
-              if ({}.hasOwnProperty.call(v12, $110)) {
-                $109[$110] = v12[$110];
+            var $113 = {};
+            for (var $114 in v12) {
+              if ({}.hasOwnProperty.call(v12, $114)) {
+                $113[$114] = v12[$114];
               }
               ;
             }
             ;
-            $109.editingName = v2.value0;
-            return $109;
+            $113.editingName = v2.value0;
+            return $113;
           });
         }
         ;
         if (v2 instanceof SaveEdit) {
           return bind3(get2)(function(state3) {
-            return discard2(lift1(db.updateCustomerName({
-              id: v2.value0,
-              name: state3.editingName
-            })))(function() {
-              return discard2(modify_3(function(v12) {
-                var $113 = {};
-                for (var $114 in v12) {
-                  if ({}.hasOwnProperty.call(v12, $114)) {
-                    $113[$114] = v12[$114];
+            var filteredCustomers = filterCustomers(state3.searchQuery)(state3.customers);
+            var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
+            var v12 = findIndex(function(c2) {
+              return c2.id === v2.value0;
+            })(sortedCustomers);
+            if (v12 instanceof Just) {
+              var relativeScrollPos = state3.scrollTop - toNumber(v12.value0) * rowHeight;
+              return discard2(lift1(db.updateCustomerName({
+                id: v2.value0,
+                name: state3.editingName
+              })))(function() {
+                return discard2(modify_3(function(v22) {
+                  var $118 = {};
+                  for (var $119 in v22) {
+                    if ({}.hasOwnProperty.call(v22, $119)) {
+                      $118[$119] = v22[$119];
+                    }
+                    ;
                   }
                   ;
-                }
-                ;
-                $113.editingId = Nothing.value;
-                $113.editingName = "";
-                return $113;
-              }))(function() {
-                return handleAction(dictMonadAff)(db)(LoadCustomers.value);
+                  $118.editingId = Nothing.value;
+                  $118.editingName = "";
+                  $118.searchQuery = "";
+                  return $118;
+                }))(function() {
+                  return discard2(handleAction(dictMonadAff)(db)(LoadCustomers.value))(function() {
+                    return handleAction(dictMonadAff)(db)(new ScrollToCustomerId(v2.value0));
+                  });
+                });
               });
-            });
+            }
+            ;
+            if (v12 instanceof Nothing) {
+              return discard2(lift1(db.updateCustomerName({
+                id: v2.value0,
+                name: state3.editingName
+              })))(function() {
+                return discard2(modify_3(function(v22) {
+                  var $122 = {};
+                  for (var $123 in v22) {
+                    if ({}.hasOwnProperty.call(v22, $123)) {
+                      $122[$123] = v22[$123];
+                    }
+                    ;
+                  }
+                  ;
+                  $122.editingId = Nothing.value;
+                  $122.editingName = "";
+                  $122.searchQuery = "";
+                  return $122;
+                }))(function() {
+                  return handleAction(dictMonadAff)(db)(LoadCustomers.value);
+                });
+              });
+            }
+            ;
+            throw new Error("Failed pattern match at Component.CustomerList (line 636, column 5 - line 654, column 38): " + [v12.constructor.name]);
           });
+        }
+        ;
+        if (v2 instanceof SaveEditOnEnter) {
+          return when2(key(v2.value1) === "Enter")(handleAction(dictMonadAff)(db)(new SaveEdit(v2.value0)));
         }
         ;
         if (v2 instanceof CancelEdit) {
           return modify_3(function(v12) {
-            var $117 = {};
-            for (var $118 in v12) {
-              if ({}.hasOwnProperty.call(v12, $118)) {
-                $117[$118] = v12[$118];
+            var $128 = {};
+            for (var $129 in v12) {
+              if ({}.hasOwnProperty.call(v12, $129)) {
+                $128[$129] = v12[$129];
               }
               ;
             }
             ;
-            $117.editingId = Nothing.value;
-            $117.editingName = "";
-            return $117;
+            $128.editingId = Nothing.value;
+            $128.editingName = "";
+            return $128;
           });
         }
         ;
         if (v2 instanceof UpdateNewName) {
           return modify_3(function(v12) {
-            var $120 = {};
-            for (var $121 in v12) {
-              if ({}.hasOwnProperty.call(v12, $121)) {
-                $120[$121] = v12[$121];
+            var $131 = {};
+            for (var $132 in v12) {
+              if ({}.hasOwnProperty.call(v12, $132)) {
+                $131[$132] = v12[$132];
               }
               ;
             }
             ;
-            $120.newCustomerName = v2.value0;
-            return $120;
+            $131.newCustomerName = v2.value0;
+            return $131;
           });
         }
         ;
@@ -6556,16 +6637,16 @@
             return bind3(get2)(function(state3) {
               return when2(state3.newCustomerName !== "")(discard2(lift1(db.addNewCustomer(state3.newCustomerName)))(function() {
                 return discard2(modify_3(function(v12) {
-                  var $124 = {};
-                  for (var $125 in v12) {
-                    if ({}.hasOwnProperty.call(v12, $125)) {
-                      $124[$125] = v12[$125];
+                  var $135 = {};
+                  for (var $136 in v12) {
+                    if ({}.hasOwnProperty.call(v12, $136)) {
+                      $135[$136] = v12[$136];
                     }
                     ;
                   }
                   ;
-                  $124.newCustomerName = "";
-                  return $124;
+                  $135.newCustomerName = "";
+                  return $135;
                 }))(function() {
                   return discard2(handleAction(dictMonadAff)(db)(LoadCustomers.value))(function() {
                     return handleAction(dictMonadAff)(db)(new ScrollToCustomer(state3.newCustomerName));
@@ -6585,7 +6666,7 @@
         if (v2 instanceof SortBy) {
           return bind3(get2)(function(state3) {
             var newSortState = (function() {
-              if (state3.sortState.field instanceof Just && eq22(state3.sortState.field.value0)(v2.value0)) {
+              if (state3.sortState.field instanceof Just && eq3(state3.sortState.field.value0)(v2.value0)) {
                 return {
                   field: new Just(v2.value0),
                   direction: toggleDirection(state3.sortState.direction)
@@ -6598,16 +6679,16 @@
               };
             })();
             return modify_3(function(v12) {
-              var $131 = {};
-              for (var $132 in v12) {
-                if ({}.hasOwnProperty.call(v12, $132)) {
-                  $131[$132] = v12[$132];
+              var $142 = {};
+              for (var $143 in v12) {
+                if ({}.hasOwnProperty.call(v12, $143)) {
+                  $142[$143] = v12[$143];
                 }
                 ;
               }
               ;
-              $131.sortState = newSortState;
-              return $131;
+              $142.sortState = newSortState;
+              return $142;
             });
           });
         }
@@ -6619,17 +6700,17 @@
             return bind3(liftEffect7(getScrollTop(v1.value0)))(function(scrollTop2) {
               return bind3(liftEffect7(getClientHeight(v1.value0)))(function(clientHeight2) {
                 return modify_3(function(v22) {
-                  var $136 = {};
-                  for (var $137 in v22) {
-                    if ({}.hasOwnProperty.call(v22, $137)) {
-                      $136[$137] = v22[$137];
+                  var $147 = {};
+                  for (var $148 in v22) {
+                    if ({}.hasOwnProperty.call(v22, $148)) {
+                      $147[$148] = v22[$148];
                     }
                     ;
                   }
                   ;
-                  $136.scrollTop = scrollTop2;
-                  $136.containerHeight = clientHeight2;
-                  return $136;
+                  $147.scrollTop = scrollTop2;
+                  $147.containerHeight = clientHeight2;
+                  return $147;
                 });
               });
             });
@@ -6639,7 +6720,7 @@
             return pure6(unit);
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 671, column 5 - line 679, column 27): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 697, column 5 - line 705, column 27): " + [v1.constructor.name]);
         }
         ;
         if (v2 instanceof ScrollToCustomer) {
@@ -6658,26 +6739,46 @@
               return pure6(unit);
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 685, column 5 - line 690, column 27): " + [v12.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 711, column 5 - line 716, column 27): " + [v12.constructor.name]);
+          });
+        }
+        ;
+        if (v2 instanceof ScrollToCustomerId) {
+          return bind3(get2)(function(state3) {
+            var filteredCustomers = filterCustomers("")(state3.customers);
+            var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
+            var v12 = findIndex(function(c2) {
+              return c2.id === v2.value0;
+            })(sortedCustomers);
+            if (v12 instanceof Just) {
+              var targetScrollTop = max1(0)(toNumber(v12.value0) * rowHeight - state3.containerHeight / 2);
+              return liftEffect7(scrollToPosition(targetScrollTop));
+            }
+            ;
+            if (v12 instanceof Nothing) {
+              return pure6(unit);
+            }
+            ;
+            throw new Error("Failed pattern match at Component.CustomerList (line 723, column 5 - line 729, column 27): " + [v12.constructor.name]);
           });
         }
         ;
         if (v2 instanceof UpdateSearchQuery) {
           return modify_3(function(v12) {
-            var $144 = {};
-            for (var $145 in v12) {
-              if ({}.hasOwnProperty.call(v12, $145)) {
-                $144[$145] = v12[$145];
+            var $158 = {};
+            for (var $159 in v12) {
+              if ({}.hasOwnProperty.call(v12, $159)) {
+                $158[$159] = v12[$159];
               }
               ;
             }
             ;
-            $144.searchQuery = v2.value0;
-            return $144;
+            $158.searchQuery = v2.value0;
+            return $158;
           });
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 605, column 19 - line 693, column 40): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 611, column 19 - line 732, column 40): " + [v2.constructor.name]);
       };
     };
   };

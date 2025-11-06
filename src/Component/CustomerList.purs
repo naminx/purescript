@@ -4,6 +4,7 @@ import Prelude
 
 import Component.Icons as Icons
 import Data.Array (drop, filter, findIndex, length, slice, snoc, sortBy, take, (!!))
+import Data.Foldable (for_)
 import Data.Int (floor, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String (Pattern(..), contains, toLower)
@@ -23,6 +24,8 @@ import Web.HTML.HTMLElement as HTMLElement
 import Web.DOM.ParentNode (QuerySelector(..), querySelector)
 import Web.HTML.HTMLElement as HTMLElem
 import Web.DOM.Element as Element
+import Web.UIEvent.KeyboardEvent (KeyboardEvent)
+import Web.UIEvent.KeyboardEvent as KE
 import Web.UIEvent.MouseEvent (MouseEvent)
 
 data SortField = SortById | SortByName
@@ -59,6 +62,7 @@ data Action
   | StartEdit Int String
   | UpdateEditName String
   | SaveEdit Int
+  | SaveEditOnEnter Int KeyboardEvent
   | CancelEdit
   | UpdateNewName String
   | AddCustomer Event
@@ -66,6 +70,7 @@ data Action
   | SortBy SortField
   | HandleScroll Event
   | ScrollToCustomer String
+  | ScrollToCustomerId Int
   | UpdateSearchQuery String
 
 type Output = Void
@@ -261,6 +266,7 @@ renderCustomerRow state customer =
             , HP.class_ (HH.ClassName "customer-name-input")
             , HP.value state.editingName
             , HE.onValueInput UpdateEditName
+            , HE.onKeyDown \e -> SaveEditOnEnter customer.id e
             ]
         else
           HH.span
@@ -624,12 +630,32 @@ handleAction db = case _ of
   
   SaveEdit id -> do
     state <- H.get
-    H.lift $ db.updateCustomerName { id, name: state.editingName }
-    H.modify_ _ 
-      { editingId = Nothing
-      , editingName = ""
-      }
-    handleAction db LoadCustomers
+    -- Store the current scroll position relative to this customer
+    let filteredCustomers = filterCustomers state.searchQuery state.customers
+    let sortedCustomers = applySorting state.sortState filteredCustomers
+    case findIndex (\c -> c.id == id) sortedCustomers of
+      Just currentIndex -> do
+        let relativeScrollPos = state.scrollTop - (toNumber currentIndex * rowHeight)
+        H.lift $ db.updateCustomerName { id, name: state.editingName }
+        H.modify_ _ 
+          { editingId = Nothing
+          , editingName = ""
+          , searchQuery = ""  -- Clear search to ensure edited customer is visible
+          }
+        handleAction db LoadCustomers
+        handleAction db (ScrollToCustomerId id)
+      Nothing -> do
+        H.lift $ db.updateCustomerName { id, name: state.editingName }
+        H.modify_ _ 
+          { editingId = Nothing
+          , editingName = ""
+          , searchQuery = ""
+          }
+        handleAction db LoadCustomers
+  
+  SaveEditOnEnter id kbEvent -> do
+    when (KE.key kbEvent == "Enter") do
+      handleAction db (SaveEdit id)
   
   CancelEdit -> do
     H.modify_ _ 
@@ -686,6 +712,19 @@ handleAction db = case _ of
       Just index -> do
         -- Calculate scroll position to show customer just above footer
         let targetScrollTop = max 0.0 (toNumber index * rowHeight - state.containerHeight + rowHeight + 60.0)
+        H.liftEffect $ scrollToPosition targetScrollTop
+      Nothing -> pure unit
+  
+  ScrollToCustomerId id -> do
+    state <- H.get
+    -- Search is now cleared, so filter with empty query
+    let filteredCustomers = filterCustomers "" state.customers
+    let sortedCustomers = applySorting state.sortState filteredCustomers
+    case findIndex (\c -> c.id == id) sortedCustomers of
+      Just newIndex -> do
+        -- Try to keep the customer at the same visual position
+        -- Calculate target scroll to show customer in middle of viewport
+        let targetScrollTop = max 0.0 (toNumber newIndex * rowHeight - (state.containerHeight / 2.0))
         H.liftEffect $ scrollToPosition targetScrollTop
       Nothing -> pure unit
   
