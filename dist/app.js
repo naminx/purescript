@@ -3302,15 +3302,11 @@
     return element3("polyline")(props)([]);
   };
   var svg = /* @__PURE__ */ element3("svg");
-  var circle = function(props) {
-    return element3("circle")(props)([]);
-  };
 
   // output/Component.Icons/index.js
   var sortNeutralIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(14), /* @__PURE__ */ height(14), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("7 15 12 20 17 15")]), /* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("7 9 12 4 17 9")])]);
   var sortDescIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(14), /* @__PURE__ */ height(14), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("12"), /* @__PURE__ */ attr2("y1")("5"), /* @__PURE__ */ attr2("x2")("12"), /* @__PURE__ */ attr2("y2")("19")]), /* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("19 12 12 19 5 12")])]);
   var sortAscIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(14), /* @__PURE__ */ height(14), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("12"), /* @__PURE__ */ attr2("y1")("19"), /* @__PURE__ */ attr2("x2")("12"), /* @__PURE__ */ attr2("y2")("5")]), /* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("5 12 12 5 19 12")])]);
-  var searchIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ circle([/* @__PURE__ */ attr2("cx")("11"), /* @__PURE__ */ attr2("cy")("11"), /* @__PURE__ */ attr2("r")("8")]), /* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("21"), /* @__PURE__ */ attr2("y1")("21"), /* @__PURE__ */ attr2("x2")("16.65"), /* @__PURE__ */ attr2("y2")("16.65")])]);
   var saveIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("20 6 9 17 4 12")])]);
   var editIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ path([/* @__PURE__ */ attr2("d")("M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")]), /* @__PURE__ */ path([/* @__PURE__ */ attr2("d")("M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")])]);
   var deleteIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("3 6 5 6 21 6")]), /* @__PURE__ */ path([/* @__PURE__ */ attr2("d")("M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")]), /* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("10"), /* @__PURE__ */ attr2("y1")("11"), /* @__PURE__ */ attr2("x2")("10"), /* @__PURE__ */ attr2("y2")("17")]), /* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("14"), /* @__PURE__ */ attr2("y1")("11"), /* @__PURE__ */ attr2("x2")("14"), /* @__PURE__ */ attr2("y2")("17")])]);
@@ -6266,16 +6262,6 @@
     };
     return UpdateSearchQuery2;
   })();
-  var PerformSearch = /* @__PURE__ */ (function() {
-    function PerformSearch2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    PerformSearch2.create = function(value0) {
-      return new PerformSearch2(value0);
-    };
-    return PerformSearch2;
-  })();
   var toggleDirection = function(v2) {
     if (v2 instanceof Ascending) {
       return Descending.value;
@@ -6287,11 +6273,11 @@
     ;
     throw new Error("Failed pattern match at Component.CustomerList (line 36, column 1 - line 36, column 50): " + [v2.constructor.name]);
   };
-  var rowHeight = 57;
+  var rowHeight = 36;
   var renderTableFooter = function(state3) {
     return div2([class_("table-footer")])([form([class_("add-customer-form"), onSubmit(AddCustomer.create)])([input([type_4(InputText.value), class_("new-customer-input"), placeholder("New Customer Name"), value3(state3.newCustomerName), onValueInput(UpdateNewName.create)]), button([type_1(ButtonSubmit.value), class_("btn btn-add"), title("Add Customer")])([addIcon])])]);
   };
-  var renderStyles = /* @__PURE__ */ style_([/* @__PURE__ */ text("\n      * {\n        box-sizing: border-box;\n      }\n      \n      body {\n        margin: 0;\n        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',\n          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',\n          sans-serif;\n        -webkit-font-smoothing: antialiased;\n        -moz-osx-font-smoothing: grayscale;\n      }\n      \n      .customer-app {\n        max-width: 900px;\n        margin: 0 auto;\n        padding: 20px;\n      }\n      \n      h1 {\n        color: #333;\n        margin-bottom: 20px;\n      }\n      \n      .customer-list-container {\n        border: 1px solid #ddd;\n        border-radius: 8px;\n        overflow: hidden;\n        margin-bottom: 20px;\n      }\n      \n      .table-header {\n        display: flex;\n        align-items: center;\n        padding: 12px 15px;\n        background-color: #f8f9fa;\n        border-bottom: 2px solid #dee2e6;\n        font-weight: 600;\n        color: #495057;\n        gap: 15px;\n      }\n      \n      .header-cell {\n        display: flex;\n        align-items: center;\n      }\n      \n      .header-id {\n        min-width: 60px;\n      }\n      \n      .header-name {\n        flex: 1;\n      }\n      \n      .header-name-content {\n        display: flex;\n        align-items: center;\n        gap: 10px;\n        width: 100%;\n      }\n      \n      .search-form {\n        display: flex;\n        align-items: center;\n        gap: 5px;\n        flex: 1;\n      }\n      \n      .search-input {\n        flex: 1;\n        padding: 4px 8px;\n        border: 1px solid #ced4da;\n        border-radius: 4px;\n        font-size: 13px;\n        min-width: 120px;\n      }\n      \n      .search-input:focus {\n        outline: none;\n        border-color: #007bff;\n        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);\n      }\n      \n      .btn-search {\n        background-color: #007bff;\n        color: white;\n        padding: 4px 8px;\n        min-width: 32px;\n      }\n      \n      .btn-search:hover {\n        background-color: #0056b3;\n      }\n      \n      .header-actions {\n        min-width: 120px;\n        justify-content: center;\n      }\n      \n      .sort-button {\n        background: none;\n        border: none;\n        cursor: pointer;\n        padding: 4px 8px;\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        color: #495057;\n        font-weight: 600;\n        font-size: 14px;\n        transition: color 0.2s;\n      }\n      \n      .sort-button:hover {\n        color: #007bff;\n      }\n      \n      .app-title {\n        display: flex;\n        align-items: baseline;\n        gap: 10px;\n      }\n      \n      .customer-count {\n        font-size: 16px;\n        color: #666;\n        font-weight: normal;\n      }\n      \n      .customer-list {\n        max-height: calc(80vh - 120px);\n        min-height: 400px;\n        overflow-y: auto;\n        background-color: #fff;\n        position: relative;\n      }\n      \n      .scroll-spacer {\n        width: 100%;\n        pointer-events: none;\n      }\n      \n      .visible-rows {\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        will-change: transform;\n      }\n      \n      .customer-row {\n        display: flex;\n        align-items: center;\n        padding: 15px;\n        border-bottom: 1px solid #eee;\n        gap: 15px;\n        min-height: 57px;\n        box-sizing: border-box;\n      }\n      \n      .customer-row:last-child {\n        border-bottom: none;\n      }\n      \n      .customer-row:hover {\n        background-color: #f8f9fa;\n      }\n      \n      .customer-id {\n        font-weight: bold;\n        color: #666;\n        min-width: 60px;\n      }\n      \n      .customer-name {\n        flex: 1;\n        color: #333;\n        word-wrap: break-word;\n        overflow-wrap: break-word;\n        hyphens: auto;\n      }\n      \n      .customer-name-input {\n        flex: 1;\n        padding: 8px 12px;\n        border: 2px solid #007bff;\n        border-radius: 4px;\n        font-size: 14px;\n      }\n      \n      .customer-name-input:focus {\n        outline: none;\n        border-color: #0056b3;\n      }\n      \n      .customer-actions {\n        display: flex;\n        gap: 8px;\n        min-width: 120px;\n        justify-content: flex-end;\n      }\n      \n      .btn {\n        padding: 8px 12px;\n        border: none;\n        border-radius: 4px;\n        cursor: pointer;\n        font-size: 14px;\n        font-weight: 500;\n        transition: all 0.2s;\n        display: flex;\n        align-items: center;\n        gap: 6px;\n      }\n      \n      .btn:hover {\n        transform: translateY(-1px);\n        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n      }\n      \n      .btn-edit {\n        background-color: #007bff;\n        color: white;\n        padding: 6px 10px;\n      }\n      \n      .btn-edit:hover {\n        background-color: #0056b3;\n      }\n      \n      .btn-save {\n        background-color: #28a745;\n        color: white;\n        padding: 6px 10px;\n      }\n      \n      .btn-save:hover {\n        background-color: #218838;\n      }\n      \n      .btn-delete {\n        background-color: #dc3545;\n        color: white;\n        padding: 6px 10px;\n      }\n      \n      .btn-delete:hover {\n        background-color: #c82333;\n      }\n      \n      .table-footer {\n        background-color: #f8f9fa;\n        border-top: 2px solid #dee2e6;\n        position: sticky;\n        bottom: 0;\n        z-index: 10;\n      }\n      \n      .add-customer-form {\n        display: flex;\n        gap: 10px;\n        padding: 15px;\n        align-items: center;\n      }\n      \n      .new-customer-input {\n        flex: 1;\n        padding: 10px 15px;\n        border: 2px solid #ddd;\n        border-radius: 4px;\n        font-size: 14px;\n      }\n      \n      .new-customer-input:focus {\n        outline: none;\n        border-color: #007bff;\n      }\n      \n      .btn-add {\n        background-color: #28a745;\n        color: white;\n        padding: 10px 12px;\n        min-width: 44px;\n      }\n      \n      .btn-add:hover {\n        background-color: #218838;\n      }\n    ")]);
+  var renderStyles = /* @__PURE__ */ style_([/* @__PURE__ */ text("\n      * {\n        box-sizing: border-box;\n      }\n      \n      body {\n        margin: 0;\n        padding: 0;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',\n          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',\n          sans-serif;\n        -webkit-font-smoothing: antialiased;\n        -moz-osx-font-smoothing: grayscale;\n        overflow: hidden;\n        height: 100vh;\n      }\n      \n      .customer-app {\n        max-width: 900px;\n        margin: 0 auto;\n        padding: 8px;\n        height: 100vh;\n        display: flex;\n        flex-direction: column;\n      }\n      \n      h1 {\n        color: #333;\n        margin: 0 0 8px 0;\n        font-size: 20px;\n      }\n      \n      .customer-list-container {\n        border: 1px solid #ddd;\n        border-radius: 4px;\n        overflow: hidden;\n        flex: 1;\n        display: flex;\n        flex-direction: column;\n        min-height: 0;\n      }\n      \n      .table-header {\n        display: flex;\n        align-items: center;\n        padding: 6px 8px;\n        background-color: #f8f9fa;\n        border-bottom: 2px solid #dee2e6;\n        font-weight: 600;\n        color: #495057;\n        gap: 8px;\n        font-size: 13px;\n      }\n      \n      .header-cell {\n        display: flex;\n        align-items: center;\n      }\n      \n      .header-id {\n        min-width: 50px;\n      }\n      \n      .header-name {\n        flex: 1;\n      }\n      \n      .header-name-content {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        width: 100%;\n      }\n      \n      .search-input {\n        flex: 1;\n        padding: 3px 6px;\n        border: 1px solid #ced4da;\n        border-radius: 3px;\n        font-size: 12px;\n        min-width: 100px;\n      }\n      \n      .search-input:focus {\n        outline: none;\n        border-color: #007bff;\n        box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.2);\n      }\n      \n      .header-actions {\n        min-width: 100px;\n        justify-content: center;\n      }\n      \n      .sort-button {\n        background: none;\n        border: none;\n        cursor: pointer;\n        padding: 2px 4px;\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        color: #495057;\n        font-weight: 600;\n        font-size: 13px;\n        transition: color 0.2s;\n      }\n      \n      .sort-button:hover {\n        color: #007bff;\n      }\n      \n      .app-title {\n        display: flex;\n        align-items: baseline;\n        gap: 10px;\n      }\n      \n      .customer-count {\n        font-size: 14px;\n        color: #666;\n        font-weight: normal;\n      }\n      \n      .customer-list {\n        flex: 1;\n        overflow-y: auto;\n        background-color: #fff;\n        position: relative;\n        min-height: 0;\n      }\n      \n      .scroll-spacer {\n        width: 100%;\n        pointer-events: none;\n      }\n      \n      .visible-rows {\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        will-change: transform;\n      }\n      \n      .customer-row {\n        display: flex;\n        align-items: center;\n        padding: 6px 8px;\n        border-bottom: 1px solid #eee;\n        gap: 8px;\n        min-height: 36px;\n        box-sizing: border-box;\n        font-size: 13px;\n      }\n      \n      .customer-row:last-child {\n        border-bottom: none;\n      }\n      \n      .customer-row:hover {\n        background-color: #f8f9fa;\n      }\n      \n      .customer-id {\n        font-weight: bold;\n        color: #666;\n        min-width: 50px;\n      }\n      \n      .customer-name {\n        flex: 1;\n        color: #333;\n        word-wrap: break-word;\n        overflow-wrap: break-word;\n        hyphens: auto;\n      }\n      \n      .customer-name-input {\n        flex: 1;\n        padding: 4px 6px;\n        border: 2px solid #007bff;\n        border-radius: 3px;\n        font-size: 13px;\n      }\n      \n      .customer-name-input:focus {\n        outline: none;\n        border-color: #0056b3;\n      }\n      \n      .customer-actions {\n        display: flex;\n        gap: 4px;\n        min-width: 100px;\n        justify-content: flex-end;\n      }\n      \n      .btn {\n        padding: 4px 6px;\n        border: none;\n        border-radius: 3px;\n        cursor: pointer;\n        font-size: 13px;\n        font-weight: 500;\n        transition: all 0.2s;\n        display: flex;\n        align-items: center;\n        gap: 4px;\n      }\n      \n      .btn:hover {\n        transform: translateY(-1px);\n        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);\n      }\n      \n      .btn-edit {\n        background-color: #007bff;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-edit:hover {\n        background-color: #0056b3;\n      }\n      \n      .btn-save {\n        background-color: #28a745;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-save:hover {\n        background-color: #218838;\n      }\n      \n      .btn-delete {\n        background-color: #dc3545;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-delete:hover {\n        background-color: #c82333;\n      }\n      \n      .table-footer {\n        background-color: #f8f9fa;\n        border-top: 2px solid #dee2e6;\n      }\n      \n      .add-customer-form {\n        display: flex;\n        gap: 6px;\n        padding: 6px 8px;\n        align-items: center;\n      }\n      \n      .new-customer-input {\n        flex: 1;\n        padding: 4px 6px;\n        border: 1px solid #ddd;\n        border-radius: 3px;\n        font-size: 13px;\n      }\n      \n      .new-customer-input:focus {\n        outline: none;\n        border-color: #007bff;\n      }\n      \n      .btn-add {\n        background-color: #28a745;\n        color: white;\n        padding: 4px 6px;\n        min-width: 32px;\n      }\n      \n      .btn-add:hover {\n        background-color: #218838;\n      }\n    ")]);
   var renderCustomerRow = function(state3) {
     return function(customer) {
       var isEditing = eq2(state3.editingId)(new Just(customer.id));
@@ -6355,7 +6341,7 @@
           return sortDescIcon;
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 255, column 7 - line 257, column 41): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 243, column 7 - line 245, column 41): " + [v2.direction.constructor.name]);
       }
       ;
       return sortNeutralIcon;
@@ -6366,7 +6352,7 @@
       return new SortBy(SortById.value);
     })])([text("ID "), renderSortIcon(SortById.value)(state3.sortState)])]), div2([class_("header-cell header-name")])([div2([class_("header-name-content")])([button([class_("sort-button"), onClick(function(v2) {
       return new SortBy(SortByName.value);
-    })])([text("Name "), renderSortIcon(SortByName.value)(state3.sortState)]), form([class_("search-form"), onSubmit(PerformSearch.create)])([input([type_4(InputText.value), class_("search-input"), placeholder("Search..."), value3(state3.searchQuery), onValueInput(UpdateSearchQuery.create)]), button([type_1(ButtonSubmit.value), class_("btn btn-search"), title("Search")])([searchIcon])])])]), div2([class_("header-cell header-actions")])([text("Actions")])]);
+    })])([text("Name "), renderSortIcon(SortByName.value)(state3.sortState)]), input([type_4(InputText.value), class_("search-input"), placeholder("Search..."), value3(state3.searchQuery), onValueInput(UpdateSearchQuery.create)])])]), div2([class_("header-cell header-actions")])([text("Actions")])]);
   };
   var calculateVisibleRangeForCustomers = function(customers) {
     return function(scrollTop2) {
@@ -6411,7 +6397,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 149, column 5 - line 151, column 65): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 148, column 5 - line 150, column 65): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByName) {
@@ -6432,10 +6418,10 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 156, column 5 - line 158, column 89): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 155, column 5 - line 157, column 89): " + [v2.direction.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Component.CustomerList (line 143, column 1 - line 143, column 62): " + [v2.constructor.name, v1.constructor.name]);
+      throw new Error("Failed pattern match at Component.CustomerList (line 142, column 1 - line 142, column 62): " + [v2.constructor.name, v1.constructor.name]);
     };
   };
   var calculateVisibleRange = function(state3) {
@@ -6653,7 +6639,7 @@
             return pure6(unit);
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 692, column 5 - line 700, column 27): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 671, column 5 - line 679, column 27): " + [v1.constructor.name]);
         }
         ;
         if (v2 instanceof ScrollToCustomer) {
@@ -6672,7 +6658,7 @@
               return pure6(unit);
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 706, column 5 - line 711, column 27): " + [v12.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 685, column 5 - line 690, column 27): " + [v12.constructor.name]);
           });
         }
         ;
@@ -6691,13 +6677,7 @@
           });
         }
         ;
-        if (v2 instanceof PerformSearch) {
-          return discard2(liftEffect7(preventDefault(v2.value0)))(function() {
-            return pure6(unit);
-          });
-        }
-        ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 626, column 19 - line 720, column 14): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 605, column 19 - line 693, column 40): " + [v2.constructor.name]);
       };
     };
   };

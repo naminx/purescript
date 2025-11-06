@@ -67,7 +67,6 @@ data Action
   | HandleScroll Event
   | ScrollToCustomer String
   | UpdateSearchQuery String
-  | PerformSearch Event
 
 type Output = Void
 
@@ -98,7 +97,7 @@ component db =
 
 -- Virtual scrolling constants
 rowHeight :: Number
-rowHeight = 57.0 -- Height of each customer row in pixels
+rowHeight = 36.0 -- Height of each customer row in pixels
 
 overscan :: Int
 overscan = 5 -- Number of extra rows to render above and below visible area
@@ -223,23 +222,12 @@ renderTableHeader state =
                 [ HH.text "Name "
                 , renderSortIcon SortByName state.sortState
                 ]
-            , HH.form
-                [ HP.class_ (HH.ClassName "search-form")
-                , HE.onSubmit PerformSearch
-                ]
-                [ HH.input
-                    [ HP.type_ HP.InputText
-                    , HP.class_ (HH.ClassName "search-input")
-                    , HP.placeholder "Search..."
-                    , HP.value state.searchQuery
-                    , HE.onValueInput UpdateSearchQuery
-                    ]
-                , HH.button
-                    [ HP.type_ HP.ButtonSubmit
-                    , HP.class_ (HH.ClassName "btn btn-search")
-                    , HP.title "Search"
-                    ]
-                    [ Icons.searchIcon ]
+            , HH.input
+                [ HP.type_ HP.InputText
+                , HP.class_ (HH.ClassName "search-input")
+                , HP.placeholder "Search..."
+                , HP.value state.searchQuery
+                , HE.onValueInput UpdateSearchQuery
                 ]
             ]
         ]
@@ -337,40 +325,51 @@ renderStyles =
       
       body {
         margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        padding: 0;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
           'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
           sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        overflow: hidden;
+        height: 100vh;
       }
       
       .customer-app {
         max-width: 900px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 8px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
       
       h1 {
         color: #333;
-        margin-bottom: 20px;
+        margin: 0 0 8px 0;
+        font-size: 20px;
       }
       
       .customer-list-container {
         border: 1px solid #ddd;
-        border-radius: 8px;
+        border-radius: 4px;
         overflow: hidden;
-        margin-bottom: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
       }
       
       .table-header {
         display: flex;
         align-items: center;
-        padding: 12px 15px;
+        padding: 6px 8px;
         background-color: #f8f9fa;
         border-bottom: 2px solid #dee2e6;
         font-weight: 600;
         color: #495057;
-        gap: 15px;
+        gap: 8px;
+        font-size: 13px;
       }
       
       .header-cell {
@@ -379,7 +378,7 @@ renderStyles =
       }
       
       .header-id {
-        min-width: 60px;
+        min-width: 50px;
       }
       
       .header-name {
@@ -389,45 +388,27 @@ renderStyles =
       .header-name-content {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 6px;
         width: 100%;
-      }
-      
-      .search-form {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        flex: 1;
       }
       
       .search-input {
         flex: 1;
-        padding: 4px 8px;
+        padding: 3px 6px;
         border: 1px solid #ced4da;
-        border-radius: 4px;
-        font-size: 13px;
-        min-width: 120px;
+        border-radius: 3px;
+        font-size: 12px;
+        min-width: 100px;
       }
       
       .search-input:focus {
         outline: none;
         border-color: #007bff;
-        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-      }
-      
-      .btn-search {
-        background-color: #007bff;
-        color: white;
-        padding: 4px 8px;
-        min-width: 32px;
-      }
-      
-      .btn-search:hover {
-        background-color: #0056b3;
+        box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.2);
       }
       
       .header-actions {
-        min-width: 120px;
+        min-width: 100px;
         justify-content: center;
       }
       
@@ -435,13 +416,13 @@ renderStyles =
         background: none;
         border: none;
         cursor: pointer;
-        padding: 4px 8px;
+        padding: 2px 4px;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
         color: #495057;
         font-weight: 600;
-        font-size: 14px;
+        font-size: 13px;
         transition: color 0.2s;
       }
       
@@ -456,17 +437,17 @@ renderStyles =
       }
       
       .customer-count {
-        font-size: 16px;
+        font-size: 14px;
         color: #666;
         font-weight: normal;
       }
       
       .customer-list {
-        max-height: calc(80vh - 120px);
-        min-height: 400px;
+        flex: 1;
         overflow-y: auto;
         background-color: #fff;
         position: relative;
+        min-height: 0;
       }
       
       .scroll-spacer {
@@ -485,11 +466,12 @@ renderStyles =
       .customer-row {
         display: flex;
         align-items: center;
-        padding: 15px;
+        padding: 6px 8px;
         border-bottom: 1px solid #eee;
-        gap: 15px;
-        min-height: 57px;
+        gap: 8px;
+        min-height: 36px;
         box-sizing: border-box;
+        font-size: 13px;
       }
       
       .customer-row:last-child {
@@ -503,7 +485,7 @@ renderStyles =
       .customer-id {
         font-weight: bold;
         color: #666;
-        min-width: 60px;
+        min-width: 50px;
       }
       
       .customer-name {
@@ -516,10 +498,10 @@ renderStyles =
       
       .customer-name-input {
         flex: 1;
-        padding: 8px 12px;
+        padding: 4px 6px;
         border: 2px solid #007bff;
-        border-radius: 4px;
-        font-size: 14px;
+        border-radius: 3px;
+        font-size: 13px;
       }
       
       .customer-name-input:focus {
@@ -529,33 +511,33 @@ renderStyles =
       
       .customer-actions {
         display: flex;
-        gap: 8px;
-        min-width: 120px;
+        gap: 4px;
+        min-width: 100px;
         justify-content: flex-end;
       }
       
       .btn {
-        padding: 8px 12px;
+        padding: 4px 6px;
         border: none;
-        border-radius: 4px;
+        border-radius: 3px;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 500;
         transition: all 0.2s;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
       }
       
       .btn:hover {
         transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       }
       
       .btn-edit {
         background-color: #007bff;
         color: white;
-        padding: 6px 10px;
+        padding: 4px 6px;
       }
       
       .btn-edit:hover {
@@ -565,7 +547,7 @@ renderStyles =
       .btn-save {
         background-color: #28a745;
         color: white;
-        padding: 6px 10px;
+        padding: 4px 6px;
       }
       
       .btn-save:hover {
@@ -575,7 +557,7 @@ renderStyles =
       .btn-delete {
         background-color: #dc3545;
         color: white;
-        padding: 6px 10px;
+        padding: 4px 6px;
       }
       
       .btn-delete:hover {
@@ -585,24 +567,21 @@ renderStyles =
       .table-footer {
         background-color: #f8f9fa;
         border-top: 2px solid #dee2e6;
-        position: sticky;
-        bottom: 0;
-        z-index: 10;
       }
       
       .add-customer-form {
         display: flex;
-        gap: 10px;
-        padding: 15px;
+        gap: 6px;
+        padding: 6px 8px;
         align-items: center;
       }
       
       .new-customer-input {
         flex: 1;
-        padding: 10px 15px;
-        border: 2px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
+        padding: 4px 6px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        font-size: 13px;
       }
       
       .new-customer-input:focus {
@@ -613,8 +592,8 @@ renderStyles =
       .btn-add {
         background-color: #28a745;
         color: white;
-        padding: 10px 12px;
-        min-width: 44px;
+        padding: 4px 6px;
+        min-width: 32px;
       }
       
       .btn-add:hover {
@@ -712,12 +691,6 @@ handleAction db = case _ of
   
   UpdateSearchQuery query -> do
     H.modify_ _ { searchQuery = query }
-  
-  PerformSearch event -> do
-    H.liftEffect $ Event.preventDefault event
-    -- Search is performed automatically via UpdateSearchQuery
-    -- This just prevents form submission
-    pure unit
 
 -- FFI helpers for getting scroll properties
 foreign import getScrollTop :: HTMLElement -> Effect Number
