@@ -163,3 +163,29 @@ sortNeutralIcon =
     , SE.polyline
         [ HP.attr (HH.AttrName "points") "7 9 12 4 17 9" ]
     ]
+
+-- | Search icon (magnifying glass)
+searchIcon :: forall w i. HH.HTML w i
+searchIcon =
+  SE.svg
+    [ SA.viewBox 0.0 0.0 24.0 24.0
+    , SA.width 16.0
+    , SA.height 16.0
+    , HP.attr (HH.AttrName "fill") "none"
+    , HP.attr (HH.AttrName "stroke") "currentColor"
+    , HP.attr (HH.AttrName "stroke-width") "2"
+    , HP.attr (HH.AttrName "stroke-linecap") "round"
+    , HP.attr (HH.AttrName "stroke-linejoin") "round"
+    ]
+    [ SE.circle
+        [ HP.attr (HH.AttrName "cx") "11"
+        , HP.attr (HH.AttrName "cy") "11"
+        , HP.attr (HH.AttrName "r") "8"
+        ]
+    , SE.line
+        [ HP.attr (HH.AttrName "x1") "21"
+        , HP.attr (HH.AttrName "y1") "21"
+        , HP.attr (HH.AttrName "x2") "16.65"
+        , HP.attr (HH.AttrName "y2") "16.65"
+        ]
+    ]

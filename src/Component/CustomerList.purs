@@ -3,10 +3,10 @@ module Component.CustomerList where
 import Prelude
 
 import Component.Icons as Icons
-import Data.Array (drop, findIndex, length, slice, snoc, sortBy, take, (!!))
+import Data.Array (drop, filter, findIndex, length, slice, snoc, sortBy, take, (!!))
 import Data.Int (floor, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.String (toLower)
+import Data.String (Pattern(..), contains, toLower)
 import Database.Types (Customer, DatabaseInterface)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -50,6 +50,7 @@ type State =
   , sortState :: SortState
   , scrollTop :: Number
   , containerHeight :: Number
+  , searchQuery :: String
   }
 
 data Action
@@ -65,6 +66,8 @@ data Action
   | SortBy SortField
   | HandleScroll Event
   | ScrollToCustomer String
+  | UpdateSearchQuery String
+  | PerformSearch Event
 
 type Output = Void
 
@@ -84,6 +87,7 @@ component db =
         , sortState: { field: Just SortByName, direction: Ascending }
         , scrollTop: 0.0
         , containerHeight: 600.0
+        , searchQuery: ""
         }
     , render: render
     , eval: H.mkEval $ H.defaultEval
@@ -100,18 +104,18 @@ overscan :: Int
 overscan = 5 -- Number of extra rows to render above and below visible area
 
 -- Calculate which rows should be rendered based on scroll position
-calculateVisibleRange :: State -> { start :: Int, end :: Int, totalHeight :: Number }
-calculateVisibleRange state =
+-- Note: This should be called with already filtered and sorted customers
+calculateVisibleRangeForCustomers :: Array Customer -> Number -> Number -> { start :: Int, end :: Int, totalHeight :: Number }
+calculateVisibleRangeForCustomers customers scrollTop containerHeight =
   let
-    sortedCustomers = applySorting state.sortState state.customers
-    totalRows = length sortedCustomers
+    totalRows = length customers
     totalHeight = toNumber totalRows * rowHeight
     
     -- Use a minimum container height to ensure initial render
-    effectiveHeight = max state.containerHeight 600.0
+    effectiveHeight = max containerHeight 600.0
     
     -- Calculate visible range
-    startIndex = floor (state.scrollTop / rowHeight) - overscan
+    startIndex = floor (scrollTop / rowHeight) - overscan
     visibleRows = floor (effectiveHeight / rowHeight) + 1
     endIndex = startIndex + visibleRows + (overscan * 2)
     
@@ -120,6 +124,20 @@ calculateVisibleRange state =
     end = min totalRows endIndex
   in
     { start, end, totalHeight }
+
+calculateVisibleRange :: State -> { start :: Int, end :: Int, totalHeight :: Number }
+calculateVisibleRange state =
+  let
+    filteredCustomers = filterCustomers state.searchQuery state.customers
+    sortedCustomers = applySorting state.sortState filteredCustomers
+  in
+    calculateVisibleRangeForCustomers sortedCustomers state.scrollTop state.containerHeight
+
+-- | Filter customers by search query
+filterCustomers :: String -> Array Customer -> Array Customer
+filterCustomers "" customers = customers
+filterCustomers query customers =
+  filter (\c -> contains (Pattern (toLower query)) (toLower c.name)) customers
 
 -- | Apply sorting to customer list
 applySorting :: SortState -> Array Customer -> Array Customer
@@ -142,7 +160,8 @@ applySorting { field: Just SortByName, direction } customers =
 render :: forall m. State -> H.ComponentHTML Action Slots m
 render state =
   let
-    sortedCustomers = applySorting state.sortState state.customers
+    filteredCustomers = filterCustomers state.searchQuery state.customers
+    sortedCustomers = applySorting state.sortState filteredCustomers
     { start, end, totalHeight } = calculateVisibleRange state
     visibleCustomers = slice start end sortedCustomers
     offsetTop = toNumber start * rowHeight
@@ -158,7 +177,7 @@ render state =
           ]
       , HH.div
           [ HP.class_ (HH.ClassName "customer-list-container") ]
-          [ renderTableHeader state.sortState
+          [ renderTableHeader state
           , HH.div
               [ HP.class_ (HH.ClassName "customer-list")
               , HE.onScroll HandleScroll
@@ -179,8 +198,8 @@ render state =
       , renderStyles
       ]
 
-renderTableHeader :: forall m. SortState -> H.ComponentHTML Action Slots m
-renderTableHeader sortState =
+renderTableHeader :: forall m. State -> H.ComponentHTML Action Slots m
+renderTableHeader state =
   HH.div
     [ HP.class_ (HH.ClassName "table-header") ]
     [ HH.div
@@ -190,17 +209,38 @@ renderTableHeader sortState =
             , HE.onClick \_ -> SortBy SortById
             ]
             [ HH.text "ID "
-            , renderSortIcon SortById sortState
+            , renderSortIcon SortById state.sortState
             ]
         ]
     , HH.div
         [ HP.class_ (HH.ClassName "header-cell header-name") ]
-        [ HH.button
-            [ HP.class_ (HH.ClassName "sort-button")
-            , HE.onClick \_ -> SortBy SortByName
-            ]
-            [ HH.text "Name "
-            , renderSortIcon SortByName sortState
+        [ HH.div
+            [ HP.class_ (HH.ClassName "header-name-content") ]
+            [ HH.button
+                [ HP.class_ (HH.ClassName "sort-button")
+                , HE.onClick \_ -> SortBy SortByName
+                ]
+                [ HH.text "Name "
+                , renderSortIcon SortByName state.sortState
+                ]
+            , HH.form
+                [ HP.class_ (HH.ClassName "search-form")
+                , HE.onSubmit PerformSearch
+                ]
+                [ HH.input
+                    [ HP.type_ HP.InputText
+                    , HP.class_ (HH.ClassName "search-input")
+                    , HP.placeholder "Search..."
+                    , HP.value state.searchQuery
+                    , HE.onValueInput UpdateSearchQuery
+                    ]
+                , HH.button
+                    [ HP.type_ HP.ButtonSubmit
+                    , HP.class_ (HH.ClassName "btn btn-search")
+                    , HP.title "Search"
+                    ]
+                    [ Icons.searchIcon ]
+                ]
             ]
         ]
     , HH.div
@@ -344,6 +384,46 @@ renderStyles =
       
       .header-name {
         flex: 1;
+      }
+      
+      .header-name-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+      }
+      
+      .search-form {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex: 1;
+      }
+      
+      .search-input {
+        flex: 1;
+        padding: 4px 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 13px;
+        min-width: 120px;
+      }
+      
+      .search-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+      }
+      
+      .btn-search {
+        background-color: #007bff;
+        color: white;
+        padding: 4px 8px;
+        min-width: 32px;
+      }
+      
+      .btn-search:hover {
+        background-color: #0056b3;
       }
       
       .header-actions {
@@ -621,13 +701,23 @@ handleAction db = case _ of
   
   ScrollToCustomer name -> do
     state <- H.get
-    let sortedCustomers = applySorting state.sortState state.customers
+    let filteredCustomers = filterCustomers state.searchQuery state.customers
+    let sortedCustomers = applySorting state.sortState filteredCustomers
     case findIndex (\c -> c.name == name) sortedCustomers of
       Just index -> do
         -- Calculate scroll position to show customer just above footer
         let targetScrollTop = max 0.0 (toNumber index * rowHeight - state.containerHeight + rowHeight + 60.0)
         H.liftEffect $ scrollToPosition targetScrollTop
       Nothing -> pure unit
+  
+  UpdateSearchQuery query -> do
+    H.modify_ _ { searchQuery = query }
+  
+  PerformSearch event -> do
+    H.liftEffect $ Event.preventDefault event
+    -- Search is performed automatically via UpdateSearchQuery
+    -- This just prevents form submission
+    pure unit
 
 -- FFI helpers for getting scroll properties
 foreign import getScrollTop :: HTMLElement -> Effect Number
