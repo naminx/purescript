@@ -1,0 +1,8 @@
+Server running on port 8080
+Database: customer_db on localhost:5432
+Database connected successfully at 2025-11-18T06:45:57.804Z
+GET /
+GET /app.js
+GET /api/customers
+Fetching customers from database...
+Retrieved 7 customers

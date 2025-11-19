@@ -21,6 +21,191 @@
       }
     };
   };
+  var getCustomerListElementImpl = function() {
+    const element4 = document.querySelector(".customer-list");
+    return element4;
+  };
+  var measureRowHeights = function() {
+    const rows4 = document.querySelectorAll(".customer-row[data-row-index]");
+    const measurements = [];
+    rows4.forEach((row) => {
+      const index4 = parseInt(row.getAttribute("data-row-index"), 10);
+      const customerId = parseInt(row.getAttribute("data-customer-id"), 10);
+      const height9 = row.offsetHeight;
+      measurements.push({ index: index4, customerId, height: height9 });
+    });
+    return measurements;
+  };
+  var requestAnimationFrameAction = function() {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+  };
+  var waitForRowAndMeasureImpl = function(rowIndex2) {
+    return function() {
+      return new Promise((resolve, reject) => {
+        const container = document.querySelector(".visible-rows");
+        if (!container) {
+          reject(new Error("Container not found"));
+          return;
+        }
+        let lastHeight = 0;
+        let stableCount = 0;
+        const requiredStableCount = 3;
+        let timeoutId = null;
+        const measureRow = function() {
+          const row = document.querySelector(`.customer-row[data-row-index="${rowIndex2}"]`);
+          if (!row) {
+            return null;
+          }
+          void row.offsetHeight;
+          void container.offsetHeight;
+          let offsetTop2 = row.offsetTop;
+          const visibleRowsStyle = window.getComputedStyle(container);
+          const transform = visibleRowsStyle.transform;
+          if (transform && transform !== "none") {
+            const matrix = new DOMMatrix(transform);
+            offsetTop2 += matrix.m42;
+          }
+          return { offsetTop: offsetTop2, height: row.offsetHeight };
+        };
+        const checkStability = function() {
+          requestAnimationFrame(() => {
+            const measurement = measureRow();
+            if (!measurement) {
+              checkStability();
+              return;
+            }
+            if (measurement.height === lastHeight && lastHeight > 0) {
+              stableCount++;
+              if (stableCount >= requiredStableCount) {
+                if (timeoutId) clearTimeout(timeoutId);
+                resolve(measurement);
+                return;
+              }
+            } else {
+              stableCount = 0;
+              lastHeight = measurement.height;
+            }
+            checkStability();
+          });
+        };
+        checkStability();
+        timeoutId = setTimeout(() => {
+          reject(new Error(`Timeout waiting for row ${rowIndex2} to stabilize`));
+        }, 5e3);
+      });
+    };
+  };
+  var checkClickOutsideInput = function(target6) {
+    return function() {
+      const nameInput = document.querySelector(".customer-name-input");
+      const moneyInput = document.querySelector(".money-input");
+      const goldInput = document.querySelector(".gold-input");
+      const activeInput = nameInput || moneyInput || goldInput;
+      if (!activeInput) {
+        return true;
+      }
+      if (activeInput.contains(target6)) {
+        return false;
+      }
+      const editableField = target6.closest(".editable-field");
+      if (editableField) {
+        return false;
+      }
+      return true;
+    };
+  };
+  var generateRandomCode = function() {
+    return Math.floor(Math.random() * 9e5) + 1e5;
+  };
+  var focusDeleteConfirmInput = function() {
+    requestAnimationFrame(() => {
+      const input3 = document.querySelector(".modal-input");
+      if (input3) {
+        input3.focus();
+      }
+    });
+  };
+  var focusEditInput = function() {
+    requestAnimationFrame(() => {
+      const nameInput = document.querySelector(".customer-name-input");
+      const moneyInput = document.querySelector(".money-input");
+      const goldInput = document.querySelector(".gold-input");
+      const input3 = nameInput || moneyInput || goldInput;
+      if (input3) {
+        input3.focus();
+        const length9 = input3.value.length;
+        input3.setSelectionRange(length9, length9);
+      }
+    });
+  };
+  var formatDateString = function(dateStr) {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const now = /* @__PURE__ */ new Date();
+    const currentYear = now.getFullYear();
+    const dateYear = date.getFullYear();
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    if (dateYear === currentYear) {
+      return `${day}/${month}`;
+    } else {
+      return `${day}/${month}/${dateYear}`;
+    }
+  };
+  var formatMoneyValue = function(n) {
+    const absN = Math.abs(n);
+    const intPart = Math.floor(absN);
+    const fracPart = Math.round((absN - intPart) * 100);
+    const fracStr = fracPart < 10 ? "0" + fracPart : fracPart.toString();
+    return {
+      integer: intPart.toLocaleString(),
+      fraction: fracStr
+    };
+  };
+  var formatGramsValue = function(n) {
+    const absN = Math.abs(n);
+    if (absN === 0) return { integer: "", fraction: "" };
+    const intPart = Math.floor(absN);
+    const fracPart = Math.round((absN - intPart) * 1e3);
+    const fracStr = fracPart.toString().padStart(3, "0");
+    return {
+      integer: intPart.toLocaleString(),
+      fraction: fracStr
+    };
+  };
+  var formatBahtValue = function(n) {
+    const absN = Math.abs(n);
+    if (absN === 0) return { integer: "", fraction: "", hasFraction: false };
+    const intPart = Math.floor(absN);
+    const fracPart = absN - intPart;
+    if (fracPart === 0) {
+      return { integer: intPart.toLocaleString(), fraction: "", hasFraction: false };
+    } else {
+      const fracStr = fracPart.toFixed(3).substring(1).replace(/0+$/, "");
+      return { integer: intPart.toLocaleString(), fraction: fracStr, hasFraction: true };
+    }
+  };
+
+  // output/Control.Apply/foreign.js
+  var arrayApply = function(fs) {
+    return function(xs) {
+      var l2 = fs.length;
+      var k = xs.length;
+      var result = new Array(l2 * k);
+      var n = 0;
+      for (var i2 = 0; i2 < l2; i2++) {
+        var f = fs[i2];
+        for (var j = 0; j < k; j++) {
+          result[n++] = f(xs[j]);
+        }
+      }
+      return result;
+    };
+  };
 
   // output/Control.Semigroupoid/index.js
   var semigroupoidFn = {
@@ -50,6 +235,15 @@
   var otherwise = true;
 
   // output/Data.Function/index.js
+  var on = function(f) {
+    return function(g) {
+      return function(x) {
+        return function(y) {
+          return f(g(x))(g(y));
+        };
+      };
+    };
+  };
   var flip = function(f) {
     return function(b2) {
       return function(a3) {
@@ -78,19 +272,42 @@
   // output/Data.Unit/foreign.js
   var unit = void 0;
 
+  // output/Type.Proxy/index.js
+  var $$Proxy = /* @__PURE__ */ (function() {
+    function $$Proxy2() {
+    }
+    ;
+    $$Proxy2.value = new $$Proxy2();
+    return $$Proxy2;
+  })();
+
   // output/Data.Functor/index.js
   var map = function(dict) {
     return dict.map;
+  };
+  var mapFlipped = function(dictFunctor) {
+    var map111 = map(dictFunctor);
+    return function(fa) {
+      return function(f) {
+        return map111(f)(fa);
+      };
+    };
   };
   var $$void = function(dictFunctor) {
     return map(dictFunctor)($$const(unit));
   };
   var voidLeft = function(dictFunctor) {
-    var map110 = map(dictFunctor);
+    var map111 = map(dictFunctor);
     return function(f) {
       return function(x) {
-        return map110($$const(x))(f);
+        return map111($$const(x))(f);
       };
+    };
+  };
+  var voidRight = function(dictFunctor) {
+    var map111 = map(dictFunctor);
+    return function(x) {
+      return map111($$const(x));
     };
   };
   var functorArray = {
@@ -99,15 +316,21 @@
 
   // output/Control.Apply/index.js
   var identity2 = /* @__PURE__ */ identity(categoryFn);
+  var applyArray = {
+    apply: arrayApply,
+    Functor0: function() {
+      return functorArray;
+    }
+  };
   var apply = function(dict) {
     return dict.apply;
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map23 = map(dictApply.Functor0());
+    var map31 = map(dictApply.Functor0());
     return function(a3) {
       return function(b2) {
-        return apply1(map23($$const(identity2))(a3))(b2);
+        return apply1(map31($$const(identity2))(a3))(b2);
       };
     };
   };
@@ -117,7 +340,7 @@
     return dict.pure;
   };
   var unless = function(dictApplicative) {
-    var pure13 = pure(dictApplicative);
+    var pure16 = pure(dictApplicative);
     return function(v2) {
       return function(v1) {
         if (!v2) {
@@ -125,7 +348,7 @@
         }
         ;
         if (v2) {
-          return pure13(unit);
+          return pure16(unit);
         }
         ;
         throw new Error("Failed pattern match at Control.Applicative (line 68, column 1 - line 68, column 65): " + [v2.constructor.name, v1.constructor.name]);
@@ -133,7 +356,7 @@
     };
   };
   var when = function(dictApplicative) {
-    var pure13 = pure(dictApplicative);
+    var pure16 = pure(dictApplicative);
     return function(v2) {
       return function(v1) {
         if (v2) {
@@ -141,7 +364,7 @@
         }
         ;
         if (!v2) {
-          return pure13(unit);
+          return pure16(unit);
         }
         ;
         throw new Error("Failed pattern match at Control.Applicative (line 63, column 1 - line 63, column 63): " + [v2.constructor.name, v1.constructor.name]);
@@ -149,11 +372,11 @@
     };
   };
   var liftA1 = function(dictApplicative) {
-    var apply2 = apply(dictApplicative.Apply0());
-    var pure13 = pure(dictApplicative);
+    var apply3 = apply(dictApplicative.Apply0());
+    var pure16 = pure(dictApplicative);
     return function(f) {
       return function(a3) {
-        return apply2(pure13(f))(a3);
+        return apply3(pure16(f))(a3);
       };
     };
   };
@@ -225,9 +448,37 @@
       return r1 === r2;
     };
   };
+  var eqBooleanImpl = refEq;
   var eqIntImpl = refEq;
   var eqNumberImpl = refEq;
+  var eqCharImpl = refEq;
   var eqStringImpl = refEq;
+
+  // output/Data.Symbol/index.js
+  var reflectSymbol = function(dict) {
+    return dict.reflectSymbol;
+  };
+
+  // output/Record.Unsafe/foreign.js
+  var unsafeGet = function(label5) {
+    return function(rec) {
+      return rec[label5];
+    };
+  };
+  var unsafeSet = function(label5) {
+    return function(value15) {
+      return function(rec) {
+        var copy2 = {};
+        for (var key2 in rec) {
+          if ({}.hasOwnProperty.call(rec, key2)) {
+            copy2[key2] = rec[key2];
+          }
+        }
+        copy2[label5] = value15;
+        return copy2;
+      };
+    };
+  };
 
   // output/Data.Eq/index.js
   var eqString = {
@@ -239,17 +490,32 @@
   var eqInt = {
     eq: eqIntImpl
   };
+  var eqChar = {
+    eq: eqCharImpl
+  };
+  var eqBoolean = {
+    eq: eqBooleanImpl
+  };
   var eq = function(dict) {
     return dict.eq;
+  };
+  var eq2 = /* @__PURE__ */ eq(eqBoolean);
+  var notEq = function(dictEq) {
+    var eq32 = eq(dictEq);
+    return function(x) {
+      return function(y) {
+        return eq2(eq32(x)(y))(false);
+      };
+    };
   };
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq4) {
+    return function(eq7) {
       return function(gt) {
         return function(x) {
           return function(y) {
-            return x < y ? lt : x === y ? eq4 : gt;
+            return x < y ? lt : x === y ? eq7 : gt;
           };
         };
       };
@@ -258,6 +524,42 @@
   var ordIntImpl = unsafeCompareImpl;
   var ordNumberImpl = unsafeCompareImpl;
   var ordStringImpl = unsafeCompareImpl;
+  var ordCharImpl = unsafeCompareImpl;
+
+  // output/Data.Ring/foreign.js
+  var intSub = function(x) {
+    return function(y) {
+      return x - y | 0;
+    };
+  };
+
+  // output/Data.Semiring/foreign.js
+  var intAdd = function(x) {
+    return function(y) {
+      return x + y | 0;
+    };
+  };
+  var intMul = function(x) {
+    return function(y) {
+      return x * y | 0;
+    };
+  };
+
+  // output/Data.Semiring/index.js
+  var semiringInt = {
+    add: intAdd,
+    zero: 0,
+    mul: intMul,
+    one: 1
+  };
+
+  // output/Data.Ring/index.js
+  var ringInt = {
+    sub: intSub,
+    Semiring0: function() {
+      return semiringInt;
+    }
+  };
 
   // output/Data.Ord/index.js
   var ordString = /* @__PURE__ */ (function() {
@@ -281,6 +583,14 @@
       compare: ordIntImpl(LT.value)(EQ.value)(GT.value),
       Eq0: function() {
         return eqInt;
+      }
+    };
+  })();
+  var ordChar = /* @__PURE__ */ (function() {
+    return {
+      compare: ordCharImpl(LT.value)(EQ.value)(GT.value),
+      Eq0: function() {
+        return eqChar;
       }
     };
   })();
@@ -338,8 +648,42 @@
     var str = n.toString();
     return isNaN(str + ".0") ? str : str + ".0";
   };
+  var showStringImpl = function(s2) {
+    var l2 = s2.length;
+    return '"' + s2.replace(
+      /[\0-\x1F\x7F"\\]/g,
+      // eslint-disable-line no-control-regex
+      function(c2, i2) {
+        switch (c2) {
+          case '"':
+          case "\\":
+            return "\\" + c2;
+          case "\x07":
+            return "\\a";
+          case "\b":
+            return "\\b";
+          case "\f":
+            return "\\f";
+          case "\n":
+            return "\\n";
+          case "\r":
+            return "\\r";
+          case "	":
+            return "\\t";
+          case "\v":
+            return "\\v";
+        }
+        var k = i2 + 1;
+        var empty7 = k < l2 && s2[k] >= "0" && s2[k] <= "9" ? "\\&" : "";
+        return "\\" + c2.charCodeAt(0).toString(10) + empty7;
+      }
+    ) + '"';
+  };
 
   // output/Data.Show/index.js
+  var showString = {
+    show: showStringImpl
+  };
   var showNumber = {
     show: showNumberImpl
   };
@@ -368,6 +712,11 @@
   };
 
   // output/Data.String.Common/foreign.js
+  var split = function(sep) {
+    return function(s2) {
+      return s2.split(sep);
+    };
+  };
   var toLower = function(s2) {
     return s2.toLowerCase();
   };
@@ -713,9 +1062,12 @@
     };
   };
 
+  // output/Control.Alt/index.js
+  var alt = function(dict) {
+    return dict.alt;
+  };
+
   // output/Data.Bounded/foreign.js
-  var topInt = 2147483647;
-  var bottomInt = -2147483648;
   var topChar = String.fromCharCode(65535);
   var bottomChar = String.fromCharCode(0);
   var topNumber = Number.POSITIVE_INFINITY;
@@ -725,11 +1077,11 @@
   var top = function(dict) {
     return dict.top;
   };
-  var boundedInt = {
-    top: topInt,
-    bottom: bottomInt,
+  var boundedChar = {
+    top: topChar,
+    bottom: bottomChar,
     Ord0: function() {
-      return ordInt;
+      return ordChar;
     }
   };
   var bottom = function(dict) {
@@ -797,7 +1149,7 @@
     };
   };
   var eqMaybe = function(dictEq) {
-    var eq4 = eq(dictEq);
+    var eq7 = eq(dictEq);
     return {
       eq: function(x) {
         return function(y) {
@@ -806,7 +1158,7 @@
           }
           ;
           if (x instanceof Just && y instanceof Just) {
-            return eq4(x.value0)(y.value0);
+            return eq7(x.value0)(y.value0);
           }
           ;
           return false;
@@ -874,6 +1226,17 @@
   var unwrap = function() {
     return coerce2;
   };
+  var alaF = function() {
+    return function() {
+      return function() {
+        return function() {
+          return function(v2) {
+            return coerce2;
+          };
+        };
+      };
+    };
+  };
 
   // output/Data.Either/index.js
   var Left = /* @__PURE__ */ (function() {
@@ -896,6 +1259,9 @@
     };
     return Right2;
   })();
+  var note = function(a3) {
+    return maybe(new Left(a3))(Right.create);
+  };
   var functorEither = {
     map: function(f) {
       return function(m2) {
@@ -911,6 +1277,7 @@
       };
     }
   };
+  var map3 = /* @__PURE__ */ map(functorEither);
   var either = function(v2) {
     return function(v1) {
       return function(v22) {
@@ -925,6 +1292,84 @@
         throw new Error("Failed pattern match at Data.Either (line 208, column 1 - line 208, column 64): " + [v2.constructor.name, v1.constructor.name, v22.constructor.name]);
       };
     };
+  };
+  var applyEither = {
+    apply: function(v2) {
+      return function(v1) {
+        if (v2 instanceof Left) {
+          return new Left(v2.value0);
+        }
+        ;
+        if (v2 instanceof Right) {
+          return map3(v2.value0)(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Data.Either (line 70, column 1 - line 72, column 30): " + [v2.constructor.name, v1.constructor.name]);
+      };
+    },
+    Functor0: function() {
+      return functorEither;
+    }
+  };
+  var bindEither = {
+    bind: /* @__PURE__ */ either(function(e) {
+      return function(v2) {
+        return new Left(e);
+      };
+    })(function(a3) {
+      return function(f) {
+        return f(a3);
+      };
+    }),
+    Apply0: function() {
+      return applyEither;
+    }
+  };
+  var applicativeEither = /* @__PURE__ */ (function() {
+    return {
+      pure: Right.create,
+      Apply0: function() {
+        return applyEither;
+      }
+    };
+  })();
+
+  // output/Data.EuclideanRing/foreign.js
+  var intDegree = function(x) {
+    return Math.min(Math.abs(x), 2147483647);
+  };
+  var intDiv = function(x) {
+    return function(y) {
+      if (y === 0) return 0;
+      return y > 0 ? Math.floor(x / y) : -Math.floor(x / -y);
+    };
+  };
+  var intMod = function(x) {
+    return function(y) {
+      if (y === 0) return 0;
+      var yy = Math.abs(y);
+      return (x % yy + yy) % yy;
+    };
+  };
+
+  // output/Data.CommutativeRing/index.js
+  var commutativeRingInt = {
+    Ring0: function() {
+      return ringInt;
+    }
+  };
+
+  // output/Data.EuclideanRing/index.js
+  var mod = function(dict) {
+    return dict.mod;
+  };
+  var euclideanRingInt = {
+    degree: intDegree,
+    div: intDiv,
+    mod: intMod,
+    CommutativeRing0: function() {
+      return commutativeRingInt;
+    }
   };
 
   // output/Data.Monoid/index.js
@@ -961,8 +1406,32 @@
   };
 
   // output/Data.Bifunctor/index.js
+  var identity4 = /* @__PURE__ */ identity(categoryFn);
   var bimap = function(dict) {
     return dict.bimap;
+  };
+  var lmap = function(dictBifunctor) {
+    var bimap1 = bimap(dictBifunctor);
+    return function(f) {
+      return bimap1(f)(identity4);
+    };
+  };
+  var bifunctorEither = {
+    bimap: function(v2) {
+      return function(v1) {
+        return function(v22) {
+          if (v22 instanceof Left) {
+            return new Left(v2(v22.value0));
+          }
+          ;
+          if (v22 instanceof Right) {
+            return new Right(v1(v22.value0));
+          }
+          ;
+          throw new Error("Failed pattern match at Data.Bifunctor (line 32, column 1 - line 34, column 36): " + [v2.constructor.name, v1.constructor.name, v22.constructor.name]);
+        };
+      };
+    }
   };
 
   // output/Halogen.Query.Input/index.js
@@ -991,24 +1460,27 @@
   })();
 
   // output/Data.Array/foreign.js
-  var replicateFill = function(count, value14) {
+  var replicateFill = function(count, value15) {
     if (count < 1) {
       return [];
     }
     var result = new Array(count);
-    return result.fill(value14);
+    return result.fill(value15);
   };
-  var replicatePolyfill = function(count, value14) {
+  var replicatePolyfill = function(count, value15) {
     var result = [];
     var n = 0;
     for (var i2 = 0; i2 < count; i2++) {
-      result[n++] = value14;
+      result[n++] = value15;
     }
     return result;
   };
   var replicateImpl = typeof Array.prototype.fill === "function" ? replicateFill : replicatePolyfill;
   var length = function(xs) {
     return xs.length;
+  };
+  var indexImpl = function(just, nothing, xs, i2) {
+    return i2 < 0 || i2 >= xs.length ? nothing : just(xs[i2]);
   };
   var findIndexImpl = function(just, nothing, f, xs) {
     for (var i2 = 0, l2 = xs.length; i2 < l2; i2++) {
@@ -1070,10 +1542,30 @@
   var sliceImpl = function(s2, e, l2) {
     return l2.slice(s2, e);
   };
+  var unsafeIndexImpl = function(xs, n) {
+    return xs[n];
+  };
+
+  // output/Control.Bind/foreign.js
+  var arrayBind = function(arr) {
+    return function(f) {
+      var result = [];
+      for (var i2 = 0, l2 = arr.length; i2 < l2; i2++) {
+        Array.prototype.push.apply(result, f(arr[i2]));
+      }
+      return result;
+    };
+  };
 
   // output/Control.Bind/index.js
   var discard = function(dict) {
     return dict.discard;
+  };
+  var bindArray = {
+    bind: arrayBind,
+    Apply0: function() {
+      return applyArray;
+    }
   };
   var bind = function(dict) {
     return dict.bind;
@@ -1109,24 +1601,24 @@
 
   // output/Control.Monad/index.js
   var unlessM = function(dictMonad) {
-    var bind7 = bind(dictMonad.Bind1());
+    var bind8 = bind(dictMonad.Bind1());
     var unless2 = unless(dictMonad.Applicative0());
     return function(mb) {
       return function(m2) {
-        return bind7(mb)(function(b2) {
+        return bind8(mb)(function(b2) {
           return unless2(b2)(m2);
         });
       };
     };
   };
   var ap = function(dictMonad) {
-    var bind7 = bind(dictMonad.Bind1());
-    var pure11 = pure(dictMonad.Applicative0());
+    var bind8 = bind(dictMonad.Bind1());
+    var pure16 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a3) {
-        return bind7(f)(function(f$prime) {
-          return bind7(a3)(function(a$prime) {
-            return pure11(f$prime(a$prime));
+        return bind8(f)(function(f$prime) {
+          return bind8(a3)(function(a$prime) {
+            return pure16(f$prime(a$prime));
           });
         });
       };
@@ -1194,14 +1686,14 @@
   };
 
   // output/Effect/index.js
-  var $runtime_lazy = function(name15, moduleName, init2) {
+  var $runtime_lazy = function(name16, moduleName, init3) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
       if (state3 === 2) return val;
-      if (state3 === 1) throw new ReferenceError(name15 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
+      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
       state3 = 1;
-      val = init2();
+      val = init3();
       state3 = 2;
       return val;
     };
@@ -1290,7 +1782,7 @@
 
   // output/Control.Monad.Rec.Class/index.js
   var bindFlipped2 = /* @__PURE__ */ bindFlipped(bindEffect);
-  var map3 = /* @__PURE__ */ map(functorEffect);
+  var map4 = /* @__PURE__ */ map(functorEffect);
   var Loop = /* @__PURE__ */ (function() {
     function Loop2(value0) {
       this.value0 = value0;
@@ -1345,7 +1837,7 @@
             ;
             return {};
           })();
-          return map3(fromDone)(read(r))();
+          return map4(fromDone)(read(r))();
         };
       };
     },
@@ -1401,9 +1893,9 @@
 
   // output/Data.Foldable/foreign.js
   var foldrArray = function(f) {
-    return function(init2) {
+    return function(init3) {
       return function(xs) {
-        var acc = init2;
+        var acc = init3;
         var len = xs.length;
         for (var i2 = len - 1; i2 >= 0; i2--) {
           acc = f(xs[i2])(acc);
@@ -1413,9 +1905,9 @@
     };
   };
   var foldlArray = function(f) {
-    return function(init2) {
+    return function(init3) {
       return function(xs) {
-        var acc = init2;
+        var acc = init3;
         var len = xs.length;
         for (var i2 = 0; i2 < len; i2++) {
           acc = f(acc)(xs[i2]);
@@ -1430,19 +1922,44 @@
     return dict.empty;
   };
 
+  // output/Data.Monoid.Disj/index.js
+  var Disj = function(x) {
+    return x;
+  };
+  var semigroupDisj = function(dictHeytingAlgebra) {
+    var disj2 = disj(dictHeytingAlgebra);
+    return {
+      append: function(v2) {
+        return function(v1) {
+          return disj2(v2)(v1);
+        };
+      }
+    };
+  };
+  var monoidDisj = function(dictHeytingAlgebra) {
+    var semigroupDisj1 = semigroupDisj(dictHeytingAlgebra);
+    return {
+      mempty: ff(dictHeytingAlgebra),
+      Semigroup0: function() {
+        return semigroupDisj1;
+      }
+    };
+  };
+
   // output/Data.Foldable/index.js
+  var alaF2 = /* @__PURE__ */ alaF()()()();
   var foldr = function(dict) {
     return dict.foldr;
   };
   var traverse_ = function(dictApplicative) {
     var applySecond2 = applySecond(dictApplicative.Apply0());
-    var pure11 = pure(dictApplicative);
+    var pure16 = pure(dictApplicative);
     return function(dictFoldable) {
       var foldr22 = foldr(dictFoldable);
       return function(f) {
         return foldr22(function($454) {
           return applySecond2(f($454));
-        })(pure11(unit));
+        })(pure16(unit));
       };
     };
   };
@@ -1487,11 +2004,11 @@
       };
     },
     foldMap: function(dictMonoid) {
-      var mempty2 = mempty(dictMonoid);
+      var mempty3 = mempty(dictMonoid);
       return function(v2) {
         return function(v1) {
           if (v1 instanceof Nothing) {
-            return mempty2;
+            return mempty3;
           }
           ;
           if (v1 instanceof Just) {
@@ -1507,13 +2024,13 @@
     var foldr22 = foldr(dictFoldable);
     return function(dictMonoid) {
       var append5 = append(dictMonoid.Semigroup0());
-      var mempty2 = mempty(dictMonoid);
+      var mempty3 = mempty(dictMonoid);
       return function(f) {
         return foldr22(function(x) {
           return function(acc) {
             return append5(f(x))(acc);
           };
-        })(mempty2);
+        })(mempty3);
       };
     };
   };
@@ -1523,6 +2040,15 @@
     foldMap: function(dictMonoid) {
       return foldMapDefaultR(foldableArray)(dictMonoid);
     }
+  };
+  var foldMap = function(dict) {
+    return dict.foldMap;
+  };
+  var any = function(dictFoldable) {
+    var foldMap2 = foldMap(dictFoldable);
+    return function(dictHeytingAlgebra) {
+      return alaF2(Disj)(foldMap2(monoidDisj(dictHeytingAlgebra)));
+    };
   };
 
   // output/Data.Function.Uncurried/foreign.js
@@ -1554,8 +2080,180 @@
     };
   };
 
-  // output/Data.Array/index.js
+  // output/Data.FunctorWithIndex/foreign.js
+  var mapWithIndexArray = function(f) {
+    return function(xs) {
+      var l2 = xs.length;
+      var result = Array(l2);
+      for (var i2 = 0; i2 < l2; i2++) {
+        result[i2] = f(i2)(xs[i2]);
+      }
+      return result;
+    };
+  };
+
+  // output/Data.FunctorWithIndex/index.js
+  var mapWithIndex = function(dict) {
+    return dict.mapWithIndex;
+  };
+  var functorWithIndexArray = {
+    mapWithIndex: mapWithIndexArray,
+    Functor0: function() {
+      return functorArray;
+    }
+  };
+
+  // output/Data.Traversable/foreign.js
+  var traverseArrayImpl = /* @__PURE__ */ (function() {
+    function array1(a3) {
+      return [a3];
+    }
+    function array2(a3) {
+      return function(b2) {
+        return [a3, b2];
+      };
+    }
+    function array3(a3) {
+      return function(b2) {
+        return function(c2) {
+          return [a3, b2, c2];
+        };
+      };
+    }
+    function concat2(xs) {
+      return function(ys) {
+        return xs.concat(ys);
+      };
+    }
+    return function(apply3) {
+      return function(map31) {
+        return function(pure16) {
+          return function(f) {
+            return function(array) {
+              function go2(bot, top2) {
+                switch (top2 - bot) {
+                  case 0:
+                    return pure16([]);
+                  case 1:
+                    return map31(array1)(f(array[bot]));
+                  case 2:
+                    return apply3(map31(array2)(f(array[bot])))(f(array[bot + 1]));
+                  case 3:
+                    return apply3(apply3(map31(array3)(f(array[bot])))(f(array[bot + 1])))(f(array[bot + 2]));
+                  default:
+                    var pivot = bot + Math.floor((top2 - bot) / 4) * 2;
+                    return apply3(map31(concat2)(go2(bot, pivot)))(go2(pivot, top2));
+                }
+              }
+              return go2(0, array.length);
+            };
+          };
+        };
+      };
+    };
+  })();
+
+  // output/Data.Traversable/index.js
+  var identity5 = /* @__PURE__ */ identity(categoryFn);
+  var traverse = function(dict) {
+    return dict.traverse;
+  };
+  var sequenceDefault = function(dictTraversable) {
+    var traverse22 = traverse(dictTraversable);
+    return function(dictApplicative) {
+      return traverse22(dictApplicative)(identity5);
+    };
+  };
+  var traversableArray = {
+    traverse: function(dictApplicative) {
+      var Apply0 = dictApplicative.Apply0();
+      return traverseArrayImpl(apply(Apply0))(map(Apply0.Functor0()))(pure(dictApplicative));
+    },
+    sequence: function(dictApplicative) {
+      return sequenceDefault(traversableArray)(dictApplicative);
+    },
+    Functor0: function() {
+      return functorArray;
+    },
+    Foldable1: function() {
+      return foldableArray;
+    }
+  };
+  var sequence = function(dict) {
+    return dict.sequence;
+  };
+
+  // output/Data.Unfoldable/foreign.js
+  var unfoldrArrayImpl = function(isNothing2) {
+    return function(fromJust5) {
+      return function(fst2) {
+        return function(snd2) {
+          return function(f) {
+            return function(b2) {
+              var result = [];
+              var value15 = b2;
+              while (true) {
+                var maybe2 = f(value15);
+                if (isNothing2(maybe2)) return result;
+                var tuple = fromJust5(maybe2);
+                result.push(fst2(tuple));
+                value15 = snd2(tuple);
+              }
+            };
+          };
+        };
+      };
+    };
+  };
+
+  // output/Data.Unfoldable1/foreign.js
+  var unfoldr1ArrayImpl = function(isNothing2) {
+    return function(fromJust5) {
+      return function(fst2) {
+        return function(snd2) {
+          return function(f) {
+            return function(b2) {
+              var result = [];
+              var value15 = b2;
+              while (true) {
+                var tuple = f(value15);
+                result.push(fst2(tuple));
+                var maybe2 = snd2(tuple);
+                if (isNothing2(maybe2)) return result;
+                value15 = fromJust5(maybe2);
+              }
+            };
+          };
+        };
+      };
+    };
+  };
+
+  // output/Data.Unfoldable1/index.js
   var fromJust2 = /* @__PURE__ */ fromJust();
+  var unfoldable1Array = {
+    unfoldr1: /* @__PURE__ */ unfoldr1ArrayImpl(isNothing)(fromJust2)(fst)(snd)
+  };
+
+  // output/Data.Unfoldable/index.js
+  var fromJust3 = /* @__PURE__ */ fromJust();
+  var unfoldr = function(dict) {
+    return dict.unfoldr;
+  };
+  var unfoldableArray = {
+    unfoldr: /* @__PURE__ */ unfoldrArrayImpl(isNothing)(fromJust3)(fst)(snd),
+    Unfoldable10: function() {
+      return unfoldable1Array;
+    }
+  };
+
+  // output/Data.Array/index.js
+  var map5 = /* @__PURE__ */ map(functorMaybe);
+  var fromJust4 = /* @__PURE__ */ fromJust();
+  var unsafeIndex = function() {
+    return runFn2(unsafeIndexImpl);
+  };
+  var unsafeIndex1 = /* @__PURE__ */ unsafeIndex();
   var sortBy = function(comp) {
     return runFn3(sortByImpl)(comp)(function(v2) {
       if (v2 instanceof GT) {
@@ -1579,9 +2277,24 @@
     };
   };
   var slice = /* @__PURE__ */ runFn3(sliceImpl);
+  var singleton2 = function(a3) {
+    return [a3];
+  };
+  var index = /* @__PURE__ */ (function() {
+    return runFn4(indexImpl)(Just.create)(Nothing.value);
+  })();
+  var last = function(xs) {
+    return index(xs)(length(xs) - 1 | 0);
+  };
+  var foldl2 = /* @__PURE__ */ foldl(foldableArray);
   var findIndex = /* @__PURE__ */ (function() {
     return runFn4(findIndexImpl)(Just.create)(Nothing.value);
   })();
+  var find2 = function(f) {
+    return function(xs) {
+      return map5(unsafeIndex1(xs))(findIndex(f)(xs));
+    };
+  };
   var filter = /* @__PURE__ */ runFn2(filterImpl);
   var deleteAt = /* @__PURE__ */ (function() {
     return runFn4(_deleteAt)(Just.create)(Nothing.value);
@@ -1594,11 +2307,21 @@
         }
         ;
         return maybe(v22)(function(i2) {
-          return fromJust2(deleteAt(i2)(v22));
+          return fromJust4(deleteAt(i2)(v22));
         })(findIndex(v2(v1))(v22));
       };
     };
   };
+  var concatMap = /* @__PURE__ */ flip(/* @__PURE__ */ bind(bindArray));
+  var mapMaybe = function(f) {
+    return concatMap((function() {
+      var $189 = maybe([])(singleton2);
+      return function($190) {
+        return $189(f($190));
+      };
+    })());
+  };
+  var catMaybes = /* @__PURE__ */ mapMaybe(/* @__PURE__ */ identity(categoryFn));
 
   // output/Data.Nullable/foreign.js
   var nullImpl = null;
@@ -1648,7 +2371,7 @@
   });
 
   // output/Halogen.VDom.Types/index.js
-  var map4 = /* @__PURE__ */ map(functorArray);
+  var map6 = /* @__PURE__ */ map(functorArray);
   var map1 = /* @__PURE__ */ map(functorTuple);
   var Text = /* @__PURE__ */ (function() {
     function Text2(value0) {
@@ -1761,11 +2484,11 @@
       }
       ;
       if (v22 instanceof Elem) {
-        return new Elem(v22.value0, v22.value1, v2.value0(v22.value2), map4(go2)(v22.value3));
+        return new Elem(v22.value0, v22.value1, v2.value0(v22.value2), map6(go2)(v22.value3));
       }
       ;
       if (v22 instanceof Keyed) {
-        return new Keyed(v22.value0, v22.value1, v2.value0(v22.value2), map4(map1(go2))(v22.value3));
+        return new Keyed(v22.value0, v22.value1, v2.value0(v22.value2), map6(map1(go2))(v22.value3));
       }
       ;
       if (v22 instanceof Widget) {
@@ -1868,11 +2591,11 @@
   function setTextContent(s2, n) {
     n.textContent = s2;
   }
-  function createElement(ns, name15, doc) {
+  function createElement(ns, name16, doc) {
     if (ns != null) {
-      return doc.createElementNS(ns, name15);
+      return doc.createElementNS(ns, name16);
     } else {
-      return doc.createElement(name15);
+      return doc.createElement(name16);
     }
   }
   function insertChildIx(i2, a3, b2) {
@@ -1922,6 +2645,16 @@
   var newImpl = function() {
     return {};
   };
+  function poke2(k) {
+    return function(v2) {
+      return function(m2) {
+        return function() {
+          m2[k] = v2;
+          return m2;
+        };
+      };
+    };
+  }
 
   // output/Halogen.VDom.Util/index.js
   var unsafeLookup = unsafeGetAny;
@@ -1930,9 +2663,9 @@
   var newMutMap = newImpl;
 
   // output/Web.DOM.Element/foreign.js
-  var getProp = function(name15) {
+  var getProp = function(name16) {
     return function(doctype) {
-      return doctype[name15];
+      return doctype[name16];
     };
   };
   var _namespaceURI = getProp("namespaceURI");
@@ -1941,10 +2674,10 @@
   var tagName = getProp("tagName");
 
   // output/Web.DOM.ParentNode/foreign.js
-  var getEffProp = function(name15) {
+  var getEffProp = function(name16) {
     return function(node) {
       return function() {
-        return node[name15];
+        return node[name16];
       };
     };
   };
@@ -1961,9 +2694,9 @@
   }
 
   // output/Web.DOM.ParentNode/index.js
-  var map5 = /* @__PURE__ */ map(functorEffect);
+  var map7 = /* @__PURE__ */ map(functorEffect);
   var querySelector = function(qs) {
-    var $2 = map5(toMaybe);
+    var $2 = map7(toMaybe);
     var $3 = _querySelector(qs);
     return function($4) {
       return $2($3($4));
@@ -1974,14 +2707,14 @@
   var toNode = unsafeCoerce2;
 
   // output/Halogen.VDom.DOM/index.js
-  var $runtime_lazy2 = function(name15, moduleName, init2) {
+  var $runtime_lazy2 = function(name16, moduleName, init3) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
       if (state3 === 2) return val;
-      if (state3 === 1) throw new ReferenceError(name15 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
+      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
       state3 = 1;
-      val = init2();
+      val = init3();
       state3 = 2;
       return val;
     };
@@ -2271,16 +3004,19 @@
   };
 
   // output/Foreign/foreign.js
-  function typeOf(value14) {
-    return typeof value14;
+  function typeOf(value15) {
+    return typeof value15;
   }
-  function tagOf(value14) {
-    return Object.prototype.toString.call(value14).slice(8, -1);
+  function tagOf(value15) {
+    return Object.prototype.toString.call(value15).slice(8, -1);
   }
 
   // output/Effect.Exception/foreign.js
   function error(msg) {
     return new Error(msg);
+  }
+  function message(e) {
+    return e.message;
   }
   function throwException(e) {
     return function() {
@@ -2303,11 +3039,11 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map23 = map(Monad0.Bind1().Apply0().Functor0());
-    var pure11 = pure(Monad0.Applicative0());
+    var map31 = map(Monad0.Bind1().Apply0().Functor0());
+    var pure16 = pure(Monad0.Applicative0());
     return function(a3) {
-      return catchError1(map23(Right.create)(a3))(function($52) {
-        return pure11(Left.create($52));
+      return catchError1(map31(Right.create)(a3))(function($52) {
+        return pure16(Left.create($52));
       });
     };
   };
@@ -2347,7 +3083,7 @@
   };
 
   // output/Control.Monad.Except.Trans/index.js
-  var map6 = /* @__PURE__ */ map(functorEither);
+  var map8 = /* @__PURE__ */ map(functorEither);
   var ExceptT = function(x) {
     return x;
   };
@@ -2360,10 +3096,10 @@
     };
   };
   var functorExceptT = function(dictFunctor) {
-    var map110 = map(dictFunctor);
+    var map111 = map(dictFunctor);
     return {
       map: function(f) {
-        return mapExceptT(map110(map6(f)));
+        return mapExceptT(map111(map8(f)));
       }
     };
   };
@@ -2378,13 +3114,13 @@
     };
   };
   var bindExceptT = function(dictMonad) {
-    var bind7 = bind(dictMonad.Bind1());
-    var pure11 = pure(dictMonad.Applicative0());
+    var bind8 = bind(dictMonad.Bind1());
+    var pure16 = pure(dictMonad.Applicative0());
     return {
       bind: function(v2) {
         return function(k) {
-          return bind7(v2)(either(function($187) {
-            return pure11(Left.create($187));
+          return bind8(v2)(either(function($187) {
+            return pure16(Left.create($187));
           })(function(a3) {
             var v1 = k(a3);
             return v1;
@@ -2432,6 +3168,45 @@
       }
     };
   };
+  var altExceptT = function(dictSemigroup) {
+    var append5 = append(dictSemigroup);
+    return function(dictMonad) {
+      var Bind1 = dictMonad.Bind1();
+      var bind8 = bind(Bind1);
+      var pure16 = pure(dictMonad.Applicative0());
+      var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
+      return {
+        alt: function(v2) {
+          return function(v1) {
+            return bind8(v2)(function(rm) {
+              if (rm instanceof Right) {
+                return pure16(new Right(rm.value0));
+              }
+              ;
+              if (rm instanceof Left) {
+                return bind8(v1)(function(rn) {
+                  if (rn instanceof Right) {
+                    return pure16(new Right(rn.value0));
+                  }
+                  ;
+                  if (rn instanceof Left) {
+                    return pure16(new Left(append5(rm.value0)(rn.value0)));
+                  }
+                  ;
+                  throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 86, column 9 - line 88, column 49): " + [rn.constructor.name]);
+                });
+              }
+              ;
+              throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 82, column 5 - line 88, column 49): " + [rm.constructor.name]);
+            });
+          };
+        },
+        Functor0: function() {
+          return functorExceptT1;
+        }
+      };
+    };
+  };
 
   // output/Data.Int/foreign.js
   var fromNumberImpl = function(just) {
@@ -2447,35 +3222,113 @@
 
   // output/Data.Number/foreign.js
   var isFiniteImpl = isFinite;
-  var floor = Math.floor;
+  function fromStringImpl(str, isFinite2, just, nothing) {
+    var num = parseFloat(str);
+    if (isFinite2(num)) {
+      return just(num);
+    } else {
+      return nothing;
+    }
+  }
+
+  // output/Data.Number/index.js
+  var fromString = function(str) {
+    return fromStringImpl(str, isFiniteImpl, Just.create, Nothing.value);
+  };
 
   // output/Data.Int/index.js
-  var top2 = /* @__PURE__ */ top(boundedInt);
-  var bottom2 = /* @__PURE__ */ bottom(boundedInt);
   var fromNumber = /* @__PURE__ */ (function() {
     return fromNumberImpl(Just.create)(Nothing.value);
   })();
-  var unsafeClamp = function(x) {
-    if (!isFiniteImpl(x)) {
-      return 0;
-    }
-    ;
-    if (x >= toNumber(top2)) {
-      return top2;
-    }
-    ;
-    if (x <= toNumber(bottom2)) {
-      return bottom2;
-    }
-    ;
-    if (otherwise) {
-      return fromMaybe(0)(fromNumber(x));
-    }
-    ;
-    throw new Error("Failed pattern match at Data.Int (line 72, column 1 - line 72, column 29): " + [x.constructor.name]);
+
+  // output/Data.FoldableWithIndex/index.js
+  var foldr8 = /* @__PURE__ */ foldr(foldableArray);
+  var mapWithIndex2 = /* @__PURE__ */ mapWithIndex(functorWithIndexArray);
+  var foldl8 = /* @__PURE__ */ foldl(foldableArray);
+  var foldrWithIndex = function(dict) {
+    return dict.foldrWithIndex;
   };
-  var floor2 = function($39) {
-    return unsafeClamp(floor($39));
+  var foldMapWithIndexDefaultR = function(dictFoldableWithIndex) {
+    var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
+    return function(dictMonoid) {
+      var append5 = append(dictMonoid.Semigroup0());
+      var mempty3 = mempty(dictMonoid);
+      return function(f) {
+        return foldrWithIndex1(function(i2) {
+          return function(x) {
+            return function(acc) {
+              return append5(f(i2)(x))(acc);
+            };
+          };
+        })(mempty3);
+      };
+    };
+  };
+  var foldableWithIndexArray = {
+    foldrWithIndex: function(f) {
+      return function(z2) {
+        var $291 = foldr8(function(v2) {
+          return function(y) {
+            return f(v2.value0)(v2.value1)(y);
+          };
+        })(z2);
+        var $292 = mapWithIndex2(Tuple.create);
+        return function($293) {
+          return $291($292($293));
+        };
+      };
+    },
+    foldlWithIndex: function(f) {
+      return function(z2) {
+        var $294 = foldl8(function(y) {
+          return function(v2) {
+            return f(v2.value0)(y)(v2.value1);
+          };
+        })(z2);
+        var $295 = mapWithIndex2(Tuple.create);
+        return function($296) {
+          return $294($295($296));
+        };
+      };
+    },
+    foldMapWithIndex: function(dictMonoid) {
+      return foldMapWithIndexDefaultR(foldableWithIndexArray)(dictMonoid);
+    },
+    Foldable0: function() {
+      return foldableArray;
+    }
+  };
+
+  // output/Data.TraversableWithIndex/index.js
+  var traverseWithIndexDefault = function(dictTraversableWithIndex) {
+    var sequence2 = sequence(dictTraversableWithIndex.Traversable2());
+    var mapWithIndex4 = mapWithIndex(dictTraversableWithIndex.FunctorWithIndex0());
+    return function(dictApplicative) {
+      var sequence12 = sequence2(dictApplicative);
+      return function(f) {
+        var $174 = mapWithIndex4(f);
+        return function($175) {
+          return sequence12($174($175));
+        };
+      };
+    };
+  };
+  var traverseWithIndex = function(dict) {
+    return dict.traverseWithIndex;
+  };
+  var traversableWithIndexArray = {
+    traverseWithIndex: function(dictApplicative) {
+      return traverseWithIndexDefault(traversableWithIndexArray)(dictApplicative);
+    },
+    FunctorWithIndex0: function() {
+      return functorWithIndexArray;
+    },
+    FoldableWithIndex1: function() {
+      return foldableWithIndexArray;
+    },
+    Traversable2: function() {
+      return traversableArray;
+    }
   };
 
   // output/Data.NonEmpty/index.js
@@ -2492,7 +3345,7 @@
     };
     return NonEmpty2;
   })();
-  var singleton2 = function(dictPlus) {
+  var singleton3 = function(dictPlus) {
     var empty7 = empty(dictPlus);
     return function(a3) {
       return new NonEmpty(a3, empty7);
@@ -2522,6 +3375,9 @@
   })();
   var NonEmptyList = function(x) {
     return x;
+  };
+  var toList = function(v2) {
+    return new Cons(v2.value0, v2.value1);
   };
   var listMap = function(f) {
     var chunkedRevMap = function($copy_v) {
@@ -2657,14 +3513,14 @@
     },
     foldMap: function(dictMonoid) {
       var append22 = append(dictMonoid.Semigroup0());
-      var mempty2 = mempty(dictMonoid);
+      var mempty3 = mempty(dictMonoid);
       return function(f) {
         return foldl(foldableList)(function(acc) {
           var $286 = append22(acc);
           return function($287) {
             return $286(f($287));
           };
-        })(mempty2);
+        })(mempty3);
       };
     }
   };
@@ -2677,6 +3533,13 @@
     }
   };
   var append1 = /* @__PURE__ */ append(semigroupList);
+  var semigroupNonEmptyList = {
+    append: function(v2) {
+      return function(as$prime) {
+        return new NonEmpty(v2.value0, append1(v2.value1)(toList(as$prime)));
+      };
+    }
+  };
   var altList = {
     alt: append1,
     Functor0: function() {
@@ -2756,12 +3619,15 @@
   };
 
   // output/Data.List.NonEmpty/index.js
-  var singleton3 = /* @__PURE__ */ (function() {
-    var $200 = singleton2(plusList);
+  var singleton4 = /* @__PURE__ */ (function() {
+    var $200 = singleton3(plusList);
     return function($201) {
       return NonEmptyList($200($201));
     };
   })();
+  var head = function(v2) {
+    return v2.value0;
+  };
   var cons = function(y) {
     return function(v2) {
       return new NonEmpty(y, new Cons(v2.value0, v2.value1));
@@ -2769,6 +3635,9 @@
   };
 
   // output/Data.String.CodeUnits/foreign.js
+  var length3 = function(s2) {
+    return s2.length;
+  };
   var _indexOf = function(just) {
     return function(nothing) {
       return function(x) {
@@ -2779,11 +3648,39 @@
       };
     };
   };
+  var take2 = function(n) {
+    return function(s2) {
+      return s2.substr(0, n);
+    };
+  };
+  var drop2 = function(n) {
+    return function(s2) {
+      return s2.substring(n);
+    };
+  };
+
+  // output/Data.String.Unsafe/foreign.js
+  var charAt = function(i2) {
+    return function(s2) {
+      if (i2 >= 0 && i2 < s2.length) return s2.charAt(i2);
+      throw new Error("Data.String.Unsafe.charAt: Invalid index.");
+    };
+  };
 
   // output/Data.String.CodeUnits/index.js
+  var takeRight = function(i2) {
+    return function(s2) {
+      return drop2(length3(s2) - i2 | 0)(s2);
+    };
+  };
   var indexOf = /* @__PURE__ */ (function() {
     return _indexOf(Just.create)(Nothing.value);
   })();
+  var dropRight = function(i2) {
+    return function(s2) {
+      return take2(length3(s2) - i2 | 0)(s2);
+    };
+  };
   var contains = function(pat) {
     var $23 = indexOf(pat);
     return function($24) {
@@ -2792,41 +3689,98 @@
   };
 
   // output/Foreign/index.js
+  var show2 = /* @__PURE__ */ show(showString);
+  var show1 = /* @__PURE__ */ show(showInt);
+  var ForeignError = /* @__PURE__ */ (function() {
+    function ForeignError2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ForeignError2.create = function(value0) {
+      return new ForeignError2(value0);
+    };
+    return ForeignError2;
+  })();
   var TypeMismatch = /* @__PURE__ */ (function() {
-    function TypeMismatch2(value0, value1) {
+    function TypeMismatch3(value0, value1) {
       this.value0 = value0;
       this.value1 = value1;
     }
     ;
-    TypeMismatch2.create = function(value0) {
+    TypeMismatch3.create = function(value0) {
       return function(value1) {
-        return new TypeMismatch2(value0, value1);
+        return new TypeMismatch3(value0, value1);
       };
     };
-    return TypeMismatch2;
+    return TypeMismatch3;
+  })();
+  var ErrorAtIndex = /* @__PURE__ */ (function() {
+    function ErrorAtIndex2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ErrorAtIndex2.create = function(value0) {
+      return function(value1) {
+        return new ErrorAtIndex2(value0, value1);
+      };
+    };
+    return ErrorAtIndex2;
+  })();
+  var ErrorAtProperty = /* @__PURE__ */ (function() {
+    function ErrorAtProperty2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ErrorAtProperty2.create = function(value0) {
+      return function(value1) {
+        return new ErrorAtProperty2(value0, value1);
+      };
+    };
+    return ErrorAtProperty2;
   })();
   var unsafeToForeign = unsafeCoerce2;
   var unsafeFromForeign = unsafeCoerce2;
+  var renderForeignError = function(v2) {
+    if (v2 instanceof ForeignError) {
+      return v2.value0;
+    }
+    ;
+    if (v2 instanceof ErrorAtIndex) {
+      return "Error at array index " + (show1(v2.value0) + (": " + renderForeignError(v2.value1)));
+    }
+    ;
+    if (v2 instanceof ErrorAtProperty) {
+      return "Error at property " + (show2(v2.value0) + (": " + renderForeignError(v2.value1)));
+    }
+    ;
+    if (v2 instanceof TypeMismatch) {
+      return "Type mismatch: expected " + (v2.value0 + (", found " + v2.value1));
+    }
+    ;
+    throw new Error("Failed pattern match at Foreign (line 78, column 1 - line 78, column 45): " + [v2.constructor.name]);
+  };
   var fail = function(dictMonad) {
     var $153 = throwError(monadThrowExceptT(dictMonad));
     return function($154) {
-      return $153(singleton3($154));
+      return $153(singleton4($154));
     };
   };
   var unsafeReadTagged = function(dictMonad) {
-    var pure13 = pure(applicativeExceptT(dictMonad));
+    var pure16 = pure(applicativeExceptT(dictMonad));
     var fail1 = fail(dictMonad);
     return function(tag) {
-      return function(value14) {
-        if (tagOf(value14) === tag) {
-          return pure13(unsafeFromForeign(value14));
+      return function(value15) {
+        if (tagOf(value15) === tag) {
+          return pure16(unsafeFromForeign(value15));
         }
         ;
         if (otherwise) {
-          return fail1(new TypeMismatch(tag, tagOf(value14)));
+          return fail1(new TypeMismatch(tag, tagOf(value15)));
         }
         ;
-        throw new Error("Failed pattern match at Foreign (line 123, column 1 - line 123, column 104): " + [tag.constructor.name, value14.constructor.name]);
+        throw new Error("Failed pattern match at Foreign (line 123, column 1 - line 123, column 104): " + [tag.constructor.name, value15.constructor.name]);
       };
     };
   };
@@ -2835,6 +3789,21 @@
   };
 
   // output/Foreign.Object/foreign.js
+  function _copyST(m2) {
+    return function() {
+      var r = {};
+      for (var k in m2) {
+        if (hasOwnProperty.call(m2, k)) {
+          r[k] = m2[k];
+        }
+      }
+      return r;
+    };
+  }
+  var empty2 = {};
+  function runST(f) {
+    return f();
+  }
   function _lookup(no, yes, k, m2) {
     return k in m2 ? yes(m2[k]) : no;
   }
@@ -2856,9 +3825,24 @@
   });
 
   // output/Foreign.Object/index.js
+  var thawST = _copyST;
+  var mutate = function(f) {
+    return function(m2) {
+      return runST(function __do3() {
+        var s2 = thawST(m2)();
+        f(s2)();
+        return s2;
+      });
+    };
+  };
   var lookup = /* @__PURE__ */ (function() {
     return runFn4(_lookup)(Nothing.value)(Just.create);
   })();
+  var insert = function(k) {
+    return function(v2) {
+      return mutate(poke2(k)(v2));
+    };
+  };
 
   // output/Web.Event.EventTarget/foreign.js
   function eventListener(fn) {
@@ -2892,14 +3876,14 @@
   }
 
   // output/Halogen.VDom.DOM.Prop/index.js
-  var $runtime_lazy3 = function(name15, moduleName, init2) {
+  var $runtime_lazy3 = function(name16, moduleName, init3) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
       if (state3 === 2) return val;
-      if (state3 === 1) throw new ReferenceError(name15 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
+      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
       state3 = 1;
-      val = init2();
+      val = init3();
       state3 = 2;
       return val;
     };
@@ -3208,10 +4192,10 @@
     return Handler.create;
   })();
   var element = function(ns) {
-    return function(name15) {
+    return function(name16) {
       return function(props) {
         return function(children2) {
-          return new Elem(ns, name15, props, children2);
+          return new Elem(ns, name16, props, children2);
         };
       };
     };
@@ -3236,6 +4220,7 @@
     return prop2(dictIsProp)("value");
   };
   var placeholder = /* @__PURE__ */ prop22("placeholder");
+  var id2 = /* @__PURE__ */ prop22("id");
   var class_ = /* @__PURE__ */ (function() {
     var $36 = prop22("className");
     return function($37) {
@@ -3247,19 +4232,19 @@
   })();
 
   // output/Halogen.Svg.Attributes/index.js
-  var show2 = /* @__PURE__ */ show(showNumber);
-  var map7 = /* @__PURE__ */ map(functorArray);
+  var show3 = /* @__PURE__ */ show(showNumber);
+  var map9 = /* @__PURE__ */ map(functorArray);
   var width = /* @__PURE__ */ (function() {
     var $34 = attr2("width");
     return function($35) {
-      return $34(show2($35));
+      return $34(show3($35));
     };
   })();
   var viewBox = function(x_) {
     return function(y_) {
       return function(w) {
         return function(h_) {
-          return attr2("viewBox")(joinWith(" ")(map7(show2)([x_, y_, w, h_])));
+          return attr2("viewBox")(joinWith(" ")(map9(show3)([x_, y_, w, h_])));
         };
       };
     };
@@ -3267,7 +4252,7 @@
   var height = /* @__PURE__ */ (function() {
     var $92 = attr2("height");
     return function($93) {
-      return $92(show2($93));
+      return $92(show3($93));
     };
   })();
 
@@ -3281,13 +4266,16 @@
   })();
   var form = /* @__PURE__ */ element2("form");
   var h1 = /* @__PURE__ */ element2("h1");
+  var h2 = /* @__PURE__ */ element2("h2");
   var input = function(props) {
     return element2("input")(props)([]);
   };
+  var p = /* @__PURE__ */ element2("p");
   var span2 = /* @__PURE__ */ element2("span");
   var style = /* @__PURE__ */ element2("style");
   var style_ = /* @__PURE__ */ style([]);
   var div2 = /* @__PURE__ */ element2("div");
+  var div_ = /* @__PURE__ */ div2([]);
   var button = /* @__PURE__ */ element2("button");
 
   // output/Halogen.Svg.Elements/index.js
@@ -3307,29 +4295,1421 @@
   var sortNeutralIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(14), /* @__PURE__ */ height(14), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("7 15 12 20 17 15")]), /* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("7 9 12 4 17 9")])]);
   var sortDescIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(14), /* @__PURE__ */ height(14), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("12"), /* @__PURE__ */ attr2("y1")("5"), /* @__PURE__ */ attr2("x2")("12"), /* @__PURE__ */ attr2("y2")("19")]), /* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("19 12 12 19 5 12")])]);
   var sortAscIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(14), /* @__PURE__ */ height(14), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("12"), /* @__PURE__ */ attr2("y1")("19"), /* @__PURE__ */ attr2("x2")("12"), /* @__PURE__ */ attr2("y2")("5")]), /* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("5 12 12 5 19 12")])]);
-  var saveIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("20 6 9 17 4 12")])]);
-  var editIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ path([/* @__PURE__ */ attr2("d")("M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7")]), /* @__PURE__ */ path([/* @__PURE__ */ attr2("d")("M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z")])]);
   var deleteIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ polyline([/* @__PURE__ */ attr2("points")("3 6 5 6 21 6")]), /* @__PURE__ */ path([/* @__PURE__ */ attr2("d")("M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2")]), /* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("10"), /* @__PURE__ */ attr2("y1")("11"), /* @__PURE__ */ attr2("x2")("10"), /* @__PURE__ */ attr2("y2")("17")]), /* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("14"), /* @__PURE__ */ attr2("y1")("11"), /* @__PURE__ */ attr2("x2")("14"), /* @__PURE__ */ attr2("y2")("17")])]);
   var addIcon = /* @__PURE__ */ svg([/* @__PURE__ */ viewBox(0)(0)(24)(24), /* @__PURE__ */ width(16), /* @__PURE__ */ height(16), /* @__PURE__ */ attr2("fill")("none"), /* @__PURE__ */ attr2("stroke")("currentColor"), /* @__PURE__ */ attr2("stroke-width")("2"), /* @__PURE__ */ attr2("stroke-linecap")("round"), /* @__PURE__ */ attr2("stroke-linejoin")("round")])([/* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("12"), /* @__PURE__ */ attr2("y1")("5"), /* @__PURE__ */ attr2("x2")("12"), /* @__PURE__ */ attr2("y2")("19")]), /* @__PURE__ */ line([/* @__PURE__ */ attr2("x1")("5"), /* @__PURE__ */ attr2("y1")("12"), /* @__PURE__ */ attr2("x2")("19"), /* @__PURE__ */ attr2("y2")("12")])]);
 
-  // output/Effect.Console/foreign.js
-  var log2 = function(s2) {
+  // output/Control.Promise/foreign.js
+  function thenImpl(promise2) {
+    return function(errCB) {
+      return function(succCB) {
+        return function() {
+          promise2.then(succCB, errCB);
+        };
+      };
+    };
+  }
+
+  // output/Control.Monad.Except/index.js
+  var unwrap3 = /* @__PURE__ */ unwrap();
+  var runExcept = function($3) {
+    return unwrap3(runExceptT($3));
+  };
+
+  // output/Effect.Aff/foreign.js
+  var Aff = (function() {
+    var EMPTY = {};
+    var PURE = "Pure";
+    var THROW = "Throw";
+    var CATCH = "Catch";
+    var SYNC = "Sync";
+    var ASYNC = "Async";
+    var BIND = "Bind";
+    var BRACKET = "Bracket";
+    var FORK = "Fork";
+    var SEQ = "Sequential";
+    var MAP = "Map";
+    var APPLY = "Apply";
+    var ALT = "Alt";
+    var CONS = "Cons";
+    var RESUME = "Resume";
+    var RELEASE = "Release";
+    var FINALIZER = "Finalizer";
+    var FINALIZED = "Finalized";
+    var FORKED = "Forked";
+    var FIBER = "Fiber";
+    var THUNK = "Thunk";
+    function Aff2(tag, _1, _2, _3) {
+      this.tag = tag;
+      this._1 = _1;
+      this._2 = _2;
+      this._3 = _3;
+    }
+    function AffCtr(tag) {
+      var fn = function(_1, _2, _3) {
+        return new Aff2(tag, _1, _2, _3);
+      };
+      fn.tag = tag;
+      return fn;
+    }
+    function nonCanceler2(error4) {
+      return new Aff2(PURE, void 0);
+    }
+    function runEff(eff) {
+      try {
+        eff();
+      } catch (error4) {
+        setTimeout(function() {
+          throw error4;
+        }, 0);
+      }
+    }
+    function runSync(left, right, eff) {
+      try {
+        return right(eff());
+      } catch (error4) {
+        return left(error4);
+      }
+    }
+    function runAsync(left, eff, k) {
+      try {
+        return eff(k)();
+      } catch (error4) {
+        k(left(error4))();
+        return nonCanceler2;
+      }
+    }
+    var Scheduler = (function() {
+      var limit = 1024;
+      var size5 = 0;
+      var ix = 0;
+      var queue = new Array(limit);
+      var draining = false;
+      function drain() {
+        var thunk;
+        draining = true;
+        while (size5 !== 0) {
+          size5--;
+          thunk = queue[ix];
+          queue[ix] = void 0;
+          ix = (ix + 1) % limit;
+          thunk();
+        }
+        draining = false;
+      }
+      return {
+        isDraining: function() {
+          return draining;
+        },
+        enqueue: function(cb) {
+          var i2, tmp;
+          if (size5 === limit) {
+            tmp = draining;
+            drain();
+            draining = tmp;
+          }
+          queue[(ix + size5) % limit] = cb;
+          size5++;
+          if (!draining) {
+            drain();
+          }
+        }
+      };
+    })();
+    function Supervisor(util) {
+      var fibers = {};
+      var fiberId = 0;
+      var count = 0;
+      return {
+        register: function(fiber) {
+          var fid = fiberId++;
+          fiber.onComplete({
+            rethrow: true,
+            handler: function(result) {
+              return function() {
+                count--;
+                delete fibers[fid];
+              };
+            }
+          })();
+          fibers[fid] = fiber;
+          count++;
+        },
+        isEmpty: function() {
+          return count === 0;
+        },
+        killAll: function(killError, cb) {
+          return function() {
+            if (count === 0) {
+              return cb();
+            }
+            var killCount = 0;
+            var kills = {};
+            function kill2(fid) {
+              kills[fid] = fibers[fid].kill(killError, function(result) {
+                return function() {
+                  delete kills[fid];
+                  killCount--;
+                  if (util.isLeft(result) && util.fromLeft(result)) {
+                    setTimeout(function() {
+                      throw util.fromLeft(result);
+                    }, 0);
+                  }
+                  if (killCount === 0) {
+                    cb();
+                  }
+                };
+              })();
+            }
+            for (var k in fibers) {
+              if (fibers.hasOwnProperty(k)) {
+                killCount++;
+                kill2(k);
+              }
+            }
+            fibers = {};
+            fiberId = 0;
+            count = 0;
+            return function(error4) {
+              return new Aff2(SYNC, function() {
+                for (var k2 in kills) {
+                  if (kills.hasOwnProperty(k2)) {
+                    kills[k2]();
+                  }
+                }
+              });
+            };
+          };
+        }
+      };
+    }
+    var SUSPENDED = 0;
+    var CONTINUE = 1;
+    var STEP_BIND = 2;
+    var STEP_RESULT = 3;
+    var PENDING = 4;
+    var RETURN = 5;
+    var COMPLETED = 6;
+    function Fiber(util, supervisor, aff) {
+      var runTick = 0;
+      var status = SUSPENDED;
+      var step3 = aff;
+      var fail3 = null;
+      var interrupt = null;
+      var bhead = null;
+      var btail = null;
+      var attempts = null;
+      var bracketCount = 0;
+      var joinId = 0;
+      var joins = null;
+      var rethrow = true;
+      function run3(localRunTick) {
+        var tmp, result, attempt;
+        while (true) {
+          tmp = null;
+          result = null;
+          attempt = null;
+          switch (status) {
+            case STEP_BIND:
+              status = CONTINUE;
+              try {
+                step3 = bhead(step3);
+                if (btail === null) {
+                  bhead = null;
+                } else {
+                  bhead = btail._1;
+                  btail = btail._2;
+                }
+              } catch (e) {
+                status = RETURN;
+                fail3 = util.left(e);
+                step3 = null;
+              }
+              break;
+            case STEP_RESULT:
+              if (util.isLeft(step3)) {
+                status = RETURN;
+                fail3 = step3;
+                step3 = null;
+              } else if (bhead === null) {
+                status = RETURN;
+              } else {
+                status = STEP_BIND;
+                step3 = util.fromRight(step3);
+              }
+              break;
+            case CONTINUE:
+              switch (step3.tag) {
+                case BIND:
+                  if (bhead) {
+                    btail = new Aff2(CONS, bhead, btail);
+                  }
+                  bhead = step3._2;
+                  status = CONTINUE;
+                  step3 = step3._1;
+                  break;
+                case PURE:
+                  if (bhead === null) {
+                    status = RETURN;
+                    step3 = util.right(step3._1);
+                  } else {
+                    status = STEP_BIND;
+                    step3 = step3._1;
+                  }
+                  break;
+                case SYNC:
+                  status = STEP_RESULT;
+                  step3 = runSync(util.left, util.right, step3._1);
+                  break;
+                case ASYNC:
+                  status = PENDING;
+                  step3 = runAsync(util.left, step3._1, function(result2) {
+                    return function() {
+                      if (runTick !== localRunTick) {
+                        return;
+                      }
+                      runTick++;
+                      Scheduler.enqueue(function() {
+                        if (runTick !== localRunTick + 1) {
+                          return;
+                        }
+                        status = STEP_RESULT;
+                        step3 = result2;
+                        run3(runTick);
+                      });
+                    };
+                  });
+                  return;
+                case THROW:
+                  status = RETURN;
+                  fail3 = util.left(step3._1);
+                  step3 = null;
+                  break;
+                // Enqueue the Catch so that we can call the error handler later on
+                // in case of an exception.
+                case CATCH:
+                  if (bhead === null) {
+                    attempts = new Aff2(CONS, step3, attempts, interrupt);
+                  } else {
+                    attempts = new Aff2(CONS, step3, new Aff2(CONS, new Aff2(RESUME, bhead, btail), attempts, interrupt), interrupt);
+                  }
+                  bhead = null;
+                  btail = null;
+                  status = CONTINUE;
+                  step3 = step3._1;
+                  break;
+                // Enqueue the Bracket so that we can call the appropriate handlers
+                // after resource acquisition.
+                case BRACKET:
+                  bracketCount++;
+                  if (bhead === null) {
+                    attempts = new Aff2(CONS, step3, attempts, interrupt);
+                  } else {
+                    attempts = new Aff2(CONS, step3, new Aff2(CONS, new Aff2(RESUME, bhead, btail), attempts, interrupt), interrupt);
+                  }
+                  bhead = null;
+                  btail = null;
+                  status = CONTINUE;
+                  step3 = step3._1;
+                  break;
+                case FORK:
+                  status = STEP_RESULT;
+                  tmp = Fiber(util, supervisor, step3._2);
+                  if (supervisor) {
+                    supervisor.register(tmp);
+                  }
+                  if (step3._1) {
+                    tmp.run();
+                  }
+                  step3 = util.right(tmp);
+                  break;
+                case SEQ:
+                  status = CONTINUE;
+                  step3 = sequential3(util, supervisor, step3._1);
+                  break;
+              }
+              break;
+            case RETURN:
+              bhead = null;
+              btail = null;
+              if (attempts === null) {
+                status = COMPLETED;
+                step3 = interrupt || fail3 || step3;
+              } else {
+                tmp = attempts._3;
+                attempt = attempts._1;
+                attempts = attempts._2;
+                switch (attempt.tag) {
+                  // We cannot recover from an unmasked interrupt. Otherwise we should
+                  // continue stepping, or run the exception handler if an exception
+                  // was raised.
+                  case CATCH:
+                    if (interrupt && interrupt !== tmp && bracketCount === 0) {
+                      status = RETURN;
+                    } else if (fail3) {
+                      status = CONTINUE;
+                      step3 = attempt._2(util.fromLeft(fail3));
+                      fail3 = null;
+                    }
+                    break;
+                  // We cannot resume from an unmasked interrupt or exception.
+                  case RESUME:
+                    if (interrupt && interrupt !== tmp && bracketCount === 0 || fail3) {
+                      status = RETURN;
+                    } else {
+                      bhead = attempt._1;
+                      btail = attempt._2;
+                      status = STEP_BIND;
+                      step3 = util.fromRight(step3);
+                    }
+                    break;
+                  // If we have a bracket, we should enqueue the handlers,
+                  // and continue with the success branch only if the fiber has
+                  // not been interrupted. If the bracket acquisition failed, we
+                  // should not run either.
+                  case BRACKET:
+                    bracketCount--;
+                    if (fail3 === null) {
+                      result = util.fromRight(step3);
+                      attempts = new Aff2(CONS, new Aff2(RELEASE, attempt._2, result), attempts, tmp);
+                      if (interrupt === tmp || bracketCount > 0) {
+                        status = CONTINUE;
+                        step3 = attempt._3(result);
+                      }
+                    }
+                    break;
+                  // Enqueue the appropriate handler. We increase the bracket count
+                  // because it should not be cancelled.
+                  case RELEASE:
+                    attempts = new Aff2(CONS, new Aff2(FINALIZED, step3, fail3), attempts, interrupt);
+                    status = CONTINUE;
+                    if (interrupt && interrupt !== tmp && bracketCount === 0) {
+                      step3 = attempt._1.killed(util.fromLeft(interrupt))(attempt._2);
+                    } else if (fail3) {
+                      step3 = attempt._1.failed(util.fromLeft(fail3))(attempt._2);
+                    } else {
+                      step3 = attempt._1.completed(util.fromRight(step3))(attempt._2);
+                    }
+                    fail3 = null;
+                    bracketCount++;
+                    break;
+                  case FINALIZER:
+                    bracketCount++;
+                    attempts = new Aff2(CONS, new Aff2(FINALIZED, step3, fail3), attempts, interrupt);
+                    status = CONTINUE;
+                    step3 = attempt._1;
+                    break;
+                  case FINALIZED:
+                    bracketCount--;
+                    status = RETURN;
+                    step3 = attempt._1;
+                    fail3 = attempt._2;
+                    break;
+                }
+              }
+              break;
+            case COMPLETED:
+              for (var k in joins) {
+                if (joins.hasOwnProperty(k)) {
+                  rethrow = rethrow && joins[k].rethrow;
+                  runEff(joins[k].handler(step3));
+                }
+              }
+              joins = null;
+              if (interrupt && fail3) {
+                setTimeout(function() {
+                  throw util.fromLeft(fail3);
+                }, 0);
+              } else if (util.isLeft(step3) && rethrow) {
+                setTimeout(function() {
+                  if (rethrow) {
+                    throw util.fromLeft(step3);
+                  }
+                }, 0);
+              }
+              return;
+            case SUSPENDED:
+              status = CONTINUE;
+              break;
+            case PENDING:
+              return;
+          }
+        }
+      }
+      function onComplete(join4) {
+        return function() {
+          if (status === COMPLETED) {
+            rethrow = rethrow && join4.rethrow;
+            join4.handler(step3)();
+            return function() {
+            };
+          }
+          var jid = joinId++;
+          joins = joins || {};
+          joins[jid] = join4;
+          return function() {
+            if (joins !== null) {
+              delete joins[jid];
+            }
+          };
+        };
+      }
+      function kill2(error4, cb) {
+        return function() {
+          if (status === COMPLETED) {
+            cb(util.right(void 0))();
+            return function() {
+            };
+          }
+          var canceler = onComplete({
+            rethrow: false,
+            handler: function() {
+              return cb(util.right(void 0));
+            }
+          })();
+          switch (status) {
+            case SUSPENDED:
+              interrupt = util.left(error4);
+              status = COMPLETED;
+              step3 = interrupt;
+              run3(runTick);
+              break;
+            case PENDING:
+              if (interrupt === null) {
+                interrupt = util.left(error4);
+              }
+              if (bracketCount === 0) {
+                if (status === PENDING) {
+                  attempts = new Aff2(CONS, new Aff2(FINALIZER, step3(error4)), attempts, interrupt);
+                }
+                status = RETURN;
+                step3 = null;
+                fail3 = null;
+                run3(++runTick);
+              }
+              break;
+            default:
+              if (interrupt === null) {
+                interrupt = util.left(error4);
+              }
+              if (bracketCount === 0) {
+                status = RETURN;
+                step3 = null;
+                fail3 = null;
+              }
+          }
+          return canceler;
+        };
+      }
+      function join3(cb) {
+        return function() {
+          var canceler = onComplete({
+            rethrow: false,
+            handler: cb
+          })();
+          if (status === SUSPENDED) {
+            run3(runTick);
+          }
+          return canceler;
+        };
+      }
+      return {
+        kill: kill2,
+        join: join3,
+        onComplete,
+        isSuspended: function() {
+          return status === SUSPENDED;
+        },
+        run: function() {
+          if (status === SUSPENDED) {
+            if (!Scheduler.isDraining()) {
+              Scheduler.enqueue(function() {
+                run3(runTick);
+              });
+            } else {
+              run3(runTick);
+            }
+          }
+        }
+      };
+    }
+    function runPar(util, supervisor, par, cb) {
+      var fiberId = 0;
+      var fibers = {};
+      var killId = 0;
+      var kills = {};
+      var early = new Error("[ParAff] Early exit");
+      var interrupt = null;
+      var root = EMPTY;
+      function kill2(error4, par2, cb2) {
+        var step3 = par2;
+        var head4 = null;
+        var tail2 = null;
+        var count = 0;
+        var kills2 = {};
+        var tmp, kid;
+        loop: while (true) {
+          tmp = null;
+          switch (step3.tag) {
+            case FORKED:
+              if (step3._3 === EMPTY) {
+                tmp = fibers[step3._1];
+                kills2[count++] = tmp.kill(error4, function(result) {
+                  return function() {
+                    count--;
+                    if (count === 0) {
+                      cb2(result)();
+                    }
+                  };
+                });
+              }
+              if (head4 === null) {
+                break loop;
+              }
+              step3 = head4._2;
+              if (tail2 === null) {
+                head4 = null;
+              } else {
+                head4 = tail2._1;
+                tail2 = tail2._2;
+              }
+              break;
+            case MAP:
+              step3 = step3._2;
+              break;
+            case APPLY:
+            case ALT:
+              if (head4) {
+                tail2 = new Aff2(CONS, head4, tail2);
+              }
+              head4 = step3;
+              step3 = step3._1;
+              break;
+          }
+        }
+        if (count === 0) {
+          cb2(util.right(void 0))();
+        } else {
+          kid = 0;
+          tmp = count;
+          for (; kid < tmp; kid++) {
+            kills2[kid] = kills2[kid]();
+          }
+        }
+        return kills2;
+      }
+      function join3(result, head4, tail2) {
+        var fail3, step3, lhs, rhs, tmp, kid;
+        if (util.isLeft(result)) {
+          fail3 = result;
+          step3 = null;
+        } else {
+          step3 = result;
+          fail3 = null;
+        }
+        loop: while (true) {
+          lhs = null;
+          rhs = null;
+          tmp = null;
+          kid = null;
+          if (interrupt !== null) {
+            return;
+          }
+          if (head4 === null) {
+            cb(fail3 || step3)();
+            return;
+          }
+          if (head4._3 !== EMPTY) {
+            return;
+          }
+          switch (head4.tag) {
+            case MAP:
+              if (fail3 === null) {
+                head4._3 = util.right(head4._1(util.fromRight(step3)));
+                step3 = head4._3;
+              } else {
+                head4._3 = fail3;
+              }
+              break;
+            case APPLY:
+              lhs = head4._1._3;
+              rhs = head4._2._3;
+              if (fail3) {
+                head4._3 = fail3;
+                tmp = true;
+                kid = killId++;
+                kills[kid] = kill2(early, fail3 === lhs ? head4._2 : head4._1, function() {
+                  return function() {
+                    delete kills[kid];
+                    if (tmp) {
+                      tmp = false;
+                    } else if (tail2 === null) {
+                      join3(fail3, null, null);
+                    } else {
+                      join3(fail3, tail2._1, tail2._2);
+                    }
+                  };
+                });
+                if (tmp) {
+                  tmp = false;
+                  return;
+                }
+              } else if (lhs === EMPTY || rhs === EMPTY) {
+                return;
+              } else {
+                step3 = util.right(util.fromRight(lhs)(util.fromRight(rhs)));
+                head4._3 = step3;
+              }
+              break;
+            case ALT:
+              lhs = head4._1._3;
+              rhs = head4._2._3;
+              if (lhs === EMPTY && util.isLeft(rhs) || rhs === EMPTY && util.isLeft(lhs)) {
+                return;
+              }
+              if (lhs !== EMPTY && util.isLeft(lhs) && rhs !== EMPTY && util.isLeft(rhs)) {
+                fail3 = step3 === lhs ? rhs : lhs;
+                step3 = null;
+                head4._3 = fail3;
+              } else {
+                head4._3 = step3;
+                tmp = true;
+                kid = killId++;
+                kills[kid] = kill2(early, step3 === lhs ? head4._2 : head4._1, function() {
+                  return function() {
+                    delete kills[kid];
+                    if (tmp) {
+                      tmp = false;
+                    } else if (tail2 === null) {
+                      join3(step3, null, null);
+                    } else {
+                      join3(step3, tail2._1, tail2._2);
+                    }
+                  };
+                });
+                if (tmp) {
+                  tmp = false;
+                  return;
+                }
+              }
+              break;
+          }
+          if (tail2 === null) {
+            head4 = null;
+          } else {
+            head4 = tail2._1;
+            tail2 = tail2._2;
+          }
+        }
+      }
+      function resolve(fiber) {
+        return function(result) {
+          return function() {
+            delete fibers[fiber._1];
+            fiber._3 = result;
+            join3(result, fiber._2._1, fiber._2._2);
+          };
+        };
+      }
+      function run3() {
+        var status = CONTINUE;
+        var step3 = par;
+        var head4 = null;
+        var tail2 = null;
+        var tmp, fid;
+        loop: while (true) {
+          tmp = null;
+          fid = null;
+          switch (status) {
+            case CONTINUE:
+              switch (step3.tag) {
+                case MAP:
+                  if (head4) {
+                    tail2 = new Aff2(CONS, head4, tail2);
+                  }
+                  head4 = new Aff2(MAP, step3._1, EMPTY, EMPTY);
+                  step3 = step3._2;
+                  break;
+                case APPLY:
+                  if (head4) {
+                    tail2 = new Aff2(CONS, head4, tail2);
+                  }
+                  head4 = new Aff2(APPLY, EMPTY, step3._2, EMPTY);
+                  step3 = step3._1;
+                  break;
+                case ALT:
+                  if (head4) {
+                    tail2 = new Aff2(CONS, head4, tail2);
+                  }
+                  head4 = new Aff2(ALT, EMPTY, step3._2, EMPTY);
+                  step3 = step3._1;
+                  break;
+                default:
+                  fid = fiberId++;
+                  status = RETURN;
+                  tmp = step3;
+                  step3 = new Aff2(FORKED, fid, new Aff2(CONS, head4, tail2), EMPTY);
+                  tmp = Fiber(util, supervisor, tmp);
+                  tmp.onComplete({
+                    rethrow: false,
+                    handler: resolve(step3)
+                  })();
+                  fibers[fid] = tmp;
+                  if (supervisor) {
+                    supervisor.register(tmp);
+                  }
+              }
+              break;
+            case RETURN:
+              if (head4 === null) {
+                break loop;
+              }
+              if (head4._1 === EMPTY) {
+                head4._1 = step3;
+                status = CONTINUE;
+                step3 = head4._2;
+                head4._2 = EMPTY;
+              } else {
+                head4._2 = step3;
+                step3 = head4;
+                if (tail2 === null) {
+                  head4 = null;
+                } else {
+                  head4 = tail2._1;
+                  tail2 = tail2._2;
+                }
+              }
+          }
+        }
+        root = step3;
+        for (fid = 0; fid < fiberId; fid++) {
+          fibers[fid].run();
+        }
+      }
+      function cancel(error4, cb2) {
+        interrupt = util.left(error4);
+        var innerKills;
+        for (var kid in kills) {
+          if (kills.hasOwnProperty(kid)) {
+            innerKills = kills[kid];
+            for (kid in innerKills) {
+              if (innerKills.hasOwnProperty(kid)) {
+                innerKills[kid]();
+              }
+            }
+          }
+        }
+        kills = null;
+        var newKills = kill2(error4, root, cb2);
+        return function(killError) {
+          return new Aff2(ASYNC, function(killCb) {
+            return function() {
+              for (var kid2 in newKills) {
+                if (newKills.hasOwnProperty(kid2)) {
+                  newKills[kid2]();
+                }
+              }
+              return nonCanceler2;
+            };
+          });
+        };
+      }
+      run3();
+      return function(killError) {
+        return new Aff2(ASYNC, function(killCb) {
+          return function() {
+            return cancel(killError, killCb);
+          };
+        });
+      };
+    }
+    function sequential3(util, supervisor, par) {
+      return new Aff2(ASYNC, function(cb) {
+        return function() {
+          return runPar(util, supervisor, par, cb);
+        };
+      });
+    }
+    Aff2.EMPTY = EMPTY;
+    Aff2.Pure = AffCtr(PURE);
+    Aff2.Throw = AffCtr(THROW);
+    Aff2.Catch = AffCtr(CATCH);
+    Aff2.Sync = AffCtr(SYNC);
+    Aff2.Async = AffCtr(ASYNC);
+    Aff2.Bind = AffCtr(BIND);
+    Aff2.Bracket = AffCtr(BRACKET);
+    Aff2.Fork = AffCtr(FORK);
+    Aff2.Seq = AffCtr(SEQ);
+    Aff2.ParMap = AffCtr(MAP);
+    Aff2.ParApply = AffCtr(APPLY);
+    Aff2.ParAlt = AffCtr(ALT);
+    Aff2.Fiber = Fiber;
+    Aff2.Supervisor = Supervisor;
+    Aff2.Scheduler = Scheduler;
+    Aff2.nonCanceler = nonCanceler2;
+    return Aff2;
+  })();
+  var _pure = Aff.Pure;
+  var _throwError = Aff.Throw;
+  function _catchError(aff) {
+    return function(k) {
+      return Aff.Catch(aff, k);
+    };
+  }
+  function _map(f) {
+    return function(aff) {
+      if (aff.tag === Aff.Pure.tag) {
+        return Aff.Pure(f(aff._1));
+      } else {
+        return Aff.Bind(aff, function(value15) {
+          return Aff.Pure(f(value15));
+        });
+      }
+    };
+  }
+  function _bind(aff) {
+    return function(k) {
+      return Aff.Bind(aff, k);
+    };
+  }
+  function _fork(immediate) {
+    return function(aff) {
+      return Aff.Fork(immediate, aff);
+    };
+  }
+  var _liftEffect = Aff.Sync;
+  function _parAffMap(f) {
+    return function(aff) {
+      return Aff.ParMap(f, aff);
+    };
+  }
+  function _parAffApply(aff1) {
+    return function(aff2) {
+      return Aff.ParApply(aff1, aff2);
+    };
+  }
+  var makeAff = Aff.Async;
+  function generalBracket(acquire) {
+    return function(options2) {
+      return function(k) {
+        return Aff.Bracket(acquire, options2, k);
+      };
+    };
+  }
+  function _makeFiber(util, aff) {
     return function() {
-      console.log(s2);
+      return Aff.Fiber(util, null, aff);
+    };
+  }
+  var _delay = /* @__PURE__ */ (function() {
+    function setDelay(n, k) {
+      if (n === 0 && typeof setImmediate !== "undefined") {
+        return setImmediate(k);
+      } else {
+        return setTimeout(k, n);
+      }
+    }
+    function clearDelay(n, t2) {
+      if (n === 0 && typeof clearImmediate !== "undefined") {
+        return clearImmediate(t2);
+      } else {
+        return clearTimeout(t2);
+      }
+    }
+    return function(right, ms) {
+      return Aff.Async(function(cb) {
+        return function() {
+          var timer = setDelay(ms, cb(right()));
+          return function() {
+            return Aff.Sync(function() {
+              return right(clearDelay(ms, timer));
+            });
+          };
+        };
+      });
+    };
+  })();
+  var _sequential = Aff.Seq;
+
+  // output/Control.Parallel.Class/index.js
+  var sequential = function(dict) {
+    return dict.sequential;
+  };
+  var parallel = function(dict) {
+    return dict.parallel;
+  };
+
+  // output/Control.Parallel/index.js
+  var identity6 = /* @__PURE__ */ identity(categoryFn);
+  var parTraverse_ = function(dictParallel) {
+    var sequential3 = sequential(dictParallel);
+    var parallel4 = parallel(dictParallel);
+    return function(dictApplicative) {
+      var traverse_7 = traverse_(dictApplicative);
+      return function(dictFoldable) {
+        var traverse_14 = traverse_7(dictFoldable);
+        return function(f) {
+          var $51 = traverse_14(function($53) {
+            return parallel4(f($53));
+          });
+          return function($52) {
+            return sequential3($51($52));
+          };
+        };
+      };
     };
   };
-  var warn = function(s2) {
-    return function() {
-      console.warn(s2);
+  var parSequence_ = function(dictParallel) {
+    var parTraverse_1 = parTraverse_(dictParallel);
+    return function(dictApplicative) {
+      var parTraverse_2 = parTraverse_1(dictApplicative);
+      return function(dictFoldable) {
+        return parTraverse_2(dictFoldable)(identity6);
+      };
     };
   };
 
-  // output/Effect.Class.Console/index.js
-  var log3 = function(dictMonadEffect) {
-    var $67 = liftEffect(dictMonadEffect);
-    return function($68) {
-      return $67(log2($68));
+  // output/Effect.Unsafe/foreign.js
+  var unsafePerformEffect = function(f) {
+    return f();
+  };
+
+  // output/Effect.Aff/index.js
+  var $runtime_lazy4 = function(name16, moduleName, init3) {
+    var state3 = 0;
+    var val;
+    return function(lineNumber) {
+      if (state3 === 2) return val;
+      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
+      state3 = 1;
+      val = init3();
+      state3 = 2;
+      return val;
     };
+  };
+  var pure3 = /* @__PURE__ */ pure(applicativeEffect);
+  var $$void3 = /* @__PURE__ */ $$void(functorEffect);
+  var map10 = /* @__PURE__ */ map(functorEffect);
+  var Canceler = function(x) {
+    return x;
+  };
+  var suspendAff = /* @__PURE__ */ _fork(false);
+  var functorParAff = {
+    map: _parAffMap
+  };
+  var functorAff = {
+    map: _map
+  };
+  var map12 = /* @__PURE__ */ map(functorAff);
+  var forkAff = /* @__PURE__ */ _fork(true);
+  var ffiUtil = /* @__PURE__ */ (function() {
+    var unsafeFromRight = function(v2) {
+      if (v2 instanceof Right) {
+        return v2.value0;
+      }
+      ;
+      if (v2 instanceof Left) {
+        return unsafeCrashWith("unsafeFromRight: Left");
+      }
+      ;
+      throw new Error("Failed pattern match at Effect.Aff (line 412, column 21 - line 414, column 54): " + [v2.constructor.name]);
+    };
+    var unsafeFromLeft = function(v2) {
+      if (v2 instanceof Left) {
+        return v2.value0;
+      }
+      ;
+      if (v2 instanceof Right) {
+        return unsafeCrashWith("unsafeFromLeft: Right");
+      }
+      ;
+      throw new Error("Failed pattern match at Effect.Aff (line 407, column 20 - line 409, column 55): " + [v2.constructor.name]);
+    };
+    var isLeft = function(v2) {
+      if (v2 instanceof Left) {
+        return true;
+      }
+      ;
+      if (v2 instanceof Right) {
+        return false;
+      }
+      ;
+      throw new Error("Failed pattern match at Effect.Aff (line 402, column 12 - line 404, column 21): " + [v2.constructor.name]);
+    };
+    return {
+      isLeft,
+      fromLeft: unsafeFromLeft,
+      fromRight: unsafeFromRight,
+      left: Left.create,
+      right: Right.create
+    };
+  })();
+  var makeFiber = function(aff) {
+    return _makeFiber(ffiUtil, aff);
+  };
+  var launchAff = function(aff) {
+    return function __do3() {
+      var fiber = makeFiber(aff)();
+      fiber.run();
+      return fiber;
+    };
+  };
+  var delay = function(v2) {
+    return _delay(Right.create, v2);
+  };
+  var bracket = function(acquire) {
+    return function(completed) {
+      return generalBracket(acquire)({
+        killed: $$const(completed),
+        failed: $$const(completed),
+        completed: $$const(completed)
+      });
+    };
+  };
+  var applyParAff = {
+    apply: _parAffApply,
+    Functor0: function() {
+      return functorParAff;
+    }
+  };
+  var monadAff = {
+    Applicative0: function() {
+      return applicativeAff;
+    },
+    Bind1: function() {
+      return bindAff;
+    }
+  };
+  var bindAff = {
+    bind: _bind,
+    Apply0: function() {
+      return $lazy_applyAff(0);
+    }
+  };
+  var applicativeAff = {
+    pure: _pure,
+    Apply0: function() {
+      return $lazy_applyAff(0);
+    }
+  };
+  var $lazy_applyAff = /* @__PURE__ */ $runtime_lazy4("applyAff", "Effect.Aff", function() {
+    return {
+      apply: ap(monadAff),
+      Functor0: function() {
+        return functorAff;
+      }
+    };
+  });
+  var applyAff = /* @__PURE__ */ $lazy_applyAff(73);
+  var pure22 = /* @__PURE__ */ pure(applicativeAff);
+  var bind1 = /* @__PURE__ */ bind(bindAff);
+  var bindFlipped3 = /* @__PURE__ */ bindFlipped(bindAff);
+  var $$finally = function(fin) {
+    return function(a3) {
+      return bracket(pure22(unit))($$const(fin))($$const(a3));
+    };
+  };
+  var parallelAff = {
+    parallel: unsafeCoerce2,
+    sequential: _sequential,
+    Apply0: function() {
+      return applyAff;
+    },
+    Apply1: function() {
+      return applyParAff;
+    }
+  };
+  var parallel2 = /* @__PURE__ */ parallel(parallelAff);
+  var applicativeParAff = {
+    pure: function($76) {
+      return parallel2(pure22($76));
+    },
+    Apply0: function() {
+      return applyParAff;
+    }
+  };
+  var parSequence_2 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableArray);
+  var semigroupCanceler = {
+    append: function(v2) {
+      return function(v1) {
+        return function(err) {
+          return parSequence_2([v2(err), v1(err)]);
+        };
+      };
+    }
+  };
+  var monadEffectAff = {
+    liftEffect: _liftEffect,
+    Monad0: function() {
+      return monadAff;
+    }
+  };
+  var liftEffect2 = /* @__PURE__ */ liftEffect(monadEffectAff);
+  var effectCanceler = function($77) {
+    return Canceler($$const(liftEffect2($77)));
+  };
+  var joinFiber = function(v2) {
+    return makeAff(function(k) {
+      return map10(effectCanceler)(v2.join(k));
+    });
+  };
+  var functorFiber = {
+    map: function(f) {
+      return function(t2) {
+        return unsafePerformEffect(makeFiber(map12(f)(joinFiber(t2))));
+      };
+    }
+  };
+  var killFiber = function(e) {
+    return function(v2) {
+      return bind1(liftEffect2(v2.isSuspended))(function(suspended) {
+        if (suspended) {
+          return liftEffect2($$void3(v2.kill(e, $$const(pure3(unit)))));
+        }
+        ;
+        return makeAff(function(k) {
+          return map10(effectCanceler)(v2.kill(e, k));
+        });
+      });
+    };
+  };
+  var monadThrowAff = {
+    throwError: _throwError,
+    Monad0: function() {
+      return monadAff;
+    }
+  };
+  var monadErrorAff = {
+    catchError: _catchError,
+    MonadThrow0: function() {
+      return monadThrowAff;
+    }
+  };
+  var $$try2 = /* @__PURE__ */ $$try(monadErrorAff);
+  var runAff = function(k) {
+    return function(aff) {
+      return launchAff(bindFlipped3(function($83) {
+        return liftEffect2(k($83));
+      })($$try2(aff)));
+    };
+  };
+  var runAff_ = function(k) {
+    return function(aff) {
+      return $$void3(runAff(k)(aff));
+    };
+  };
+  var monadRecAff = {
+    tailRecM: function(k) {
+      var go2 = function(a3) {
+        return bind1(k(a3))(function(res) {
+          if (res instanceof Done) {
+            return pure22(res.value0);
+          }
+          ;
+          if (res instanceof Loop) {
+            return go2(res.value0);
+          }
+          ;
+          throw new Error("Failed pattern match at Effect.Aff (line 104, column 7 - line 106, column 23): " + [res.constructor.name]);
+        });
+      };
+      return go2;
+    },
+    Monad0: function() {
+      return monadAff;
+    }
+  };
+  var nonCanceler = /* @__PURE__ */ $$const(/* @__PURE__ */ pure22(unit));
+  var monoidCanceler = {
+    mempty: nonCanceler,
+    Semigroup0: function() {
+      return semigroupCanceler;
+    }
+  };
+
+  // output/Control.Promise/index.js
+  var voidRight2 = /* @__PURE__ */ voidRight(functorEffect);
+  var mempty2 = /* @__PURE__ */ mempty(monoidCanceler);
+  var identity7 = /* @__PURE__ */ identity(categoryFn);
+  var alt2 = /* @__PURE__ */ alt(/* @__PURE__ */ altExceptT(semigroupNonEmptyList)(monadIdentity));
+  var unsafeReadTagged2 = /* @__PURE__ */ unsafeReadTagged(monadIdentity);
+  var map11 = /* @__PURE__ */ map(/* @__PURE__ */ functorExceptT(functorIdentity));
+  var readString2 = /* @__PURE__ */ readString(monadIdentity);
+  var toAff$prime = function(customCoerce) {
+    return function(p2) {
+      return makeAff(function(cb) {
+        return voidRight2(mempty2)(thenImpl(p2)(function($14) {
+          return cb(Left.create(customCoerce($14)))();
+        })(function($15) {
+          return cb(Right.create($15))();
+        }));
+      });
+    };
+  };
+  var coerce3 = function(fn) {
+    return either(function(v2) {
+      return error("Promise failed, couldn't extract JS Error or String");
+    })(identity7)(runExcept(alt2(unsafeReadTagged2("Error")(fn))(map11(error)(readString2(fn)))));
+  };
+  var toAff = /* @__PURE__ */ toAff$prime(coerce3);
+
+  // output/Data.String.CodePoints/foreign.js
+  var hasArrayFrom = typeof Array.from === "function";
+  var hasStringIterator = typeof Symbol !== "undefined" && Symbol != null && typeof Symbol.iterator !== "undefined" && typeof String.prototype[Symbol.iterator] === "function";
+  var hasFromCodePoint = typeof String.prototype.fromCodePoint === "function";
+  var hasCodePointAt = typeof String.prototype.codePointAt === "function";
+  var _unsafeCodePointAt0 = function(fallback) {
+    return hasCodePointAt ? function(str) {
+      return str.codePointAt(0);
+    } : fallback;
+  };
+  var _toCodePointArray = function(fallback) {
+    return function(unsafeCodePointAt02) {
+      if (hasArrayFrom) {
+        return function(str) {
+          return Array.from(str, unsafeCodePointAt02);
+        };
+      }
+      return fallback;
+    };
+  };
+
+  // output/Data.Enum/foreign.js
+  function toCharCode(c2) {
+    return c2.charCodeAt(0);
+  }
+  function fromCharCode(c2) {
+    return String.fromCharCode(c2);
+  }
+
+  // output/Data.Enum/index.js
+  var bottom1 = /* @__PURE__ */ bottom(boundedChar);
+  var top1 = /* @__PURE__ */ top(boundedChar);
+  var fromEnum = function(dict) {
+    return dict.fromEnum;
+  };
+  var defaultSucc = function(toEnum$prime) {
+    return function(fromEnum$prime) {
+      return function(a3) {
+        return toEnum$prime(fromEnum$prime(a3) + 1 | 0);
+      };
+    };
+  };
+  var defaultPred = function(toEnum$prime) {
+    return function(fromEnum$prime) {
+      return function(a3) {
+        return toEnum$prime(fromEnum$prime(a3) - 1 | 0);
+      };
+    };
+  };
+  var charToEnum = function(v2) {
+    if (v2 >= toCharCode(bottom1) && v2 <= toCharCode(top1)) {
+      return new Just(fromCharCode(v2));
+    }
+    ;
+    return Nothing.value;
+  };
+  var enumChar = {
+    succ: /* @__PURE__ */ defaultSucc(charToEnum)(toCharCode),
+    pred: /* @__PURE__ */ defaultPred(charToEnum)(toCharCode),
+    Ord0: function() {
+      return ordChar;
+    }
+  };
+  var boundedEnumChar = /* @__PURE__ */ (function() {
+    return {
+      cardinality: toCharCode(top1) - toCharCode(bottom1) | 0,
+      toEnum: charToEnum,
+      fromEnum: toCharCode,
+      Bounded0: function() {
+        return boundedChar;
+      },
+      Enum1: function() {
+        return enumChar;
+      }
+    };
+  })();
+
+  // output/Data.String.CodePoints/index.js
+  var fromEnum2 = /* @__PURE__ */ fromEnum(boundedEnumChar);
+  var map13 = /* @__PURE__ */ map(functorMaybe);
+  var unfoldr2 = /* @__PURE__ */ unfoldr(unfoldableArray);
+  var unsurrogate = function(lead) {
+    return function(trail) {
+      return (((lead - 55296 | 0) * 1024 | 0) + (trail - 56320 | 0) | 0) + 65536 | 0;
+    };
+  };
+  var isTrail = function(cu) {
+    return 56320 <= cu && cu <= 57343;
+  };
+  var isLead = function(cu) {
+    return 55296 <= cu && cu <= 56319;
+  };
+  var uncons2 = function(s2) {
+    var v2 = length3(s2);
+    if (v2 === 0) {
+      return Nothing.value;
+    }
+    ;
+    if (v2 === 1) {
+      return new Just({
+        head: fromEnum2(charAt(0)(s2)),
+        tail: ""
+      });
+    }
+    ;
+    var cu1 = fromEnum2(charAt(1)(s2));
+    var cu0 = fromEnum2(charAt(0)(s2));
+    var $43 = isLead(cu0) && isTrail(cu1);
+    if ($43) {
+      return new Just({
+        head: unsurrogate(cu0)(cu1),
+        tail: drop2(2)(s2)
+      });
+    }
+    ;
+    return new Just({
+      head: cu0,
+      tail: drop2(1)(s2)
+    });
+  };
+  var unconsButWithTuple = function(s2) {
+    return map13(function(v2) {
+      return new Tuple(v2.head, v2.tail);
+    })(uncons2(s2));
+  };
+  var toCodePointArrayFallback = function(s2) {
+    return unfoldr2(unconsButWithTuple)(s2);
+  };
+  var unsafeCodePointAt0Fallback = function(s2) {
+    var cu0 = fromEnum2(charAt(0)(s2));
+    var $47 = isLead(cu0) && length3(s2) > 1;
+    if ($47) {
+      var cu1 = fromEnum2(charAt(1)(s2));
+      var $48 = isTrail(cu1);
+      if ($48) {
+        return unsurrogate(cu0)(cu1);
+      }
+      ;
+      return cu0;
+    }
+    ;
+    return cu0;
+  };
+  var unsafeCodePointAt0 = /* @__PURE__ */ _unsafeCodePointAt0(unsafeCodePointAt0Fallback);
+  var toCodePointArray = /* @__PURE__ */ _toCodePointArray(toCodePointArrayFallback)(unsafeCodePointAt0);
+  var length4 = function($74) {
+    return length(toCodePointArray($74));
+  };
+
+  // output/Effect.Aff.Class/index.js
+  var monadAffAff = {
+    liftAff: /* @__PURE__ */ identity(categoryFn),
+    MonadEffect0: function() {
+      return monadEffectAff;
+    }
+  };
+  var liftAff = function(dict) {
+    return dict.liftAff;
   };
 
   // output/Data.Exists/index.js
@@ -3376,14 +5756,14 @@
   var liftCoyoneda = /* @__PURE__ */ coyoneda(/* @__PURE__ */ identity(categoryFn));
 
   // output/Data.Map.Internal/index.js
-  var $runtime_lazy4 = function(name15, moduleName, init2) {
+  var $runtime_lazy5 = function(name16, moduleName, init3) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
       if (state3 === 2) return val;
-      if (state3 === 1) throw new ReferenceError(name15 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
+      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
       state3 = 1;
-      val = init2();
+      val = init3();
       state3 = 2;
       return val;
     };
@@ -3486,7 +5866,7 @@
     ;
     throw new Error("Failed pattern match at Data.Map.Internal (line 700, column 32 - line 712, column 68): " + [l2.constructor.name]);
   };
-  var singleton5 = function(k) {
+  var singleton6 = function(k) {
     return function(v2) {
       return new Node(1, 1, k, v2, Leaf.value, Leaf.value);
     };
@@ -3520,7 +5900,7 @@
     return function(k, v2, l2, r) {
       if (l2 instanceof Leaf) {
         if (r instanceof Leaf) {
-          return singleton5(k)(v2);
+          return singleton6(k)(v2);
         }
         ;
         if (r instanceof Node && r.value0 > 1) {
@@ -3552,7 +5932,7 @@
       throw new Error("Failed pattern match at Data.Map.Internal (line 717, column 40 - line 738, column 34): " + [l2.constructor.name]);
     };
   })();
-  var $lazy_unsafeSplit = /* @__PURE__ */ $runtime_lazy4("unsafeSplit", "Data.Map.Internal", function() {
+  var $lazy_unsafeSplit = /* @__PURE__ */ $runtime_lazy5("unsafeSplit", "Data.Map.Internal", function() {
     return function(comp, k, m2) {
       if (m2 instanceof Leaf) {
         return new Split(Nothing.value, Leaf.value, Leaf.value);
@@ -3581,7 +5961,7 @@
     };
   });
   var unsafeSplit = /* @__PURE__ */ $lazy_unsafeSplit(786);
-  var $lazy_unsafeSplitLast = /* @__PURE__ */ $runtime_lazy4("unsafeSplitLast", "Data.Map.Internal", function() {
+  var $lazy_unsafeSplitLast = /* @__PURE__ */ $runtime_lazy5("unsafeSplitLast", "Data.Map.Internal", function() {
     return function(k, v2, l2, r) {
       if (r instanceof Leaf) {
         return new SplitLast(k, v2, l2);
@@ -3652,13 +6032,13 @@
       return go2;
     };
   };
-  var insert = function(dictOrd) {
+  var insert2 = function(dictOrd) {
     var compare3 = compare(dictOrd);
     return function(k) {
       return function(v2) {
         var go2 = function(v1) {
           if (v1 instanceof Leaf) {
-            return singleton5(k)(v2);
+            return singleton6(k)(v2);
           }
           ;
           if (v1 instanceof Node) {
@@ -3687,7 +6067,7 @@
   var foldableMap = {
     foldr: function(f) {
       return function(z2) {
-        var $lazy_go = $runtime_lazy4("go", "Data.Map.Internal", function() {
+        var $lazy_go = $runtime_lazy5("go", "Data.Map.Internal", function() {
           return function(m$prime, z$prime) {
             if (m$prime instanceof Leaf) {
               return z$prime;
@@ -3708,7 +6088,7 @@
     },
     foldl: function(f) {
       return function(z2) {
-        var $lazy_go = $runtime_lazy4("go", "Data.Map.Internal", function() {
+        var $lazy_go = $runtime_lazy5("go", "Data.Map.Internal", function() {
           return function(z$prime, m$prime) {
             if (m$prime instanceof Leaf) {
               return z$prime;
@@ -3728,16 +6108,16 @@
       };
     },
     foldMap: function(dictMonoid) {
-      var mempty2 = mempty(dictMonoid);
-      var append12 = append(dictMonoid.Semigroup0());
+      var mempty3 = mempty(dictMonoid);
+      var append13 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v2) {
           if (v2 instanceof Leaf) {
-            return mempty2;
+            return mempty3;
           }
           ;
           if (v2 instanceof Node) {
-            return append12(go2(v2.value4))(append12(f(v2.value3))(go2(v2.value5)));
+            return append13(go2(v2.value4))(append13(f(v2.value3))(go2(v2.value5)));
           }
           ;
           throw new Error("Failed pattern match at Data.Map.Internal (line 181, column 10 - line 184, column 28): " + [v2.constructor.name]);
@@ -3814,7 +6194,7 @@
   var empty4 = empty3;
 
   // output/Control.Applicative.Free/index.js
-  var identity4 = /* @__PURE__ */ identity(categoryFn);
+  var identity8 = /* @__PURE__ */ identity(categoryFn);
   var Pure = /* @__PURE__ */ (function() {
     function Pure2(value0) {
       this.value0 = value0;
@@ -3857,7 +6237,7 @@
     return Lift.create;
   })();
   var goLeft = function(dictApplicative) {
-    var pure11 = pure(dictApplicative);
+    var pure16 = pure(dictApplicative);
     return function(fStack) {
       return function(valStack) {
         return function(nat) {
@@ -3865,7 +6245,7 @@
             return function(count) {
               if (func instanceof Pure) {
                 return new Tuple(new Cons({
-                  func: pure11(func.value0),
+                  func: pure16(func.value0),
                   count
                 }, fStack), valStack);
               }
@@ -3889,7 +6269,7 @@
     };
   };
   var goApply = function(dictApplicative) {
-    var apply2 = apply(dictApplicative.Apply0());
+    var apply3 = apply(dictApplicative.Apply0());
     return function(fStack) {
       return function(vals) {
         return function(gVal) {
@@ -3898,7 +6278,7 @@
           }
           ;
           if (fStack instanceof Cons) {
-            var gRes = apply2(fStack.value0.func)(gVal);
+            var gRes = apply3(fStack.value0.func)(gVal);
             var $31 = fStack.value0.count === 1;
             if ($31) {
               if (fStack.value1 instanceof Nil) {
@@ -3936,7 +6316,7 @@
   };
   var foldFreeAp = function(dictApplicative) {
     var goApply1 = goApply(dictApplicative);
-    var pure11 = pure(dictApplicative);
+    var pure16 = pure(dictApplicative);
     var goLeft1 = goLeft(dictApplicative);
     return function(nat) {
       return function(z2) {
@@ -3945,7 +6325,7 @@
           var $tco_result;
           function $tco_loop(v2) {
             if (v2.value1.value0 instanceof Pure) {
-              var v1 = goApply1(v2.value0)(v2.value1.value1)(pure11(v2.value1.value0.value0));
+              var v1 = goApply1(v2.value0)(v2.value1.value1)(pure16(v2.value1.value0.value0));
               if (v1 instanceof Left) {
                 $tco_done = true;
                 return v1.value0;
@@ -3989,12 +6369,12 @@
           ;
           return $tco_result;
         };
-        return go2(new Tuple(Nil.value, singleton3(z2)));
+        return go2(new Tuple(Nil.value, singleton4(z2)));
       };
     };
   };
   var retractFreeAp = function(dictApplicative) {
-    return foldFreeAp(dictApplicative)(identity4);
+    return foldFreeAp(dictApplicative)(identity8);
   };
   var applyFreeAp = {
     apply: function(fba) {
@@ -4035,7 +6415,7 @@
     };
     return CatQueue2;
   })();
-  var uncons2 = function($copy_v) {
+  var uncons3 = function($copy_v) {
     var $tco_done = false;
     var $tco_result;
     function $tco_loop(v2) {
@@ -4120,7 +6500,7 @@
   var foldr3 = function(k) {
     return function(b2) {
       return function(q3) {
-        var foldl2 = function($copy_v) {
+        var foldl3 = function($copy_v) {
           return function($copy_v1) {
             return function($copy_v2) {
               var $tco_var_v = $copy_v;
@@ -4157,10 +6537,10 @@
             var $tco_done1 = false;
             var $tco_result;
             function $tco_loop(xs, ys) {
-              var v2 = uncons2(xs);
+              var v2 = uncons3(xs);
               if (v2 instanceof Nothing) {
                 $tco_done1 = true;
-                return foldl2(function(x) {
+                return foldl3(function(x) {
                   return function(i2) {
                     return i2(x);
                   };
@@ -4187,7 +6567,7 @@
       };
     };
   };
-  var uncons3 = function(v2) {
+  var uncons4 = function(v2) {
     if (v2 instanceof CatNil) {
       return Nothing.value;
     }
@@ -4219,14 +6599,14 @@
   };
 
   // output/Control.Monad.Free/index.js
-  var $runtime_lazy5 = function(name15, moduleName, init2) {
+  var $runtime_lazy6 = function(name16, moduleName, init3) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
       if (state3 === 2) return val;
-      if (state3 === 1) throw new ReferenceError(name15 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
+      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
       state3 = 1;
-      val = init2();
+      val = init3();
       state3 = 2;
       return val;
     };
@@ -4281,7 +6661,7 @@
         };
       };
       if (v2.value0 instanceof Return) {
-        var v22 = uncons3(v2.value1);
+        var v22 = uncons4(v2.value1);
         if (v22 instanceof Nothing) {
           $tco_done = true;
           return new Return(v2.value0.value0);
@@ -4352,7 +6732,7 @@
       return $lazy_freeApply(0);
     }
   };
-  var $lazy_freeApply = /* @__PURE__ */ $runtime_lazy5("freeApply", "Control.Monad.Free", function() {
+  var $lazy_freeApply = /* @__PURE__ */ $runtime_lazy6("freeApply", "Control.Monad.Free", function() {
     return {
       apply: ap(freeMonad),
       Functor0: function() {
@@ -4360,26 +6740,26 @@
       }
     };
   });
-  var pure3 = /* @__PURE__ */ pure(freeApplicative);
+  var pure4 = /* @__PURE__ */ pure(freeApplicative);
   var liftF = function(f) {
     return fromView(new Bind(f, function($192) {
-      return pure3($192);
+      return pure4($192);
     }));
   };
   var foldFree = function(dictMonadRec) {
     var Monad0 = dictMonadRec.Monad0();
-    var map110 = map(Monad0.Bind1().Apply0().Functor0());
-    var pure13 = pure(Monad0.Applicative0());
+    var map111 = map(Monad0.Bind1().Apply0().Functor0());
+    var pure16 = pure(Monad0.Applicative0());
     var tailRecM4 = tailRecM(dictMonadRec);
     return function(k) {
       var go2 = function(f) {
         var v2 = toView(f);
         if (v2 instanceof Return) {
-          return map110(Done.create)(pure13(v2.value0));
+          return map111(Done.create)(pure16(v2.value0));
         }
         ;
         if (v2 instanceof Bind) {
-          return map110(function($199) {
+          return map111(function($199) {
             return Loop.create(v2.value1($199));
           })(k(v2.value0));
         }
@@ -4388,1178 +6768,6 @@
       };
       return tailRecM4(go2);
     };
-  };
-
-  // output/Effect.Aff/foreign.js
-  var Aff = (function() {
-    var EMPTY = {};
-    var PURE = "Pure";
-    var THROW = "Throw";
-    var CATCH = "Catch";
-    var SYNC = "Sync";
-    var ASYNC = "Async";
-    var BIND = "Bind";
-    var BRACKET = "Bracket";
-    var FORK = "Fork";
-    var SEQ = "Sequential";
-    var MAP = "Map";
-    var APPLY = "Apply";
-    var ALT = "Alt";
-    var CONS = "Cons";
-    var RESUME = "Resume";
-    var RELEASE = "Release";
-    var FINALIZER = "Finalizer";
-    var FINALIZED = "Finalized";
-    var FORKED = "Forked";
-    var FIBER = "Fiber";
-    var THUNK = "Thunk";
-    function Aff2(tag, _1, _2, _3) {
-      this.tag = tag;
-      this._1 = _1;
-      this._2 = _2;
-      this._3 = _3;
-    }
-    function AffCtr(tag) {
-      var fn = function(_1, _2, _3) {
-        return new Aff2(tag, _1, _2, _3);
-      };
-      fn.tag = tag;
-      return fn;
-    }
-    function nonCanceler2(error4) {
-      return new Aff2(PURE, void 0);
-    }
-    function runEff(eff) {
-      try {
-        eff();
-      } catch (error4) {
-        setTimeout(function() {
-          throw error4;
-        }, 0);
-      }
-    }
-    function runSync(left, right, eff) {
-      try {
-        return right(eff());
-      } catch (error4) {
-        return left(error4);
-      }
-    }
-    function runAsync(left, eff, k) {
-      try {
-        return eff(k)();
-      } catch (error4) {
-        k(left(error4))();
-        return nonCanceler2;
-      }
-    }
-    var Scheduler = (function() {
-      var limit = 1024;
-      var size4 = 0;
-      var ix = 0;
-      var queue = new Array(limit);
-      var draining = false;
-      function drain() {
-        var thunk;
-        draining = true;
-        while (size4 !== 0) {
-          size4--;
-          thunk = queue[ix];
-          queue[ix] = void 0;
-          ix = (ix + 1) % limit;
-          thunk();
-        }
-        draining = false;
-      }
-      return {
-        isDraining: function() {
-          return draining;
-        },
-        enqueue: function(cb) {
-          var i2, tmp;
-          if (size4 === limit) {
-            tmp = draining;
-            drain();
-            draining = tmp;
-          }
-          queue[(ix + size4) % limit] = cb;
-          size4++;
-          if (!draining) {
-            drain();
-          }
-        }
-      };
-    })();
-    function Supervisor(util) {
-      var fibers = {};
-      var fiberId = 0;
-      var count = 0;
-      return {
-        register: function(fiber) {
-          var fid = fiberId++;
-          fiber.onComplete({
-            rethrow: true,
-            handler: function(result) {
-              return function() {
-                count--;
-                delete fibers[fid];
-              };
-            }
-          })();
-          fibers[fid] = fiber;
-          count++;
-        },
-        isEmpty: function() {
-          return count === 0;
-        },
-        killAll: function(killError, cb) {
-          return function() {
-            if (count === 0) {
-              return cb();
-            }
-            var killCount = 0;
-            var kills = {};
-            function kill2(fid) {
-              kills[fid] = fibers[fid].kill(killError, function(result) {
-                return function() {
-                  delete kills[fid];
-                  killCount--;
-                  if (util.isLeft(result) && util.fromLeft(result)) {
-                    setTimeout(function() {
-                      throw util.fromLeft(result);
-                    }, 0);
-                  }
-                  if (killCount === 0) {
-                    cb();
-                  }
-                };
-              })();
-            }
-            for (var k in fibers) {
-              if (fibers.hasOwnProperty(k)) {
-                killCount++;
-                kill2(k);
-              }
-            }
-            fibers = {};
-            fiberId = 0;
-            count = 0;
-            return function(error4) {
-              return new Aff2(SYNC, function() {
-                for (var k2 in kills) {
-                  if (kills.hasOwnProperty(k2)) {
-                    kills[k2]();
-                  }
-                }
-              });
-            };
-          };
-        }
-      };
-    }
-    var SUSPENDED = 0;
-    var CONTINUE = 1;
-    var STEP_BIND = 2;
-    var STEP_RESULT = 3;
-    var PENDING = 4;
-    var RETURN = 5;
-    var COMPLETED = 6;
-    function Fiber(util, supervisor, aff) {
-      var runTick = 0;
-      var status = SUSPENDED;
-      var step3 = aff;
-      var fail2 = null;
-      var interrupt = null;
-      var bhead = null;
-      var btail = null;
-      var attempts = null;
-      var bracketCount = 0;
-      var joinId = 0;
-      var joins = null;
-      var rethrow = true;
-      function run3(localRunTick) {
-        var tmp, result, attempt;
-        while (true) {
-          tmp = null;
-          result = null;
-          attempt = null;
-          switch (status) {
-            case STEP_BIND:
-              status = CONTINUE;
-              try {
-                step3 = bhead(step3);
-                if (btail === null) {
-                  bhead = null;
-                } else {
-                  bhead = btail._1;
-                  btail = btail._2;
-                }
-              } catch (e) {
-                status = RETURN;
-                fail2 = util.left(e);
-                step3 = null;
-              }
-              break;
-            case STEP_RESULT:
-              if (util.isLeft(step3)) {
-                status = RETURN;
-                fail2 = step3;
-                step3 = null;
-              } else if (bhead === null) {
-                status = RETURN;
-              } else {
-                status = STEP_BIND;
-                step3 = util.fromRight(step3);
-              }
-              break;
-            case CONTINUE:
-              switch (step3.tag) {
-                case BIND:
-                  if (bhead) {
-                    btail = new Aff2(CONS, bhead, btail);
-                  }
-                  bhead = step3._2;
-                  status = CONTINUE;
-                  step3 = step3._1;
-                  break;
-                case PURE:
-                  if (bhead === null) {
-                    status = RETURN;
-                    step3 = util.right(step3._1);
-                  } else {
-                    status = STEP_BIND;
-                    step3 = step3._1;
-                  }
-                  break;
-                case SYNC:
-                  status = STEP_RESULT;
-                  step3 = runSync(util.left, util.right, step3._1);
-                  break;
-                case ASYNC:
-                  status = PENDING;
-                  step3 = runAsync(util.left, step3._1, function(result2) {
-                    return function() {
-                      if (runTick !== localRunTick) {
-                        return;
-                      }
-                      runTick++;
-                      Scheduler.enqueue(function() {
-                        if (runTick !== localRunTick + 1) {
-                          return;
-                        }
-                        status = STEP_RESULT;
-                        step3 = result2;
-                        run3(runTick);
-                      });
-                    };
-                  });
-                  return;
-                case THROW:
-                  status = RETURN;
-                  fail2 = util.left(step3._1);
-                  step3 = null;
-                  break;
-                // Enqueue the Catch so that we can call the error handler later on
-                // in case of an exception.
-                case CATCH:
-                  if (bhead === null) {
-                    attempts = new Aff2(CONS, step3, attempts, interrupt);
-                  } else {
-                    attempts = new Aff2(CONS, step3, new Aff2(CONS, new Aff2(RESUME, bhead, btail), attempts, interrupt), interrupt);
-                  }
-                  bhead = null;
-                  btail = null;
-                  status = CONTINUE;
-                  step3 = step3._1;
-                  break;
-                // Enqueue the Bracket so that we can call the appropriate handlers
-                // after resource acquisition.
-                case BRACKET:
-                  bracketCount++;
-                  if (bhead === null) {
-                    attempts = new Aff2(CONS, step3, attempts, interrupt);
-                  } else {
-                    attempts = new Aff2(CONS, step3, new Aff2(CONS, new Aff2(RESUME, bhead, btail), attempts, interrupt), interrupt);
-                  }
-                  bhead = null;
-                  btail = null;
-                  status = CONTINUE;
-                  step3 = step3._1;
-                  break;
-                case FORK:
-                  status = STEP_RESULT;
-                  tmp = Fiber(util, supervisor, step3._2);
-                  if (supervisor) {
-                    supervisor.register(tmp);
-                  }
-                  if (step3._1) {
-                    tmp.run();
-                  }
-                  step3 = util.right(tmp);
-                  break;
-                case SEQ:
-                  status = CONTINUE;
-                  step3 = sequential3(util, supervisor, step3._1);
-                  break;
-              }
-              break;
-            case RETURN:
-              bhead = null;
-              btail = null;
-              if (attempts === null) {
-                status = COMPLETED;
-                step3 = interrupt || fail2 || step3;
-              } else {
-                tmp = attempts._3;
-                attempt = attempts._1;
-                attempts = attempts._2;
-                switch (attempt.tag) {
-                  // We cannot recover from an unmasked interrupt. Otherwise we should
-                  // continue stepping, or run the exception handler if an exception
-                  // was raised.
-                  case CATCH:
-                    if (interrupt && interrupt !== tmp && bracketCount === 0) {
-                      status = RETURN;
-                    } else if (fail2) {
-                      status = CONTINUE;
-                      step3 = attempt._2(util.fromLeft(fail2));
-                      fail2 = null;
-                    }
-                    break;
-                  // We cannot resume from an unmasked interrupt or exception.
-                  case RESUME:
-                    if (interrupt && interrupt !== tmp && bracketCount === 0 || fail2) {
-                      status = RETURN;
-                    } else {
-                      bhead = attempt._1;
-                      btail = attempt._2;
-                      status = STEP_BIND;
-                      step3 = util.fromRight(step3);
-                    }
-                    break;
-                  // If we have a bracket, we should enqueue the handlers,
-                  // and continue with the success branch only if the fiber has
-                  // not been interrupted. If the bracket acquisition failed, we
-                  // should not run either.
-                  case BRACKET:
-                    bracketCount--;
-                    if (fail2 === null) {
-                      result = util.fromRight(step3);
-                      attempts = new Aff2(CONS, new Aff2(RELEASE, attempt._2, result), attempts, tmp);
-                      if (interrupt === tmp || bracketCount > 0) {
-                        status = CONTINUE;
-                        step3 = attempt._3(result);
-                      }
-                    }
-                    break;
-                  // Enqueue the appropriate handler. We increase the bracket count
-                  // because it should not be cancelled.
-                  case RELEASE:
-                    attempts = new Aff2(CONS, new Aff2(FINALIZED, step3, fail2), attempts, interrupt);
-                    status = CONTINUE;
-                    if (interrupt && interrupt !== tmp && bracketCount === 0) {
-                      step3 = attempt._1.killed(util.fromLeft(interrupt))(attempt._2);
-                    } else if (fail2) {
-                      step3 = attempt._1.failed(util.fromLeft(fail2))(attempt._2);
-                    } else {
-                      step3 = attempt._1.completed(util.fromRight(step3))(attempt._2);
-                    }
-                    fail2 = null;
-                    bracketCount++;
-                    break;
-                  case FINALIZER:
-                    bracketCount++;
-                    attempts = new Aff2(CONS, new Aff2(FINALIZED, step3, fail2), attempts, interrupt);
-                    status = CONTINUE;
-                    step3 = attempt._1;
-                    break;
-                  case FINALIZED:
-                    bracketCount--;
-                    status = RETURN;
-                    step3 = attempt._1;
-                    fail2 = attempt._2;
-                    break;
-                }
-              }
-              break;
-            case COMPLETED:
-              for (var k in joins) {
-                if (joins.hasOwnProperty(k)) {
-                  rethrow = rethrow && joins[k].rethrow;
-                  runEff(joins[k].handler(step3));
-                }
-              }
-              joins = null;
-              if (interrupt && fail2) {
-                setTimeout(function() {
-                  throw util.fromLeft(fail2);
-                }, 0);
-              } else if (util.isLeft(step3) && rethrow) {
-                setTimeout(function() {
-                  if (rethrow) {
-                    throw util.fromLeft(step3);
-                  }
-                }, 0);
-              }
-              return;
-            case SUSPENDED:
-              status = CONTINUE;
-              break;
-            case PENDING:
-              return;
-          }
-        }
-      }
-      function onComplete(join4) {
-        return function() {
-          if (status === COMPLETED) {
-            rethrow = rethrow && join4.rethrow;
-            join4.handler(step3)();
-            return function() {
-            };
-          }
-          var jid = joinId++;
-          joins = joins || {};
-          joins[jid] = join4;
-          return function() {
-            if (joins !== null) {
-              delete joins[jid];
-            }
-          };
-        };
-      }
-      function kill2(error4, cb) {
-        return function() {
-          if (status === COMPLETED) {
-            cb(util.right(void 0))();
-            return function() {
-            };
-          }
-          var canceler = onComplete({
-            rethrow: false,
-            handler: function() {
-              return cb(util.right(void 0));
-            }
-          })();
-          switch (status) {
-            case SUSPENDED:
-              interrupt = util.left(error4);
-              status = COMPLETED;
-              step3 = interrupt;
-              run3(runTick);
-              break;
-            case PENDING:
-              if (interrupt === null) {
-                interrupt = util.left(error4);
-              }
-              if (bracketCount === 0) {
-                if (status === PENDING) {
-                  attempts = new Aff2(CONS, new Aff2(FINALIZER, step3(error4)), attempts, interrupt);
-                }
-                status = RETURN;
-                step3 = null;
-                fail2 = null;
-                run3(++runTick);
-              }
-              break;
-            default:
-              if (interrupt === null) {
-                interrupt = util.left(error4);
-              }
-              if (bracketCount === 0) {
-                status = RETURN;
-                step3 = null;
-                fail2 = null;
-              }
-          }
-          return canceler;
-        };
-      }
-      function join3(cb) {
-        return function() {
-          var canceler = onComplete({
-            rethrow: false,
-            handler: cb
-          })();
-          if (status === SUSPENDED) {
-            run3(runTick);
-          }
-          return canceler;
-        };
-      }
-      return {
-        kill: kill2,
-        join: join3,
-        onComplete,
-        isSuspended: function() {
-          return status === SUSPENDED;
-        },
-        run: function() {
-          if (status === SUSPENDED) {
-            if (!Scheduler.isDraining()) {
-              Scheduler.enqueue(function() {
-                run3(runTick);
-              });
-            } else {
-              run3(runTick);
-            }
-          }
-        }
-      };
-    }
-    function runPar(util, supervisor, par, cb) {
-      var fiberId = 0;
-      var fibers = {};
-      var killId = 0;
-      var kills = {};
-      var early = new Error("[ParAff] Early exit");
-      var interrupt = null;
-      var root = EMPTY;
-      function kill2(error4, par2, cb2) {
-        var step3 = par2;
-        var head2 = null;
-        var tail = null;
-        var count = 0;
-        var kills2 = {};
-        var tmp, kid;
-        loop: while (true) {
-          tmp = null;
-          switch (step3.tag) {
-            case FORKED:
-              if (step3._3 === EMPTY) {
-                tmp = fibers[step3._1];
-                kills2[count++] = tmp.kill(error4, function(result) {
-                  return function() {
-                    count--;
-                    if (count === 0) {
-                      cb2(result)();
-                    }
-                  };
-                });
-              }
-              if (head2 === null) {
-                break loop;
-              }
-              step3 = head2._2;
-              if (tail === null) {
-                head2 = null;
-              } else {
-                head2 = tail._1;
-                tail = tail._2;
-              }
-              break;
-            case MAP:
-              step3 = step3._2;
-              break;
-            case APPLY:
-            case ALT:
-              if (head2) {
-                tail = new Aff2(CONS, head2, tail);
-              }
-              head2 = step3;
-              step3 = step3._1;
-              break;
-          }
-        }
-        if (count === 0) {
-          cb2(util.right(void 0))();
-        } else {
-          kid = 0;
-          tmp = count;
-          for (; kid < tmp; kid++) {
-            kills2[kid] = kills2[kid]();
-          }
-        }
-        return kills2;
-      }
-      function join3(result, head2, tail) {
-        var fail2, step3, lhs, rhs, tmp, kid;
-        if (util.isLeft(result)) {
-          fail2 = result;
-          step3 = null;
-        } else {
-          step3 = result;
-          fail2 = null;
-        }
-        loop: while (true) {
-          lhs = null;
-          rhs = null;
-          tmp = null;
-          kid = null;
-          if (interrupt !== null) {
-            return;
-          }
-          if (head2 === null) {
-            cb(fail2 || step3)();
-            return;
-          }
-          if (head2._3 !== EMPTY) {
-            return;
-          }
-          switch (head2.tag) {
-            case MAP:
-              if (fail2 === null) {
-                head2._3 = util.right(head2._1(util.fromRight(step3)));
-                step3 = head2._3;
-              } else {
-                head2._3 = fail2;
-              }
-              break;
-            case APPLY:
-              lhs = head2._1._3;
-              rhs = head2._2._3;
-              if (fail2) {
-                head2._3 = fail2;
-                tmp = true;
-                kid = killId++;
-                kills[kid] = kill2(early, fail2 === lhs ? head2._2 : head2._1, function() {
-                  return function() {
-                    delete kills[kid];
-                    if (tmp) {
-                      tmp = false;
-                    } else if (tail === null) {
-                      join3(fail2, null, null);
-                    } else {
-                      join3(fail2, tail._1, tail._2);
-                    }
-                  };
-                });
-                if (tmp) {
-                  tmp = false;
-                  return;
-                }
-              } else if (lhs === EMPTY || rhs === EMPTY) {
-                return;
-              } else {
-                step3 = util.right(util.fromRight(lhs)(util.fromRight(rhs)));
-                head2._3 = step3;
-              }
-              break;
-            case ALT:
-              lhs = head2._1._3;
-              rhs = head2._2._3;
-              if (lhs === EMPTY && util.isLeft(rhs) || rhs === EMPTY && util.isLeft(lhs)) {
-                return;
-              }
-              if (lhs !== EMPTY && util.isLeft(lhs) && rhs !== EMPTY && util.isLeft(rhs)) {
-                fail2 = step3 === lhs ? rhs : lhs;
-                step3 = null;
-                head2._3 = fail2;
-              } else {
-                head2._3 = step3;
-                tmp = true;
-                kid = killId++;
-                kills[kid] = kill2(early, step3 === lhs ? head2._2 : head2._1, function() {
-                  return function() {
-                    delete kills[kid];
-                    if (tmp) {
-                      tmp = false;
-                    } else if (tail === null) {
-                      join3(step3, null, null);
-                    } else {
-                      join3(step3, tail._1, tail._2);
-                    }
-                  };
-                });
-                if (tmp) {
-                  tmp = false;
-                  return;
-                }
-              }
-              break;
-          }
-          if (tail === null) {
-            head2 = null;
-          } else {
-            head2 = tail._1;
-            tail = tail._2;
-          }
-        }
-      }
-      function resolve(fiber) {
-        return function(result) {
-          return function() {
-            delete fibers[fiber._1];
-            fiber._3 = result;
-            join3(result, fiber._2._1, fiber._2._2);
-          };
-        };
-      }
-      function run3() {
-        var status = CONTINUE;
-        var step3 = par;
-        var head2 = null;
-        var tail = null;
-        var tmp, fid;
-        loop: while (true) {
-          tmp = null;
-          fid = null;
-          switch (status) {
-            case CONTINUE:
-              switch (step3.tag) {
-                case MAP:
-                  if (head2) {
-                    tail = new Aff2(CONS, head2, tail);
-                  }
-                  head2 = new Aff2(MAP, step3._1, EMPTY, EMPTY);
-                  step3 = step3._2;
-                  break;
-                case APPLY:
-                  if (head2) {
-                    tail = new Aff2(CONS, head2, tail);
-                  }
-                  head2 = new Aff2(APPLY, EMPTY, step3._2, EMPTY);
-                  step3 = step3._1;
-                  break;
-                case ALT:
-                  if (head2) {
-                    tail = new Aff2(CONS, head2, tail);
-                  }
-                  head2 = new Aff2(ALT, EMPTY, step3._2, EMPTY);
-                  step3 = step3._1;
-                  break;
-                default:
-                  fid = fiberId++;
-                  status = RETURN;
-                  tmp = step3;
-                  step3 = new Aff2(FORKED, fid, new Aff2(CONS, head2, tail), EMPTY);
-                  tmp = Fiber(util, supervisor, tmp);
-                  tmp.onComplete({
-                    rethrow: false,
-                    handler: resolve(step3)
-                  })();
-                  fibers[fid] = tmp;
-                  if (supervisor) {
-                    supervisor.register(tmp);
-                  }
-              }
-              break;
-            case RETURN:
-              if (head2 === null) {
-                break loop;
-              }
-              if (head2._1 === EMPTY) {
-                head2._1 = step3;
-                status = CONTINUE;
-                step3 = head2._2;
-                head2._2 = EMPTY;
-              } else {
-                head2._2 = step3;
-                step3 = head2;
-                if (tail === null) {
-                  head2 = null;
-                } else {
-                  head2 = tail._1;
-                  tail = tail._2;
-                }
-              }
-          }
-        }
-        root = step3;
-        for (fid = 0; fid < fiberId; fid++) {
-          fibers[fid].run();
-        }
-      }
-      function cancel(error4, cb2) {
-        interrupt = util.left(error4);
-        var innerKills;
-        for (var kid in kills) {
-          if (kills.hasOwnProperty(kid)) {
-            innerKills = kills[kid];
-            for (kid in innerKills) {
-              if (innerKills.hasOwnProperty(kid)) {
-                innerKills[kid]();
-              }
-            }
-          }
-        }
-        kills = null;
-        var newKills = kill2(error4, root, cb2);
-        return function(killError) {
-          return new Aff2(ASYNC, function(killCb) {
-            return function() {
-              for (var kid2 in newKills) {
-                if (newKills.hasOwnProperty(kid2)) {
-                  newKills[kid2]();
-                }
-              }
-              return nonCanceler2;
-            };
-          });
-        };
-      }
-      run3();
-      return function(killError) {
-        return new Aff2(ASYNC, function(killCb) {
-          return function() {
-            return cancel(killError, killCb);
-          };
-        });
-      };
-    }
-    function sequential3(util, supervisor, par) {
-      return new Aff2(ASYNC, function(cb) {
-        return function() {
-          return runPar(util, supervisor, par, cb);
-        };
-      });
-    }
-    Aff2.EMPTY = EMPTY;
-    Aff2.Pure = AffCtr(PURE);
-    Aff2.Throw = AffCtr(THROW);
-    Aff2.Catch = AffCtr(CATCH);
-    Aff2.Sync = AffCtr(SYNC);
-    Aff2.Async = AffCtr(ASYNC);
-    Aff2.Bind = AffCtr(BIND);
-    Aff2.Bracket = AffCtr(BRACKET);
-    Aff2.Fork = AffCtr(FORK);
-    Aff2.Seq = AffCtr(SEQ);
-    Aff2.ParMap = AffCtr(MAP);
-    Aff2.ParApply = AffCtr(APPLY);
-    Aff2.ParAlt = AffCtr(ALT);
-    Aff2.Fiber = Fiber;
-    Aff2.Supervisor = Supervisor;
-    Aff2.Scheduler = Scheduler;
-    Aff2.nonCanceler = nonCanceler2;
-    return Aff2;
-  })();
-  var _pure = Aff.Pure;
-  var _throwError = Aff.Throw;
-  function _catchError(aff) {
-    return function(k) {
-      return Aff.Catch(aff, k);
-    };
-  }
-  function _map(f) {
-    return function(aff) {
-      if (aff.tag === Aff.Pure.tag) {
-        return Aff.Pure(f(aff._1));
-      } else {
-        return Aff.Bind(aff, function(value14) {
-          return Aff.Pure(f(value14));
-        });
-      }
-    };
-  }
-  function _bind(aff) {
-    return function(k) {
-      return Aff.Bind(aff, k);
-    };
-  }
-  function _fork(immediate) {
-    return function(aff) {
-      return Aff.Fork(immediate, aff);
-    };
-  }
-  var _liftEffect = Aff.Sync;
-  function _parAffMap(f) {
-    return function(aff) {
-      return Aff.ParMap(f, aff);
-    };
-  }
-  function _parAffApply(aff1) {
-    return function(aff2) {
-      return Aff.ParApply(aff1, aff2);
-    };
-  }
-  var makeAff = Aff.Async;
-  function generalBracket(acquire) {
-    return function(options2) {
-      return function(k) {
-        return Aff.Bracket(acquire, options2, k);
-      };
-    };
-  }
-  function _makeFiber(util, aff) {
-    return function() {
-      return Aff.Fiber(util, null, aff);
-    };
-  }
-  var _sequential = Aff.Seq;
-
-  // output/Control.Parallel.Class/index.js
-  var sequential = function(dict) {
-    return dict.sequential;
-  };
-  var parallel = function(dict) {
-    return dict.parallel;
-  };
-
-  // output/Control.Parallel/index.js
-  var identity5 = /* @__PURE__ */ identity(categoryFn);
-  var parTraverse_ = function(dictParallel) {
-    var sequential3 = sequential(dictParallel);
-    var parallel4 = parallel(dictParallel);
-    return function(dictApplicative) {
-      var traverse_7 = traverse_(dictApplicative);
-      return function(dictFoldable) {
-        var traverse_14 = traverse_7(dictFoldable);
-        return function(f) {
-          var $51 = traverse_14(function($53) {
-            return parallel4(f($53));
-          });
-          return function($52) {
-            return sequential3($51($52));
-          };
-        };
-      };
-    };
-  };
-  var parSequence_ = function(dictParallel) {
-    var parTraverse_1 = parTraverse_(dictParallel);
-    return function(dictApplicative) {
-      var parTraverse_2 = parTraverse_1(dictApplicative);
-      return function(dictFoldable) {
-        return parTraverse_2(dictFoldable)(identity5);
-      };
-    };
-  };
-
-  // output/Effect.Unsafe/foreign.js
-  var unsafePerformEffect = function(f) {
-    return f();
-  };
-
-  // output/Effect.Aff/index.js
-  var $runtime_lazy6 = function(name15, moduleName, init2) {
-    var state3 = 0;
-    var val;
-    return function(lineNumber) {
-      if (state3 === 2) return val;
-      if (state3 === 1) throw new ReferenceError(name15 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
-      state3 = 1;
-      val = init2();
-      state3 = 2;
-      return val;
-    };
-  };
-  var pure4 = /* @__PURE__ */ pure(applicativeEffect);
-  var $$void3 = /* @__PURE__ */ $$void(functorEffect);
-  var map8 = /* @__PURE__ */ map(functorEffect);
-  var Canceler = function(x) {
-    return x;
-  };
-  var suspendAff = /* @__PURE__ */ _fork(false);
-  var functorParAff = {
-    map: _parAffMap
-  };
-  var functorAff = {
-    map: _map
-  };
-  var map12 = /* @__PURE__ */ map(functorAff);
-  var forkAff = /* @__PURE__ */ _fork(true);
-  var ffiUtil = /* @__PURE__ */ (function() {
-    var unsafeFromRight = function(v2) {
-      if (v2 instanceof Right) {
-        return v2.value0;
-      }
-      ;
-      if (v2 instanceof Left) {
-        return unsafeCrashWith("unsafeFromRight: Left");
-      }
-      ;
-      throw new Error("Failed pattern match at Effect.Aff (line 412, column 21 - line 414, column 54): " + [v2.constructor.name]);
-    };
-    var unsafeFromLeft = function(v2) {
-      if (v2 instanceof Left) {
-        return v2.value0;
-      }
-      ;
-      if (v2 instanceof Right) {
-        return unsafeCrashWith("unsafeFromLeft: Right");
-      }
-      ;
-      throw new Error("Failed pattern match at Effect.Aff (line 407, column 20 - line 409, column 55): " + [v2.constructor.name]);
-    };
-    var isLeft = function(v2) {
-      if (v2 instanceof Left) {
-        return true;
-      }
-      ;
-      if (v2 instanceof Right) {
-        return false;
-      }
-      ;
-      throw new Error("Failed pattern match at Effect.Aff (line 402, column 12 - line 404, column 21): " + [v2.constructor.name]);
-    };
-    return {
-      isLeft,
-      fromLeft: unsafeFromLeft,
-      fromRight: unsafeFromRight,
-      left: Left.create,
-      right: Right.create
-    };
-  })();
-  var makeFiber = function(aff) {
-    return _makeFiber(ffiUtil, aff);
-  };
-  var launchAff = function(aff) {
-    return function __do3() {
-      var fiber = makeFiber(aff)();
-      fiber.run();
-      return fiber;
-    };
-  };
-  var bracket = function(acquire) {
-    return function(completed) {
-      return generalBracket(acquire)({
-        killed: $$const(completed),
-        failed: $$const(completed),
-        completed: $$const(completed)
-      });
-    };
-  };
-  var applyParAff = {
-    apply: _parAffApply,
-    Functor0: function() {
-      return functorParAff;
-    }
-  };
-  var monadAff = {
-    Applicative0: function() {
-      return applicativeAff;
-    },
-    Bind1: function() {
-      return bindAff;
-    }
-  };
-  var bindAff = {
-    bind: _bind,
-    Apply0: function() {
-      return $lazy_applyAff(0);
-    }
-  };
-  var applicativeAff = {
-    pure: _pure,
-    Apply0: function() {
-      return $lazy_applyAff(0);
-    }
-  };
-  var $lazy_applyAff = /* @__PURE__ */ $runtime_lazy6("applyAff", "Effect.Aff", function() {
-    return {
-      apply: ap(monadAff),
-      Functor0: function() {
-        return functorAff;
-      }
-    };
-  });
-  var applyAff = /* @__PURE__ */ $lazy_applyAff(73);
-  var pure22 = /* @__PURE__ */ pure(applicativeAff);
-  var bind1 = /* @__PURE__ */ bind(bindAff);
-  var bindFlipped3 = /* @__PURE__ */ bindFlipped(bindAff);
-  var $$finally = function(fin) {
-    return function(a3) {
-      return bracket(pure22(unit))($$const(fin))($$const(a3));
-    };
-  };
-  var parallelAff = {
-    parallel: unsafeCoerce2,
-    sequential: _sequential,
-    Apply0: function() {
-      return applyAff;
-    },
-    Apply1: function() {
-      return applyParAff;
-    }
-  };
-  var parallel2 = /* @__PURE__ */ parallel(parallelAff);
-  var applicativeParAff = {
-    pure: function($76) {
-      return parallel2(pure22($76));
-    },
-    Apply0: function() {
-      return applyParAff;
-    }
-  };
-  var monadEffectAff = {
-    liftEffect: _liftEffect,
-    Monad0: function() {
-      return monadAff;
-    }
-  };
-  var liftEffect2 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var effectCanceler = function($77) {
-    return Canceler($$const(liftEffect2($77)));
-  };
-  var joinFiber = function(v2) {
-    return makeAff(function(k) {
-      return map8(effectCanceler)(v2.join(k));
-    });
-  };
-  var functorFiber = {
-    map: function(f) {
-      return function(t2) {
-        return unsafePerformEffect(makeFiber(map12(f)(joinFiber(t2))));
-      };
-    }
-  };
-  var killFiber = function(e) {
-    return function(v2) {
-      return bind1(liftEffect2(v2.isSuspended))(function(suspended) {
-        if (suspended) {
-          return liftEffect2($$void3(v2.kill(e, $$const(pure4(unit)))));
-        }
-        ;
-        return makeAff(function(k) {
-          return map8(effectCanceler)(v2.kill(e, k));
-        });
-      });
-    };
-  };
-  var monadThrowAff = {
-    throwError: _throwError,
-    Monad0: function() {
-      return monadAff;
-    }
-  };
-  var monadErrorAff = {
-    catchError: _catchError,
-    MonadThrow0: function() {
-      return monadThrowAff;
-    }
-  };
-  var $$try2 = /* @__PURE__ */ $$try(monadErrorAff);
-  var runAff = function(k) {
-    return function(aff) {
-      return launchAff(bindFlipped3(function($83) {
-        return liftEffect2(k($83));
-      })($$try2(aff)));
-    };
-  };
-  var runAff_ = function(k) {
-    return function(aff) {
-      return $$void3(runAff(k)(aff));
-    };
-  };
-  var monadRecAff = {
-    tailRecM: function(k) {
-      var go2 = function(a3) {
-        return bind1(k(a3))(function(res) {
-          if (res instanceof Done) {
-            return pure22(res.value0);
-          }
-          ;
-          if (res instanceof Loop) {
-            return go2(res.value0);
-          }
-          ;
-          throw new Error("Failed pattern match at Effect.Aff (line 104, column 7 - line 106, column 23): " + [res.constructor.name]);
-        });
-      };
-      return go2;
-    },
-    Monad0: function() {
-      return monadAff;
-    }
-  };
-  var nonCanceler = /* @__PURE__ */ $$const(/* @__PURE__ */ pure22(unit));
-
-  // output/Effect.Aff.Class/index.js
-  var monadAffAff = {
-    liftAff: /* @__PURE__ */ identity(categoryFn),
-    MonadEffect0: function() {
-      return monadEffectAff;
-    }
   };
 
   // output/Halogen.Query.ChildQuery/index.js
@@ -5616,6 +6824,7 @@
   };
 
   // output/Halogen.Query.HalogenM/index.js
+  var identity9 = /* @__PURE__ */ identity(categoryFn);
   var SubscriptionId = function(x) {
     return x;
   };
@@ -5787,7 +6996,24 @@
       }
     };
   };
+  var monadAffHalogenM = function(dictMonadAff) {
+    var monadEffectHalogenM1 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
+    return {
+      liftAff: (function() {
+        var $188 = liftAff(dictMonadAff);
+        return function($189) {
+          return HalogenM(liftF(Lift2.create($188($189))));
+        };
+      })(),
+      MonadEffect0: function() {
+        return monadEffectHalogenM1;
+      }
+    };
+  };
   var functorHalogenM = freeFunctor;
+  var fork = function(hmu) {
+    return liftF(new Fork(hmu, identity9));
+  };
   var bindHalogenM = freeBind;
   var applicativeHalogenM = freeApplicative;
 
@@ -5853,14 +7079,14 @@
   })();
 
   // output/Halogen.VDom.Thunk/index.js
-  var $runtime_lazy7 = function(name15, moduleName, init2) {
+  var $runtime_lazy7 = function(name16, moduleName, init3) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
       if (state3 === 2) return val;
-      if (state3 === 1) throw new ReferenceError(name15 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
+      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
       state3 = 1;
-      val = init2();
+      val = init3();
       state3 = 2;
       return val;
     };
@@ -5905,7 +7131,7 @@
   // output/Halogen.Component/index.js
   var voidLeft2 = /* @__PURE__ */ voidLeft(functorHalogenM);
   var traverse_3 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableMaybe);
-  var map9 = /* @__PURE__ */ map(functorHalogenM);
+  var map14 = /* @__PURE__ */ map(functorHalogenM);
   var pure5 = /* @__PURE__ */ pure(applicativeHalogenM);
   var ComponentSlot = /* @__PURE__ */ (function() {
     function ComponentSlot2(value0) {
@@ -5949,7 +7175,7 @@
       ;
       if (v2 instanceof Query) {
         return unCoyoneda(function(g) {
-          var $45 = map9(maybe(v2.value1(unit))(g));
+          var $45 = map14(maybe(v2.value1(unit))(g));
           return function($46) {
             return $45(args.handleQuery($46));
           };
@@ -5970,24 +7196,18 @@
     };
   })();
 
-  // output/Control.Monad.Except/index.js
-  var unwrap3 = /* @__PURE__ */ unwrap();
-  var runExcept = function($3) {
-    return unwrap3(runExceptT($3));
-  };
-
   // output/Foreign.Index/foreign.js
-  function unsafeReadPropImpl(f, s2, key2, value14) {
-    return value14 == null ? f : s2(value14[key2]);
+  function unsafeReadPropImpl(f, s2, key2, value15) {
+    return value15 == null ? f : s2(value15[key2]);
   }
 
   // output/Foreign.Index/index.js
   var unsafeReadProp = function(dictMonad) {
-    var fail2 = fail(dictMonad);
-    var pure11 = pure(applicativeExceptT(dictMonad));
+    var fail3 = fail(dictMonad);
+    var pure16 = pure(applicativeExceptT(dictMonad));
     return function(k) {
-      return function(value14) {
-        return unsafeReadPropImpl(fail2(new TypeMismatch("object", typeOf(value14))), pure11, k, value14);
+      return function(value15) {
+        return unsafeReadPropImpl(fail3(new TypeMismatch("object", typeOf(value15))), pure16, k, value15);
       };
     };
   };
@@ -6005,6 +7225,11 @@
   function preventDefault(e) {
     return function() {
       return e.preventDefault();
+    };
+  }
+  function stopPropagation(e) {
+    return function() {
+      return e.stopPropagation();
     };
   }
 
@@ -6027,17 +7252,17 @@
   var click = "click";
 
   // output/Halogen.HTML.Events/index.js
-  var map10 = /* @__PURE__ */ map(functorMaybe);
+  var map15 = /* @__PURE__ */ map(functorMaybe);
   var composeKleisli2 = /* @__PURE__ */ composeKleisli(bindMaybe);
   var composeKleisliFlipped2 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
   var readProp2 = /* @__PURE__ */ readProp(monadIdentity);
-  var readString2 = /* @__PURE__ */ readString(monadIdentity);
+  var readString3 = /* @__PURE__ */ readString(monadIdentity);
   var mouseHandler = unsafeCoerce2;
   var keyHandler = unsafeCoerce2;
   var handler$prime = function(et) {
     return function(f) {
       return handler(et)(function(ev) {
-        return map10(Action.create)(f(ev));
+        return map15(Action.create)(f(ev));
       });
     };
   };
@@ -6078,13 +7303,13 @@
       };
     };
   };
-  var onValueInput = /* @__PURE__ */ addForeignPropHandler(input2)("value")(readString2);
+  var onValueInput = /* @__PURE__ */ addForeignPropHandler(input2)("value")(readString3);
 
   // output/Web.HTML.HTMLElement/foreign.js
-  function _read(nothing, just, value14) {
-    var tag = Object.prototype.toString.call(value14);
+  function _read(nothing, just, value15) {
+    var tag = Object.prototype.toString.call(value15);
     if (tag.indexOf("[object HTML") === 0 && tag.indexOf("Element]") === tag.length - 8) {
-      return just(value14);
+      return just(value15);
     } else {
       return nothing;
     }
@@ -6104,27 +7329,34 @@
     return e.key;
   }
 
+  // output/Web.UIEvent.MouseEvent/index.js
+  var toEvent = unsafeCoerce2;
+
   // output/Component.CustomerList/index.js
+  var show4 = /* @__PURE__ */ show(showInt);
   var type_4 = /* @__PURE__ */ type_(isPropInputType);
   var value3 = /* @__PURE__ */ value(isPropString);
   var type_1 = /* @__PURE__ */ type_(isPropButtonType);
-  var eq2 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
-  var show3 = /* @__PURE__ */ show(showInt);
+  var map16 = /* @__PURE__ */ map(functorArray);
+  var append12 = /* @__PURE__ */ append(semigroupArray);
+  var compare2 = /* @__PURE__ */ compare(ordString);
+  var show12 = /* @__PURE__ */ show(showNumber);
   var max4 = /* @__PURE__ */ max(ordInt);
-  var max1 = /* @__PURE__ */ max(ordNumber);
   var min4 = /* @__PURE__ */ min(ordInt);
-  var compare2 = /* @__PURE__ */ compare(ordInt);
-  var compare12 = /* @__PURE__ */ compare(ordString);
-  var discard2 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var compare12 = /* @__PURE__ */ compare(ordInt);
+  var compare22 = /* @__PURE__ */ compare(ordNumber);
   var bind3 = /* @__PURE__ */ bind(bindHalogenM);
   var lift3 = /* @__PURE__ */ lift(monadTransHalogenM);
+  var discard2 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_3 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get2 = /* @__PURE__ */ get(monadStateHalogenM);
   var when2 = /* @__PURE__ */ when(applicativeHalogenM);
+  var pure1 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var $$void5 = /* @__PURE__ */ $$void(functorHalogenM);
   var bind12 = /* @__PURE__ */ bind(bindMaybe);
-  var pure6 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var show1 = /* @__PURE__ */ show(showNumber);
-  var map11 = /* @__PURE__ */ map(functorArray);
+  var max1 = /* @__PURE__ */ max(ordNumber);
+  var eq4 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
+  var mod2 = /* @__PURE__ */ mod(euclideanRingInt);
   var SortById = /* @__PURE__ */ (function() {
     function SortById2() {
     }
@@ -6138,6 +7370,69 @@
     ;
     SortByName2.value = new SortByName2();
     return SortByName2;
+  })();
+  var SortByMoneyDebit = /* @__PURE__ */ (function() {
+    function SortByMoneyDebit2() {
+    }
+    ;
+    SortByMoneyDebit2.value = new SortByMoneyDebit2();
+    return SortByMoneyDebit2;
+  })();
+  var SortByMoneyCredit = /* @__PURE__ */ (function() {
+    function SortByMoneyCredit2() {
+    }
+    ;
+    SortByMoneyCredit2.value = new SortByMoneyCredit2();
+    return SortByMoneyCredit2;
+  })();
+  var SortByGoldJewelryDebit = /* @__PURE__ */ (function() {
+    function SortByGoldJewelryDebit2() {
+    }
+    ;
+    SortByGoldJewelryDebit2.value = new SortByGoldJewelryDebit2();
+    return SortByGoldJewelryDebit2;
+  })();
+  var SortByGoldJewelryCredit = /* @__PURE__ */ (function() {
+    function SortByGoldJewelryCredit2() {
+    }
+    ;
+    SortByGoldJewelryCredit2.value = new SortByGoldJewelryCredit2();
+    return SortByGoldJewelryCredit2;
+  })();
+  var SortByGoldBar96Debit = /* @__PURE__ */ (function() {
+    function SortByGoldBar96Debit2() {
+    }
+    ;
+    SortByGoldBar96Debit2.value = new SortByGoldBar96Debit2();
+    return SortByGoldBar96Debit2;
+  })();
+  var SortByGoldBar96Credit = /* @__PURE__ */ (function() {
+    function SortByGoldBar96Credit2() {
+    }
+    ;
+    SortByGoldBar96Credit2.value = new SortByGoldBar96Credit2();
+    return SortByGoldBar96Credit2;
+  })();
+  var SortByGoldBar99Debit = /* @__PURE__ */ (function() {
+    function SortByGoldBar99Debit2() {
+    }
+    ;
+    SortByGoldBar99Debit2.value = new SortByGoldBar99Debit2();
+    return SortByGoldBar99Debit2;
+  })();
+  var SortByGoldBar99Credit = /* @__PURE__ */ (function() {
+    function SortByGoldBar99Credit2() {
+    }
+    ;
+    SortByGoldBar99Credit2.value = new SortByGoldBar99Credit2();
+    return SortByGoldBar99Credit2;
+  })();
+  var SortByUpdated = /* @__PURE__ */ (function() {
+    function SortByUpdated2() {
+    }
+    ;
+    SortByUpdated2.value = new SortByUpdated2();
+    return SortByUpdated2;
   })();
   var Ascending = /* @__PURE__ */ (function() {
     function Ascending2() {
@@ -6153,6 +7448,62 @@
     Descending2.value = new Descending2();
     return Descending2;
   })();
+  var FieldName = /* @__PURE__ */ (function() {
+    function FieldName2() {
+    }
+    ;
+    FieldName2.value = new FieldName2();
+    return FieldName2;
+  })();
+  var FieldMoney = /* @__PURE__ */ (function() {
+    function FieldMoney2() {
+    }
+    ;
+    FieldMoney2.value = new FieldMoney2();
+    return FieldMoney2;
+  })();
+  var FieldGoldJewelryGrams = /* @__PURE__ */ (function() {
+    function FieldGoldJewelryGrams2() {
+    }
+    ;
+    FieldGoldJewelryGrams2.value = new FieldGoldJewelryGrams2();
+    return FieldGoldJewelryGrams2;
+  })();
+  var FieldGoldJewelryBaht = /* @__PURE__ */ (function() {
+    function FieldGoldJewelryBaht2() {
+    }
+    ;
+    FieldGoldJewelryBaht2.value = new FieldGoldJewelryBaht2();
+    return FieldGoldJewelryBaht2;
+  })();
+  var FieldGoldBar96Grams = /* @__PURE__ */ (function() {
+    function FieldGoldBar96Grams2() {
+    }
+    ;
+    FieldGoldBar96Grams2.value = new FieldGoldBar96Grams2();
+    return FieldGoldBar96Grams2;
+  })();
+  var FieldGoldBar96Baht = /* @__PURE__ */ (function() {
+    function FieldGoldBar96Baht2() {
+    }
+    ;
+    FieldGoldBar96Baht2.value = new FieldGoldBar96Baht2();
+    return FieldGoldBar96Baht2;
+  })();
+  var FieldGoldBar99Grams = /* @__PURE__ */ (function() {
+    function FieldGoldBar99Grams2() {
+    }
+    ;
+    FieldGoldBar99Grams2.value = new FieldGoldBar99Grams2();
+    return FieldGoldBar99Grams2;
+  })();
+  var FieldGoldBar99Baht = /* @__PURE__ */ (function() {
+    function FieldGoldBar99Baht2() {
+    }
+    ;
+    FieldGoldBar99Baht2.value = new FieldGoldBar99Baht2();
+    return FieldGoldBar99Baht2;
+  })();
   var Initialize2 = /* @__PURE__ */ (function() {
     function Initialize3() {
     }
@@ -6167,49 +7518,88 @@
     LoadCustomers2.value = new LoadCustomers2();
     return LoadCustomers2;
   })();
-  var StartEdit = /* @__PURE__ */ (function() {
-    function StartEdit2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
+  var PollForChanges = /* @__PURE__ */ (function() {
+    function PollForChanges2() {
     }
     ;
-    StartEdit2.create = function(value0) {
+    PollForChanges2.value = new PollForChanges2();
+    return PollForChanges2;
+  })();
+  var ApplyChanges = /* @__PURE__ */ (function() {
+    function ApplyChanges2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ApplyChanges2.create = function(value0) {
+      return new ApplyChanges2(value0);
+    };
+    return ApplyChanges2;
+  })();
+  var StartEditField = /* @__PURE__ */ (function() {
+    function StartEditField2(value0, value1, value22, value32) {
+      this.value0 = value0;
+      this.value1 = value1;
+      this.value2 = value22;
+      this.value3 = value32;
+    }
+    ;
+    StartEditField2.create = function(value0) {
       return function(value1) {
-        return new StartEdit2(value0, value1);
+        return function(value22) {
+          return function(value32) {
+            return new StartEditField2(value0, value1, value22, value32);
+          };
+        };
       };
     };
-    return StartEdit2;
+    return StartEditField2;
   })();
-  var UpdateEditName = /* @__PURE__ */ (function() {
-    function UpdateEditName2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    UpdateEditName2.create = function(value0) {
-      return new UpdateEditName2(value0);
-    };
-    return UpdateEditName2;
-  })();
-  var SaveEdit = /* @__PURE__ */ (function() {
-    function SaveEdit2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SaveEdit2.create = function(value0) {
-      return new SaveEdit2(value0);
-    };
-    return SaveEdit2;
-  })();
-  var SaveEditOnEnter = /* @__PURE__ */ (function() {
-    function SaveEditOnEnter2(value0, value1) {
+  var StartEditFieldWithEvent = /* @__PURE__ */ (function() {
+    function StartEditFieldWithEvent2(value0, value1, value22, value32, value42) {
       this.value0 = value0;
       this.value1 = value1;
+      this.value2 = value22;
+      this.value3 = value32;
+      this.value4 = value42;
+    }
+    ;
+    StartEditFieldWithEvent2.create = function(value0) {
+      return function(value1) {
+        return function(value22) {
+          return function(value32) {
+            return function(value42) {
+              return new StartEditFieldWithEvent2(value0, value1, value22, value32, value42);
+            };
+          };
+        };
+      };
+    };
+    return StartEditFieldWithEvent2;
+  })();
+  var UpdateEditValue = /* @__PURE__ */ (function() {
+    function UpdateEditValue2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    UpdateEditValue2.create = function(value0) {
+      return new UpdateEditValue2(value0);
+    };
+    return UpdateEditValue2;
+  })();
+  var SaveEditField = /* @__PURE__ */ (function() {
+    function SaveEditField2() {
+    }
+    ;
+    SaveEditField2.value = new SaveEditField2();
+    return SaveEditField2;
+  })();
+  var SaveEditOnEnter = /* @__PURE__ */ (function() {
+    function SaveEditOnEnter2(value0) {
+      this.value0 = value0;
     }
     ;
     SaveEditOnEnter2.create = function(value0) {
-      return function(value1) {
-        return new SaveEditOnEnter2(value0, value1);
-      };
+      return new SaveEditOnEnter2(value0);
     };
     return SaveEditOnEnter2;
   })();
@@ -6219,6 +7609,16 @@
     ;
     CancelEdit2.value = new CancelEdit2();
     return CancelEdit2;
+  })();
+  var CancelEditOnClickOutside = /* @__PURE__ */ (function() {
+    function CancelEditOnClickOutside2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    CancelEditOnClickOutside2.create = function(value0) {
+      return new CancelEditOnClickOutside2(value0);
+    };
+    return CancelEditOnClickOutside2;
   })();
   var UpdateNewName = /* @__PURE__ */ (function() {
     function UpdateNewName2(value0) {
@@ -6240,15 +7640,56 @@
     };
     return AddCustomer2;
   })();
-  var DeleteCustomer = /* @__PURE__ */ (function() {
-    function DeleteCustomer2(value0) {
+  var ShowDeleteConfirmation = /* @__PURE__ */ (function() {
+    function ShowDeleteConfirmation2(value0) {
       this.value0 = value0;
     }
     ;
-    DeleteCustomer2.create = function(value0) {
-      return new DeleteCustomer2(value0);
+    ShowDeleteConfirmation2.create = function(value0) {
+      return new ShowDeleteConfirmation2(value0);
     };
-    return DeleteCustomer2;
+    return ShowDeleteConfirmation2;
+  })();
+  var UpdateDeleteConfirmInput = /* @__PURE__ */ (function() {
+    function UpdateDeleteConfirmInput2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    UpdateDeleteConfirmInput2.create = function(value0) {
+      return new UpdateDeleteConfirmInput2(value0);
+    };
+    return UpdateDeleteConfirmInput2;
+  })();
+  var ConfirmDelete = /* @__PURE__ */ (function() {
+    function ConfirmDelete2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ConfirmDelete2.create = function(value0) {
+      return new ConfirmDelete2(value0);
+    };
+    return ConfirmDelete2;
+  })();
+  var CancelDelete = /* @__PURE__ */ (function() {
+    function CancelDelete2() {
+    }
+    ;
+    CancelDelete2.value = new CancelDelete2();
+    return CancelDelete2;
+  })();
+  var FocusDeleteInput = /* @__PURE__ */ (function() {
+    function FocusDeleteInput2() {
+    }
+    ;
+    FocusDeleteInput2.value = new FocusDeleteInput2();
+    return FocusDeleteInput2;
+  })();
+  var FocusEditInput = /* @__PURE__ */ (function() {
+    function FocusEditInput2() {
+    }
+    ;
+    FocusEditInput2.value = new FocusEditInput2();
+    return FocusEditInput2;
   })();
   var SortBy = /* @__PURE__ */ (function() {
     function SortBy2(value0) {
@@ -6300,6 +7741,63 @@
     };
     return UpdateSearchQuery2;
   })();
+  var MeasureRenderedRows = /* @__PURE__ */ (function() {
+    function MeasureRenderedRows2() {
+    }
+    ;
+    MeasureRenderedRows2.value = new MeasureRenderedRows2();
+    return MeasureRenderedRows2;
+  })();
+  var UpdateRenderedRange = /* @__PURE__ */ (function() {
+    function UpdateRenderedRange2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    UpdateRenderedRange2.create = function(value0) {
+      return function(value1) {
+        return new UpdateRenderedRange2(value0, value1);
+      };
+    };
+    return UpdateRenderedRange2;
+  })();
+  var RenderAroundAndScrollTo = /* @__PURE__ */ (function() {
+    function RenderAroundAndScrollTo2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    RenderAroundAndScrollTo2.create = function(value0) {
+      return new RenderAroundAndScrollTo2(value0);
+    };
+    return RenderAroundAndScrollTo2;
+  })();
+  var trimTrailingZeros = function($copy_s) {
+    var $tco_done = false;
+    var $tco_result;
+    function $tco_loop(s2) {
+      var len = length3(s2);
+      var $143 = len === 0;
+      if ($143) {
+        $tco_done = true;
+        return s2;
+      }
+      ;
+      var $144 = takeRight(1)(s2) === "0";
+      if ($144) {
+        $copy_s = dropRight(1)(s2);
+        return;
+      }
+      ;
+      $tco_done = true;
+      return s2;
+    }
+    ;
+    while (!$tco_done) {
+      $tco_result = $tco_loop($copy_s);
+    }
+    ;
+    return $tco_result;
+  };
   var toggleDirection = function(v2) {
     if (v2 instanceof Ascending) {
       return Descending.value;
@@ -6309,40 +7807,369 @@
       return Ascending.value;
     }
     ;
-    throw new Error("Failed pattern match at Component.CustomerList (line 39, column 1 - line 39, column 50): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at Component.CustomerList (line 60, column 1 - line 60, column 50): " + [v2.constructor.name]);
   };
-  var rowHeight = 36;
+  var textConstants = {
+    appTitle: "\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D\u0E25\u0E39\u0E01\u0E04\u0E49\u0E32",
+    customersCount: function(n) {
+      return show4(n) + " \u0E23\u0E32\u0E22";
+    },
+    columnId: "\u0E23\u0E2B\u0E31\u0E2A",
+    columnName: "\u0E0A\u0E37\u0E48\u0E2D",
+    columnMoney: "\u0E40\u0E07\u0E34\u0E19",
+    columnGoldJewelry: "\u0E23\u0E39\u0E1B\u0E1E\u0E23\u0E23\u0E13",
+    columnGoldBar96: "\u0E41\u0E17\u0E48\u0E07 96.5%",
+    columnGoldBar99: "\u0E41\u0E17\u0E48\u0E07 99.99%",
+    columnUpdated: "\u0E1B\u0E23\u0E31\u0E1A\u0E1B\u0E23\u0E38\u0E07",
+    columnActions: "\u0E25\u0E1A",
+    headerDebit: "\u0E04\u0E49\u0E32\u0E07",
+    headerCredit: "\u0E40\u0E2B\u0E25\u0E37\u0E2D",
+    newCustomerPlaceholder: "\u0E0A\u0E37\u0E48\u0E2D\u0E25\u0E39\u0E01\u0E04\u0E49\u0E32\u0E23\u0E32\u0E22\u0E43\u0E2B\u0E21\u0E48",
+    searchPlaceholder: "\u0E04\u0E49\u0E19\u0E2B\u0E32\u0E0A\u0E37\u0E48\u0E2D\u0E25\u0E39\u0E01\u0E04\u0E49\u0E32 ...",
+    deleteConfirmTitle: "\u0E22\u0E37\u0E19\u0E22\u0E31\u0E19\u0E01\u0E32\u0E23\u0E25\u0E1A",
+    deleteConfirmPrompt: "\u0E42\u0E1B\u0E23\u0E14\u0E43\u0E2A\u0E48\u0E23\u0E2B\u0E31\u0E2A\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E22\u0E37\u0E19\u0E22\u0E31\u0E19:",
+    buttonConfirm: "\u0E22\u0E37\u0E19\u0E22\u0E31\u0E19",
+    buttonCancel: "\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01",
+    unitGrams: "g",
+    unitBaht: "\u0E1A"
+  };
   var renderTableFooter = function(state3) {
-    return div2([class_("table-footer")])([form([class_("add-customer-form"), onSubmit(AddCustomer.create)])([input([type_4(InputText.value), class_("new-customer-input"), placeholder("New Customer Name"), value3(state3.newCustomerName), onValueInput(UpdateNewName.create)]), button([type_1(ButtonSubmit.value), class_("btn btn-add"), title("Add Customer")])([addIcon])])]);
+    return div2([class_("table-footer")])([form([class_("add-customer-form"), onSubmit(AddCustomer.create)])([input([type_4(InputText.value), class_("new-customer-input"), placeholder(textConstants.newCustomerPlaceholder), value3(state3.newCustomerName), onValueInput(UpdateNewName.create)]), button([type_1(ButtonSubmit.value), class_("btn btn-add"), title("Add Customer")])([addIcon])])]);
   };
-  var renderStyles = /* @__PURE__ */ style_([/* @__PURE__ */ text("\n      * {\n        box-sizing: border-box;\n      }\n      \n      body {\n        margin: 0;\n        padding: 0;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',\n          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',\n          sans-serif;\n        -webkit-font-smoothing: antialiased;\n        -moz-osx-font-smoothing: grayscale;\n        overflow: hidden;\n        height: 100vh;\n      }\n      \n      .customer-app {\n        max-width: 900px;\n        margin: 0 auto;\n        padding: 8px;\n        height: 100vh;\n        display: flex;\n        flex-direction: column;\n      }\n      \n      h1 {\n        color: #333;\n        margin: 0 0 8px 0;\n        font-size: 20px;\n      }\n      \n      .customer-list-container {\n        border: 1px solid #ddd;\n        border-radius: 4px;\n        overflow: hidden;\n        flex: 1;\n        display: flex;\n        flex-direction: column;\n        min-height: 0;\n      }\n      \n      .table-header {\n        display: flex;\n        align-items: center;\n        padding: 6px 8px;\n        background-color: #f8f9fa;\n        border-bottom: 2px solid #dee2e6;\n        font-weight: 600;\n        color: #495057;\n        gap: 8px;\n        font-size: 13px;\n      }\n      \n      .header-cell {\n        display: flex;\n        align-items: center;\n      }\n      \n      .header-id {\n        min-width: 50px;\n      }\n      \n      .header-name {\n        flex: 1;\n      }\n      \n      .header-name-content {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        width: 100%;\n      }\n      \n      .search-input {\n        flex: 1;\n        padding: 3px 6px;\n        border: 1px solid #ced4da;\n        border-radius: 3px;\n        font-size: 12px;\n        min-width: 100px;\n      }\n      \n      .search-input:focus {\n        outline: none;\n        border-color: #007bff;\n        box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.2);\n      }\n      \n      .header-actions {\n        min-width: 100px;\n        justify-content: center;\n      }\n      \n      .sort-button {\n        background: none;\n        border: none;\n        cursor: pointer;\n        padding: 2px 4px;\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        color: #495057;\n        font-weight: 600;\n        font-size: 13px;\n        transition: color 0.2s;\n      }\n      \n      .sort-button:hover {\n        color: #007bff;\n      }\n      \n      .app-title {\n        display: flex;\n        align-items: baseline;\n        gap: 10px;\n      }\n      \n      .customer-count {\n        font-size: 14px;\n        color: #666;\n        font-weight: normal;\n      }\n      \n      .customer-list {\n        flex: 1;\n        overflow-y: scroll;\n        background-color: #fff;\n        position: relative;\n        min-height: 0;\n      }\n      \n      .scroll-spacer {\n        width: 100%;\n        pointer-events: none;\n      }\n      \n      .visible-rows {\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        will-change: transform;\n      }\n      \n      .customer-row {\n        display: flex;\n        align-items: center;\n        padding: 6px 8px;\n        border-bottom: 1px solid #eee;\n        gap: 8px;\n        min-height: 36px;\n        box-sizing: border-box;\n        font-size: 13px;\n      }\n      \n      .customer-row:last-child {\n        border-bottom: none;\n      }\n      \n      .customer-row:hover {\n        background-color: #f8f9fa;\n      }\n      \n      .customer-id {\n        font-weight: bold;\n        color: #666;\n        min-width: 50px;\n      }\n      \n      .customer-name {\n        flex: 1;\n        color: #333;\n        word-wrap: break-word;\n        overflow-wrap: break-word;\n        hyphens: auto;\n      }\n      \n      .customer-name-input {\n        flex: 1;\n        padding: 4px 6px;\n        border: 2px solid #007bff;\n        border-radius: 3px;\n        font-size: 13px;\n      }\n      \n      .customer-name-input:focus {\n        outline: none;\n        border-color: #0056b3;\n      }\n      \n      .customer-actions {\n        display: flex;\n        gap: 4px;\n        min-width: 100px;\n        justify-content: flex-end;\n      }\n      \n      .btn {\n        padding: 4px 6px;\n        border: none;\n        border-radius: 3px;\n        cursor: pointer;\n        font-size: 13px;\n        font-weight: 500;\n        transition: all 0.2s;\n        display: flex;\n        align-items: center;\n        gap: 4px;\n      }\n      \n      .btn:hover {\n        transform: translateY(-1px);\n        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);\n      }\n      \n      .btn-edit {\n        background-color: #007bff;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-edit:hover {\n        background-color: #0056b3;\n      }\n      \n      .btn-save {\n        background-color: #28a745;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-save:hover {\n        background-color: #218838;\n      }\n      \n      .btn-delete {\n        background-color: #dc3545;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-delete:hover {\n        background-color: #c82333;\n      }\n      \n      .table-footer {\n        background-color: #f8f9fa;\n        border-top: 2px solid #dee2e6;\n      }\n      \n      .add-customer-form {\n        display: flex;\n        gap: 6px;\n        padding: 6px 8px;\n        align-items: center;\n      }\n      \n      .new-customer-input {\n        flex: 1;\n        padding: 4px 6px;\n        border: 1px solid #ddd;\n        border-radius: 3px;\n        font-size: 13px;\n      }\n      \n      .new-customer-input:focus {\n        outline: none;\n        border-color: #007bff;\n      }\n      \n      .btn-add {\n        background-color: #28a745;\n        color: white;\n        padding: 4px 6px;\n        min-width: 32px;\n      }\n      \n      .btn-add:hover {\n        background-color: #218838;\n      }\n    ")]);
-  var renderCustomerRow = function(state3) {
-    return function(customer) {
-      var isEditing = eq2(state3.editingId)(new Just(customer.id));
-      return div2([class_("customer-row")])([span2([class_("customer-id")])([text(show3(customer.id))]), (function() {
-        if (isEditing) {
-          return input([type_4(InputText.value), class_("customer-name-input"), value3(state3.editingName), onValueInput(UpdateEditName.create), onKeyDown(function(e) {
-            return new SaveEditOnEnter(customer.id, e);
-          })]);
+  var renderStyles = /* @__PURE__ */ style_([/* @__PURE__ */ text("\n      * {\n        box-sizing: border-box;\n      }\n      \n      body {\n        margin: 0;\n        padding: 0;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',\n          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',\n          sans-serif;\n        -webkit-font-smoothing: antialiased;\n        -moz-osx-font-smoothing: grayscale;\n        overflow: hidden;\n        height: 100vh;\n      }\n      \n      .app-wrapper {\n        width: 100%;\n        height: 100vh;\n        overflow: hidden;\n      }\n      \n      .customer-app {\n        width: 100%;\n        padding: 8px;\n        height: 100vh;\n        display: flex;\n        flex-direction: column;\n      }\n      \n      h1 {\n        color: #333;\n        margin: 0 0 8px 0;\n        font-size: 20px;\n      }\n      \n      .customer-list-container {\n        border: 1px solid #ddd;\n        border-radius: 4px;\n        overflow: hidden;\n        flex: 1;\n        display: flex;\n        flex-direction: column;\n        min-height: 0;\n      }\n      \n      .table-header-container {\n        background-color: #f8f9fa;\n        border-bottom: 2px solid #dee2e6;\n      }\n      \n      .table-header-row1,\n      .table-header-row2 {\n        display: grid;\n        grid-template-columns: 50px 200px 90px 90px 100px 100px 100px 100px 100px 100px 90px 100px;\n        align-items: center;\n        padding: 4px 8px;\n        font-weight: 600;\n        color: #495057;\n        gap: 8px;\n        font-size: 12px;\n      }\n      \n      .table-header-row1 {\n        border-bottom: 1px solid #dee2e6;\n      }\n      \n      .table-header-row1 .header-cell {\n        justify-content: center;\n      }\n      \n      .header-money-merged {\n        grid-column: span 2;\n        text-align: center;\n      }\n      \n      .header-gold-acc-merged {\n        grid-column: span 2;\n        text-align: center;\n      }\n      \n      .header-gold-965-merged {\n        grid-column: span 2;\n        text-align: center;\n      }\n      \n      .header-gold-9999-merged {\n        grid-column: span 2;\n        text-align: center;\n      }\n      \n      .header-cell {\n        display: flex;\n        align-items: center;\n        padding: 2px;\n        border-right: 1px solid #dee2e6;\n      }\n      \n      .header-cell:last-child {\n        border-right: none;\n      }\n      \n      .header-debit,\n      .header-credit {\n        justify-content: flex-end;\n      }\n      \n      .header-id {\n        min-width: 50px;\n      }\n      \n      .header-name {\n        min-width: 150px;\n      }\n      \n      .header-name-content {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        width: 100%;\n      }\n      \n      .search-input {\n        flex: 1;\n        padding: 3px 6px;\n        border: 1px solid #ced4da;\n        border-radius: 3px;\n        font-size: 12px;\n        min-width: 80px;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n      }\n      \n      .search-input:focus {\n        outline: none;\n        border-color: #007bff;\n        box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.2);\n      }\n      \n      .header-actions {\n        min-width: 100px;\n        justify-content: center;\n      }\n      \n      .sort-button {\n        background: none;\n        border: none;\n        cursor: pointer;\n        padding: 2px 4px;\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        color: #495057;\n        font-weight: 600;\n        font-size: 12px;\n        transition: color 0.2s;\n      }\n      \n      .sort-button:hover {\n        color: #007bff;\n      }\n      \n      .app-title {\n        display: flex;\n        align-items: baseline;\n        gap: 10px;\n      }\n      \n      .customer-count {\n        font-size: 12px;\n        color: #666;\n        font-weight: normal;\n      }\n      \n      .customer-list {\n        flex: 1;\n        overflow-y: scroll;\n        overflow-x: auto;\n        background-color: #fff;\n        position: relative;\n        min-height: 0;\n      }\n      \n      .scroll-spacer {\n        width: 100%;\n        pointer-events: none;\n      }\n      \n      .visible-rows {\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        will-change: transform;\n      }\n      \n      .customer-row {\n        display: grid;\n        grid-template-columns: 50px 200px 90px 90px 100px 100px 100px 100px 100px 100px 90px 100px;\n        align-items: center;\n        padding: 6px 8px;\n        border-bottom: 1px solid #eee;\n        gap: 8px;\n        min-height: 36px;\n        box-sizing: border-box;\n        font-size: 12px;\n      }\n      \n      .customer-row > * {\n        border-right: 1px solid #eee;\n        padding-right: 8px;\n      }\n      \n      .customer-row > *:last-child {\n        border-right: none;\n      }\n      \n      .customer-row:last-child {\n        border-bottom: none;\n      }\n      \n      .customer-row-even {\n        background-color: #ffffff;\n      }\n      \n      .customer-row-odd {\n        background-color: #f9f9f9;\n      }\n      \n      .customer-row:hover {\n        background-color: #f0f0f0 !important;\n      }\n      \n      .customer-row-highlighted {\n        background-color: #f5e6d3 !important;\n        transition: background-color 0.3s ease;\n      }\n      \n      .customer-row-highlighted:hover {\n        background-color: #ead5bb !important;\n      }\n      \n      .customer-row-pending-delete {\n        background-color: #d4a59a !important;\n        transition: background-color 0.3s ease;\n      }\n      \n      .customer-row-pending-delete:hover {\n        background-color: #c99388 !important;\n      }\n      \n      .customer-id {\n        font-weight: bold;\n        color: #666;\n        padding: 2px;\n        text-align: right;\n      }\n      \n      .customer-name {\n        color: #333;\n        word-wrap: break-word;\n        overflow-wrap: break-word;\n        hyphens: auto;\n        padding: 2px;\n        cursor: pointer;\n        border-radius: 3px;\n        transition: background-color 0.2s ease;\n      }\n      \n      .customer-name:hover {\n        background-color: #e3f2fd;\n        box-shadow: 0 0 0 1px #90caf9;\n      }\n      \n      .editable-field {\n        cursor: pointer;\n        border-radius: 3px;\n        transition: background-color 0.2s ease;\n        padding: 2px 4px;\n        min-height: 20px;\n        display: inline-block;\n      }\n      \n      .editable-field:hover {\n        background-color: #e3f2fd;\n        box-shadow: 0 0 0 1px #90caf9;\n      }\n      \n      .gold-grams .editable-field,\n      .gold-baht .editable-field {\n        display: block;\n        width: 100%;\n        box-sizing: border-box;\n      }\n      \n      .field-warning {\n        background-color: #d4a59a !important;\n        animation: pulse-warning 1s ease-in-out infinite;\n      }\n      \n      @keyframes pulse-warning {\n        0%, 100% {\n          background-color: #d4a59a;\n        }\n        50% {\n          background-color: #c99388;\n        }\n      }\n      \n      .money-input {\n        width: 80px;\n        padding: 2px 4px;\n        border: 2px solid #007bff;\n        border-radius: 3px;\n        font-size: 12px;\n        text-align: right;\n      }\n      \n      .gold-input-container {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n      }\n      \n      .gold-input {\n        width: 70px;\n        padding: 2px 4px;\n        border: 2px solid #007bff;\n        border-radius: 3px;\n        font-size: 12px;\n        text-align: right;\n      }\n      \n      .gold-unit {\n        font-size: 12px;\n        color: #666;\n        font-weight: 500;\n      }\n      \n      .customer-name-input {\n        width: 100%;\n        padding: 4px 6px;\n        border: 2px solid #007bff;\n        border-radius: 3px;\n        font-size: 12px;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n      }\n      \n      .customer-name-input:focus {\n        outline: none;\n        border-color: #0056b3;\n      }\n      \n      .customer-money-debit,\n      .customer-money-credit {\n        text-align: right;\n        padding: 2px 4px;\n        color: #333;\n      }\n      \n      .customer-money-debit {\n        color: #dc3545;\n      }\n      \n      .customer-money-credit {\n        color: #28a745;\n      }\n      \n      .money-value {\n        white-space: nowrap;\n      }\n      \n      .money-integer {\n        font-size: 12px;\n      }\n      \n      .money-decimal,\n      .money-fraction {\n        font-size: 9px;\n        vertical-align: baseline;\n      }\n      \n      /* Make .00 fraction and decimal point blend with background for right alignment */\n      .money-decimal-zero,\n      .money-fraction-zero {\n        color: transparent;\n      }\n      \n      /* Default row backgrounds */\n      .customer-row-even .money-decimal-zero,\n      .customer-row-even .money-fraction-zero {\n        color: #ffffff;\n      }\n      \n      .customer-row-odd .money-decimal-zero,\n      .customer-row-odd .money-fraction-zero {\n        color: #f9f9f9;\n      }\n      \n      /* Hover state */\n      .customer-row:hover .money-decimal-zero,\n      .customer-row:hover .money-fraction-zero {\n        color: #f0f0f0;\n      }\n      \n      /* Highlighted row (newly added/edited) */\n      .customer-row-highlighted .money-decimal-zero,\n      .customer-row-highlighted .money-fraction-zero {\n        color: #f5e6d3;\n      }\n      \n      .customer-row-highlighted:hover .money-decimal-zero,\n      .customer-row-highlighted:hover .money-fraction-zero {\n        color: #ead5bb;\n      }\n      \n      /* Pending delete row */\n      .customer-row-pending-delete .money-decimal-zero,\n      .customer-row-pending-delete .money-fraction-zero {\n        color: #d4a59a;\n      }\n      \n      .customer-row-pending-delete:hover .money-decimal-zero,\n      .customer-row-pending-delete:hover .money-fraction-zero {\n        color: #c99388;\n      }\n      \n      /* Warning field (opposite side being edited) */\n      .field-warning .money-decimal-zero,\n      .field-warning .money-fraction-zero {\n        color: #d4a59a;\n        animation: pulse-warning-text 1s ease-in-out infinite;\n      }\n      \n      @keyframes pulse-warning-text {\n        0%, 100% {\n          color: #d4a59a;\n        }\n        50% {\n          color: #c99388;\n        }\n      }\n      \n      .customer-gold-debit,\n      .customer-gold-credit {\n        text-align: right;\n        padding: 2px 4px;\n        font-size: 12px;\n        line-height: 1.3;\n      }\n      \n      .customer-gold-debit {\n        color: #dc3545;\n      }\n      \n      .customer-gold-credit {\n        color: #28a745;\n      }\n      \n      .gold-grams {\n        font-weight: 500;\n      }\n      \n      .gold-baht {\n        font-size: 12px;\n      }\n      \n      .customer-gold-debit .gold-baht {\n        color: #dc3545;\n      }\n      \n      .customer-gold-credit .gold-baht {\n        color: #28a745;\n      }\n      \n      .baht-value {\n        white-space: nowrap;\n        font-size: 12px;\n      }\n      \n      .baht-integer,\n      .baht-unit {\n        font-size: 12px;\n      }\n      \n      .baht-fraction {\n        font-size: 12px;\n        vertical-align: baseline;\n      }\n      \n      .grams-value {\n        white-space: nowrap;\n      }\n      \n      .grams-integer,\n      .grams-unit {\n        font-size: 12px;\n      }\n      \n      .grams-decimal,\n      .grams-fraction {\n        font-size: 12px;\n        vertical-align: baseline;\n      }\n      \n      .customer-updated {\n        font-size: 12px;\n        color: #666;\n        padding: 2px;\n        text-align: center;\n      }\n      \n      .customer-actions {\n        display: flex;\n        gap: 4px;\n        justify-content: center;\n      }\n      \n      .btn {\n        padding: 4px 6px;\n        border: none;\n        border-radius: 3px;\n        cursor: pointer;\n        font-size: 12px;\n        font-weight: 500;\n        transition: all 0.2s;\n        display: flex;\n        align-items: center;\n        gap: 4px;\n      }\n      \n      .btn:hover {\n        transform: translateY(-1px);\n        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);\n      }\n      \n      .btn-edit {\n        background-color: #007bff;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-edit:hover {\n        background-color: #0056b3;\n      }\n      \n      .btn-save {\n        background-color: #28a745;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-save:hover {\n        background-color: #218838;\n      }\n      \n      .btn-delete {\n        background-color: #dc3545;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-delete:hover {\n        background-color: #c82333;\n      }\n      \n      .table-footer {\n        background-color: #f8f9fa;\n        border-top: 2px solid #dee2e6;\n      }\n      \n      .add-customer-form {\n        display: flex;\n        gap: 6px;\n        padding: 6px 8px;\n        align-items: center;\n      }\n      \n      .new-customer-input {\n        flex: 1;\n        padding: 4px 6px;\n        border: 1px solid #ddd;\n        border-radius: 3px;\n        font-size: 12px;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n      }\n      \n      .new-customer-input:focus {\n        outline: none;\n        border-color: #007bff;\n      }\n      \n      .btn-add {\n        background-color: #28a745;\n        color: white;\n        padding: 4px 6px;\n        min-width: 32px;\n      }\n      \n      .btn-add:hover {\n        background-color: #218838;\n      }\n      \n      /* Modal Dialog Styles */\n      .modal-overlay {\n        position: fixed;\n        top: 0;\n        left: 0;\n        right: 0;\n        bottom: 0;\n        background-color: rgba(0, 0, 0, 0.5);\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        z-index: 1000;\n      }\n      \n      .modal-dialog {\n        background: white;\n        border-radius: 8px;\n        padding: 24px;\n        max-width: 400px;\n        width: 90%;\n        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);\n      }\n      \n      .modal-title {\n        margin: 0 0 16px 0;\n        font-size: 20px;\n        font-weight: 600;\n        color: #333;\n      }\n      \n      .modal-message {\n        margin: 0 0 16px 0;\n        color: #666;\n        line-height: 1.5;\n      }\n      \n      .modal-code {\n        background: #f8f9fa;\n        border: 2px solid #dee2e6;\n        border-radius: 4px;\n        padding: 16px;\n        text-align: center;\n        font-size: 24px;\n        font-weight: 700;\n        color: #dc3545;\n        margin-bottom: 16px;\n        letter-spacing: 2px;\n        font-family: 'Courier New', monospace;\n      }\n      \n      .modal-input {\n        width: 100%;\n        padding: 12px;\n        border: 2px solid #dee2e6;\n        border-radius: 4px;\n        font-size: 16px;\n        margin-bottom: 16px;\n        text-align: center;\n        font-family: 'Courier New', monospace;\n        letter-spacing: 1px;\n      }\n      \n      .modal-input:focus {\n        outline: none;\n        border-color: #0056b3;\n      }\n      \n      .modal-buttons {\n        display: flex;\n        gap: 12px;\n        justify-content: flex-end;\n      }\n      \n      .btn-confirm {\n        background-color: #dc3545;\n        color: white;\n        padding: 10px 20px;\n      }\n      \n      .btn-confirm:hover {\n        background-color: #c82333;\n      }\n      \n      .btn-cancel {\n        background-color: #6c757d;\n        color: white;\n        padding: 10px 20px;\n      }\n      \n      .btn-cancel:hover {\n        background-color: #5a6268;\n      }\n    ")]);
+  var renderMoney = function(n) {
+    var absN = (function() {
+      var $146 = n < 0;
+      if ($146) {
+        return -n;
+      }
+      ;
+      return n;
+    })();
+    var formatted = formatMoneyValue(absN);
+    var isInteger = formatted.fraction === "00";
+    var decimalClass = (function() {
+      if (isInteger) {
+        return "money-decimal money-decimal-zero";
+      }
+      ;
+      return "money-decimal";
+    })();
+    var fractionClass = (function() {
+      if (isInteger) {
+        return "money-fraction money-fraction-zero";
+      }
+      ;
+      return "money-fraction";
+    })();
+    return span2([class_("money-value")])([span2([class_("money-integer")])([text(formatted.integer)]), span2([class_(decimalClass)])([text(".")]), span2([class_(fractionClass)])([text(formatted.fraction)])]);
+  };
+  var renderGrams = function(n) {
+    var absN = (function() {
+      var $149 = n < 0;
+      if ($149) {
+        return -n;
+      }
+      ;
+      return n;
+    })();
+    var formatted = formatGramsValue(absN);
+    var $150 = formatted.integer === "";
+    if ($150) {
+      return text("");
+    }
+    ;
+    return span2([class_("grams-value")])([span2([class_("grams-integer")])([text(formatted.integer)]), span2([class_("grams-decimal")])([text(".")]), span2([class_("grams-fraction")])([text(formatted.fraction)]), span2([class_("grams-unit")])([text(textConstants.unitGrams)])]);
+  };
+  var renderDeleteConfirmationDialog = function(state3) {
+    if (state3.deleteConfirmation instanceof Nothing) {
+      return text("");
+    }
+    ;
+    if (state3.deleteConfirmation instanceof Just) {
+      return div2([class_("modal-overlay")])([div2([class_("modal-dialog")])([h2([class_("modal-title")])([text(textConstants.deleteConfirmTitle)]), p([class_("modal-message")])([text(textConstants.deleteConfirmPrompt)]), div2([class_("modal-code")])([text(show4(state3.deleteConfirmation.value0.confirmCode))]), input([type_4(InputText.value), class_("modal-input"), placeholder(textConstants.deleteConfirmPrompt), value3(state3.deleteConfirmation.value0.inputValue), onValueInput(UpdateDeleteConfirmInput.create), onKeyDown(function(e) {
+        var $152 = key(e) === "Enter";
+        if ($152) {
+          return new ConfirmDelete(state3.deleteConfirmation.value0.customerId);
         }
         ;
-        return span2([class_("customer-name")])([text(customer.name)]);
-      })(), div2([class_("customer-actions")])([(function() {
-        if (isEditing) {
-          return button([class_("btn btn-save"), onClick(function(v2) {
-            return new SaveEdit(customer.id);
-          }), title("Save")])([saveIcon]);
+        var $153 = key(e) === "Escape";
+        if ($153) {
+          return CancelDelete.value;
         }
         ;
-        return button([class_("btn btn-edit"), onClick(function(v2) {
-          return new StartEdit(customer.id, customer.name);
-        }), title("Edit")])([editIcon]);
-      })(), button([class_("btn btn-delete"), onClick(function(v2) {
-        return new DeleteCustomer(customer.id);
-      }), title("Delete")])([deleteIcon])])]);
+        return new UpdateDeleteConfirmInput(state3.deleteConfirmation.value0.inputValue);
+      })]), div2([class_("modal-buttons")])([button([class_("btn btn-confirm"), onClick(function(v2) {
+        return new ConfirmDelete(state3.deleteConfirmation.value0.customerId);
+      })])([text(textConstants.buttonConfirm)]), button([class_("btn btn-cancel"), onClick(function(v2) {
+        return CancelDelete.value;
+      })])([text(textConstants.buttonCancel)])])])]);
+    }
+    ;
+    throw new Error("Failed pattern match at Component.CustomerList (line 996, column 3 - line 1040, column 10): " + [state3.deleteConfirmation.constructor.name]);
+  };
+  var renderBaht = function(n) {
+    var absN = (function() {
+      var $155 = n < 0;
+      if ($155) {
+        return -n;
+      }
+      ;
+      return n;
+    })();
+    var formatted = formatBahtValue(absN);
+    var $156 = formatted.integer === "";
+    if ($156) {
+      return text("");
+    }
+    ;
+    var $157 = !formatted.hasFraction;
+    if ($157) {
+      return span2([class_("baht-value")])([span2([class_("baht-integer")])([text(formatted.integer)]), span2([class_("baht-unit")])([text(textConstants.unitBaht)])]);
+    }
+    ;
+    return span2([class_("baht-value")])([span2([class_("baht-integer")])([text(formatted.integer)]), span2([class_("baht-fraction")])([text(formatted.fraction)]), span2([class_("baht-unit")])([text(textConstants.unitBaht)])]);
+  };
+  var parseNumber = function(value1) {
+    return function(maxDecimals) {
+      var v2 = fromString(value1);
+      if (v2 instanceof Nothing) {
+        return Nothing.value;
+      }
+      ;
+      if (v2 instanceof Just) {
+        var $159 = v2.value0 < 0;
+        if ($159) {
+          return Nothing.value;
+        }
+        ;
+        var parts = split(".")(value1);
+        if (parts.length === 1) {
+          return new Just(value1);
+        }
+        ;
+        if (parts.length === 2) {
+          var $162 = length4(parts[1]) <= maxDecimals;
+          if ($162) {
+            return new Just(value1);
+          }
+          ;
+          return Nothing.value;
+        }
+        ;
+        return Nothing.value;
+      }
+      ;
+      throw new Error("Failed pattern match at Component.CustomerList (line 127, column 3 - line 139, column 23): " + [v2.constructor.name]);
+    };
+  };
+  var parseFieldValue = function(v2) {
+    return function(v1) {
+      if (v2 instanceof FieldName) {
+        var $168 = v1 === "";
+        if ($168) {
+          return Nothing.value;
+        }
+        ;
+        return new Just(v1);
+      }
+      ;
+      if (v2 instanceof FieldMoney) {
+        return parseNumber(v1)(2);
+      }
+      ;
+      if (v2 instanceof FieldGoldJewelryGrams) {
+        return parseNumber(v1)(3);
+      }
+      ;
+      if (v2 instanceof FieldGoldJewelryBaht) {
+        return parseNumber(v1)(3);
+      }
+      ;
+      if (v2 instanceof FieldGoldBar96Grams) {
+        return parseNumber(v1)(3);
+      }
+      ;
+      if (v2 instanceof FieldGoldBar96Baht) {
+        return parseNumber(v1)(3);
+      }
+      ;
+      if (v2 instanceof FieldGoldBar99Grams) {
+        return parseNumber(v1)(3);
+      }
+      ;
+      if (v2 instanceof FieldGoldBar99Baht) {
+        return parseNumber(v1)(3);
+      }
+      ;
+      throw new Error("Failed pattern match at Component.CustomerList (line 113, column 1 - line 113, column 59): " + [v2.constructor.name, v1.constructor.name]);
     };
   };
   var overscan = 5;
+  var mergeCustomers = function(existing) {
+    return function(changes) {
+      var updated = map16(function(c2) {
+        var v2 = findIndex(function(ch) {
+          return ch.id === c2.id;
+        })(changes);
+        if (v2 instanceof Just) {
+          var v1 = index(changes)(v2.value0);
+          if (v1 instanceof Just) {
+            var $171 = v1.value0.name !== c2.name;
+            if ($171) {
+              return v1.value0;
+            }
+            ;
+            return {
+              baht_bar96: v1.value0.baht_bar96,
+              baht_bar99: v1.value0.baht_bar99,
+              baht_jewelry: v1.value0.baht_jewelry,
+              created_at: v1.value0.created_at,
+              gram_bar96: v1.value0.gram_bar96,
+              gram_bar99: v1.value0.gram_bar99,
+              gram_jewelry: v1.value0.gram_jewelry,
+              id: v1.value0.id,
+              money: v1.value0.money,
+              name: v1.value0.name,
+              updated_at: v1.value0.updated_at,
+              rowHeight: c2.rowHeight
+            };
+          }
+          ;
+          if (v1 instanceof Nothing) {
+            return c2;
+          }
+          ;
+          throw new Error("Failed pattern match at Component.CustomerList (line 363, column 21 - line 370, column 23): " + [v1.constructor.name]);
+        }
+        ;
+        if (v2 instanceof Nothing) {
+          return c2;
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 362, column 7 - line 371, column 21): " + [v2.constructor.name]);
+      })(existing);
+      var newCustomers = filter(function(ch) {
+        var v2 = findIndex(function(c2) {
+          return c2.id === ch.id;
+        })(existing);
+        if (v2 instanceof Just) {
+          return false;
+        }
+        ;
+        if (v2 instanceof Nothing) {
+          return true;
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 376, column 7 - line 378, column 24): " + [v2.constructor.name]);
+      })(changes);
+      return append12(updated)(newCustomers);
+    };
+  };
+  var gramsPerBahtJewelry = 15.24;
+  var gramsPerBahtBar99 = 15.244;
+  var gramsPerBahtBar96 = 15.244;
+  var getLatestTimestamp = function(customers) {
+    if (customers.length === 0) {
+      return Nothing.value;
+    }
+    ;
+    var timestamps = catMaybes(map16(function(v3) {
+      return v3.updated_at;
+    })(customers));
+    var v2 = sortBy(compare2)(timestamps);
+    if (v2.length === 0) {
+      return Nothing.value;
+    }
+    ;
+    return last(v2);
+  };
+  var getDbFieldName = function(v2) {
+    if (v2 instanceof FieldName) {
+      return "name";
+    }
+    ;
+    if (v2 instanceof FieldMoney) {
+      return "money";
+    }
+    ;
+    if (v2 instanceof FieldGoldJewelryGrams) {
+      return "gram_jewelry";
+    }
+    ;
+    if (v2 instanceof FieldGoldJewelryBaht) {
+      return "baht_jewelry";
+    }
+    ;
+    if (v2 instanceof FieldGoldBar96Grams) {
+      return "gram_bar96";
+    }
+    ;
+    if (v2 instanceof FieldGoldBar96Baht) {
+      return "baht_bar96";
+    }
+    ;
+    if (v2 instanceof FieldGoldBar99Grams) {
+      return "gram_bar99";
+    }
+    ;
+    if (v2 instanceof FieldGoldBar99Baht) {
+      return "baht_bar99";
+    }
+    ;
+    throw new Error("Failed pattern match at Component.CustomerList (line 102, column 1 - line 102, column 42): " + [v2.constructor.name]);
+  };
+  var getCustomerListElement = function __do2() {
+    var nullable2 = getCustomerListElementImpl();
+    return toMaybe(nullable2);
+  };
+  var formatNumberForEdit = function(n) {
+    var str = show12(n);
+    var trimmed = trimTrailingZeros(str);
+    var $179 = takeRight(1)(trimmed) === ".";
+    if ($179) {
+      return dropRight(1)(trimmed);
+    }
+    ;
+    return trimmed;
+  };
+  var getFieldValue = function(v2) {
+    return function(v1) {
+      if (v2 instanceof FieldName) {
+        return v1.name;
+      }
+      ;
+      if (v2 instanceof FieldMoney) {
+        return formatNumberForEdit(v1.money);
+      }
+      ;
+      if (v2 instanceof FieldGoldJewelryGrams) {
+        return formatNumberForEdit(v1.gram_jewelry);
+      }
+      ;
+      if (v2 instanceof FieldGoldJewelryBaht) {
+        return formatNumberForEdit(v1.baht_jewelry);
+      }
+      ;
+      if (v2 instanceof FieldGoldBar96Grams) {
+        return formatNumberForEdit(v1.gram_bar96);
+      }
+      ;
+      if (v2 instanceof FieldGoldBar96Baht) {
+        return formatNumberForEdit(v1.baht_bar96);
+      }
+      ;
+      if (v2 instanceof FieldGoldBar99Grams) {
+        return formatNumberForEdit(v1.gram_bar99);
+      }
+      ;
+      if (v2 instanceof FieldGoldBar99Baht) {
+        return formatNumberForEdit(v1.baht_bar99);
+      }
+      ;
+      throw new Error("Failed pattern match at Component.CustomerList (line 91, column 1 - line 91, column 53): " + [v2.constructor.name, v1.constructor.name]);
+    };
+  };
   var filterCustomers = function(v2) {
     return function(v1) {
       if (v2 === "") {
@@ -6353,6 +8180,22 @@
         return contains(toLower(v2))(toLower(c2.name));
       })(v1);
     };
+  };
+  var extractDatePart = function(v2) {
+    if (v2 instanceof Nothing) {
+      return "";
+    }
+    ;
+    if (v2 instanceof Just) {
+      var v1 = split("T")(v2.value0);
+      if (v1.length === 2) {
+        return v1[0];
+      }
+      ;
+      return v2.value0;
+    }
+    ;
+    throw new Error("Failed pattern match at Component.CustomerList (line 143, column 1 - line 143, column 42): " + [v2.constructor.name]);
   };
   var eqSortField = {
     eq: function(x) {
@@ -6365,14 +8208,50 @@
           return true;
         }
         ;
+        if (x instanceof SortByMoneyDebit && y instanceof SortByMoneyDebit) {
+          return true;
+        }
+        ;
+        if (x instanceof SortByMoneyCredit && y instanceof SortByMoneyCredit) {
+          return true;
+        }
+        ;
+        if (x instanceof SortByGoldJewelryDebit && y instanceof SortByGoldJewelryDebit) {
+          return true;
+        }
+        ;
+        if (x instanceof SortByGoldJewelryCredit && y instanceof SortByGoldJewelryCredit) {
+          return true;
+        }
+        ;
+        if (x instanceof SortByGoldBar96Debit && y instanceof SortByGoldBar96Debit) {
+          return true;
+        }
+        ;
+        if (x instanceof SortByGoldBar96Credit && y instanceof SortByGoldBar96Credit) {
+          return true;
+        }
+        ;
+        if (x instanceof SortByGoldBar99Debit && y instanceof SortByGoldBar99Debit) {
+          return true;
+        }
+        ;
+        if (x instanceof SortByGoldBar99Credit && y instanceof SortByGoldBar99Credit) {
+          return true;
+        }
+        ;
+        if (x instanceof SortByUpdated && y instanceof SortByUpdated) {
+          return true;
+        }
+        ;
         return false;
       };
     }
   };
-  var eq3 = /* @__PURE__ */ eq(eqSortField);
+  var eq5 = /* @__PURE__ */ eq(eqSortField);
   var renderSortIcon = function(field) {
     return function(v2) {
-      if (v2.field instanceof Just && eq3(v2.field.value0)(field)) {
+      if (v2.field instanceof Just && eq5(v2.field.value0)(field)) {
         if (v2.direction instanceof Ascending) {
           return sortAscIcon;
         }
@@ -6381,35 +8260,414 @@
           return sortDescIcon;
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 248, column 7 - line 250, column 41): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 673, column 7 - line 675, column 41): " + [v2.direction.constructor.name]);
       }
       ;
       return sortNeutralIcon;
     };
   };
   var renderTableHeader = function(state3) {
-    return div2([class_("table-header")])([div2([class_("header-cell header-id")])([button([class_("sort-button"), onClick(function(v2) {
+    return div2([class_("table-header-container")])([div2([class_("table-header-row1")])([div2([class_("header-cell header-id-row1")])([button([class_("sort-button"), onClick(function(v2) {
       return new SortBy(SortById.value);
-    })])([text("ID "), renderSortIcon(SortById.value)(state3.sortState)])]), div2([class_("header-cell header-name")])([div2([class_("header-name-content")])([button([class_("sort-button"), onClick(function(v2) {
+    })])([text(textConstants.columnId + " "), renderSortIcon(SortById.value)(state3.sortState)])]), div2([class_("header-cell header-name-row1")])([button([class_("sort-button"), onClick(function(v2) {
       return new SortBy(SortByName.value);
-    })])([text("Name "), renderSortIcon(SortByName.value)(state3.sortState)]), input([type_4(InputText.value), class_("search-input"), placeholder("Search..."), value3(state3.searchQuery), onValueInput(UpdateSearchQuery.create)])])]), div2([class_("header-cell header-actions")])([text("Actions")])]);
+    })])([text(textConstants.columnName + " "), renderSortIcon(SortByName.value)(state3.sortState)])]), div2([class_("header-cell header-money-merged")])([text(textConstants.columnMoney)]), div2([class_("header-cell header-gold-acc-merged")])([text(textConstants.columnGoldJewelry)]), div2([class_("header-cell header-gold-965-merged")])([text(textConstants.columnGoldBar96)]), div2([class_("header-cell header-gold-9999-merged")])([text(textConstants.columnGoldBar99)]), button([class_("header-cell sort-button"), onClick(function(v2) {
+      return new SortBy(SortByUpdated.value);
+    })])([text(textConstants.columnUpdated), renderSortIcon(SortByUpdated.value)(state3.sortState)]), div2([class_("header-cell header-actions-row1")])([text(textConstants.columnActions)])]), div2([class_("table-header-row2")])([div2([class_("header-cell header-id-row2")])([]), div2([class_("header-cell header-name-row2")])([input([type_4(InputText.value), class_("search-input"), placeholder(textConstants.searchPlaceholder), value3(state3.searchQuery), onValueInput(UpdateSearchQuery.create)])]), button([class_("header-cell header-debit sort-button"), onClick(function(v2) {
+      return new SortBy(SortByMoneyDebit.value);
+    })])([text(textConstants.headerDebit + " "), renderSortIcon(SortByMoneyDebit.value)(state3.sortState)]), button([class_("header-cell header-credit sort-button"), onClick(function(v2) {
+      return new SortBy(SortByMoneyCredit.value);
+    })])([text(textConstants.headerCredit + " "), renderSortIcon(SortByMoneyCredit.value)(state3.sortState)]), button([class_("header-cell header-debit sort-button"), onClick(function(v2) {
+      return new SortBy(SortByGoldJewelryDebit.value);
+    })])([text(textConstants.headerDebit + " "), renderSortIcon(SortByGoldJewelryDebit.value)(state3.sortState)]), button([class_("header-cell header-credit sort-button"), onClick(function(v2) {
+      return new SortBy(SortByGoldJewelryCredit.value);
+    })])([text(textConstants.headerCredit + " "), renderSortIcon(SortByGoldJewelryCredit.value)(state3.sortState)]), button([class_("header-cell header-debit sort-button"), onClick(function(v2) {
+      return new SortBy(SortByGoldBar96Debit.value);
+    })])([text(textConstants.headerDebit + " "), renderSortIcon(SortByGoldBar96Debit.value)(state3.sortState)]), button([class_("header-cell header-credit sort-button"), onClick(function(v2) {
+      return new SortBy(SortByGoldBar96Credit.value);
+    })])([text(textConstants.headerCredit + " "), renderSortIcon(SortByGoldBar96Credit.value)(state3.sortState)]), button([class_("header-cell header-debit sort-button"), onClick(function(v2) {
+      return new SortBy(SortByGoldBar99Debit.value);
+    })])([text(textConstants.headerDebit + " "), renderSortIcon(SortByGoldBar99Debit.value)(state3.sortState)]), button([class_("header-cell header-credit sort-button"), onClick(function(v2) {
+      return new SortBy(SortByGoldBar99Credit.value);
+    })])([text(textConstants.headerCredit + " "), renderSortIcon(SortByGoldBar99Credit.value)(state3.sortState)]), div2([class_("header-cell header-updated-row2")])([]), div2([class_("header-cell header-actions-row2")])([])])]);
   };
-  var calculateVisibleRangeForCustomers = function(customers) {
-    return function(scrollTop2) {
-      return function(containerHeight) {
-        var totalRows = length(customers);
-        var totalHeight = toNumber(totalRows) * rowHeight;
-        var startIndex = floor2(scrollTop2 / rowHeight) - overscan | 0;
-        var start2 = max4(0)(startIndex);
-        var effectiveHeight = max1(containerHeight)(600);
-        var visibleRows = floor2(effectiveHeight / rowHeight) + 1 | 0;
-        var endIndex = (startIndex + visibleRows | 0) + (overscan * 2 | 0) | 0;
-        var end = min4(totalRows)(endIndex);
-        return {
-          start: start2,
-          end,
-          totalHeight
+  var eqEditableField = {
+    eq: function(x) {
+      return function(y) {
+        if (x instanceof FieldName && y instanceof FieldName) {
+          return true;
+        }
+        ;
+        if (x instanceof FieldMoney && y instanceof FieldMoney) {
+          return true;
+        }
+        ;
+        if (x instanceof FieldGoldJewelryGrams && y instanceof FieldGoldJewelryGrams) {
+          return true;
+        }
+        ;
+        if (x instanceof FieldGoldJewelryBaht && y instanceof FieldGoldJewelryBaht) {
+          return true;
+        }
+        ;
+        if (x instanceof FieldGoldBar96Grams && y instanceof FieldGoldBar96Grams) {
+          return true;
+        }
+        ;
+        if (x instanceof FieldGoldBar96Baht && y instanceof FieldGoldBar96Baht) {
+          return true;
+        }
+        ;
+        if (x instanceof FieldGoldBar99Grams && y instanceof FieldGoldBar99Grams) {
+          return true;
+        }
+        ;
+        if (x instanceof FieldGoldBar99Baht && y instanceof FieldGoldBar99Baht) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+  var eq6 = /* @__PURE__ */ eq(eqEditableField);
+  var notEq4 = /* @__PURE__ */ notEq(eqEditableField);
+  var renderEditableField = function(state3) {
+    return function(customer) {
+      return function(field) {
+        return function(displayClass) {
+          return function(inputClass) {
+            var isEditing = (function() {
+              if (state3.editing instanceof Just) {
+                return state3.editing.value0.customerId === customer.id && eq6(state3.editing.value0.field)(field);
+              }
+              ;
+              if (state3.editing instanceof Nothing) {
+                return false;
+              }
+              ;
+              throw new Error("Failed pattern match at Component.CustomerList (line 748, column 17 - line 750, column 23): " + [state3.editing.constructor.name]);
+            })();
+            var currentValue = getFieldValue(field)(customer);
+            var editValue = (function() {
+              if (state3.editing instanceof Just && (state3.editing.value0.customerId === customer.id && eq6(state3.editing.value0.field)(field))) {
+                return state3.editing.value0.value;
+              }
+              ;
+              return currentValue;
+            })();
+            if (isEditing) {
+              return input([type_4(InputText.value), class_(inputClass), value3(editValue), onValueInput(UpdateEditValue.create), onKeyDown(SaveEditOnEnter.create)]);
+            }
+            ;
+            return span2([class_(displayClass), onClick(function(e) {
+              return new StartEditFieldWithEvent(customer.id, field, currentValue, false, e);
+            })])([text(currentValue)]);
+          };
         };
+      };
+    };
+  };
+  var renderGoldField = function(state3) {
+    return function(customer) {
+      return function(field) {
+        return function(isDebit) {
+          return function(unit2) {
+            return function(renderer) {
+              return function(value1) {
+                var shouldShowValue = (function() {
+                  if (isDebit) {
+                    return value1 <= 0;
+                  }
+                  ;
+                  return value1 >= 0;
+                })();
+                var isEditingThisSide = (function() {
+                  if (state3.editing instanceof Just) {
+                    return state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(field) && state3.editing.value0.isDebitSide === isDebit);
+                  }
+                  ;
+                  if (state3.editing instanceof Nothing) {
+                    return false;
+                  }
+                  ;
+                  throw new Error("Failed pattern match at Component.CustomerList (line 776, column 25 - line 778, column 23): " + [state3.editing.constructor.name]);
+                })();
+                var isEditingOppositeSide = (function() {
+                  if (state3.editing instanceof Just) {
+                    return state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(field) && state3.editing.value0.isDebitSide !== isDebit);
+                  }
+                  ;
+                  if (state3.editing instanceof Nothing) {
+                    return false;
+                  }
+                  ;
+                  throw new Error("Failed pattern match at Component.CustomerList (line 780, column 29 - line 782, column 23): " + [state3.editing.constructor.name]);
+                })();
+                var baseClassName = (function() {
+                  if (isDebit) {
+                    return "customer-gold-debit";
+                  }
+                  ;
+                  return "customer-gold-credit";
+                })();
+                var absValue = (function() {
+                  var $221 = value1 < 0;
+                  if ($221) {
+                    return -value1;
+                  }
+                  ;
+                  return value1;
+                })();
+                var className2 = (function() {
+                  var $222 = isEditingOppositeSide && (shouldShowValue && absValue > 0);
+                  if ($222) {
+                    return baseClassName + " field-warning";
+                  }
+                  ;
+                  return baseClassName;
+                })();
+                var displayValue = (function() {
+                  var $223 = shouldShowValue && absValue > 0;
+                  if ($223) {
+                    return formatNumberForEdit(absValue);
+                  }
+                  ;
+                  return "";
+                })();
+                var editValue = (function() {
+                  if (state3.editing instanceof Just && (state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(field) && state3.editing.value0.isDebitSide === isDebit))) {
+                    return state3.editing.value0.value;
+                  }
+                  ;
+                  return displayValue;
+                })();
+                if (isEditingThisSide) {
+                  return div2([class_(baseClassName + " gold-input-container")])([input([type_4(InputText.value), class_("gold-input"), value3(editValue), onValueInput(UpdateEditValue.create), onKeyDown(SaveEditOnEnter.create)]), span2([class_("gold-unit")])([text(unit2)])]);
+                }
+                ;
+                return div2([class_(className2 + " editable-field"), onClick(function(e) {
+                  return new StartEditFieldWithEvent(customer.id, field, displayValue, isDebit, e);
+                })])([(function() {
+                  var $227 = shouldShowValue && absValue > 0;
+                  if ($227) {
+                    return renderer(value1);
+                  }
+                  ;
+                  return text(" ");
+                })()]);
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+  var renderMoneyField = function(state3) {
+    return function(customer) {
+      return function(isDebit) {
+        var shouldShowValue = (function() {
+          if (isDebit) {
+            return customer.money <= 0;
+          }
+          ;
+          return customer.money >= 0;
+        })();
+        var isEditingThisSide = (function() {
+          if (state3.editing instanceof Just) {
+            return state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(FieldMoney.value) && state3.editing.value0.isDebitSide === isDebit);
+          }
+          ;
+          if (state3.editing instanceof Nothing) {
+            return false;
+          }
+          ;
+          throw new Error("Failed pattern match at Component.CustomerList (line 823, column 25 - line 825, column 23): " + [state3.editing.constructor.name]);
+        })();
+        var isEditingOppositeSide = (function() {
+          if (state3.editing instanceof Just) {
+            return state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(FieldMoney.value) && state3.editing.value0.isDebitSide !== isDebit);
+          }
+          ;
+          if (state3.editing instanceof Nothing) {
+            return false;
+          }
+          ;
+          throw new Error("Failed pattern match at Component.CustomerList (line 827, column 29 - line 829, column 23): " + [state3.editing.constructor.name]);
+        })();
+        var baseClassName = (function() {
+          if (isDebit) {
+            return "customer-money-debit";
+          }
+          ;
+          return "customer-money-credit";
+        })();
+        var absValue = (function() {
+          var $234 = customer.money < 0;
+          if ($234) {
+            return -customer.money;
+          }
+          ;
+          return customer.money;
+        })();
+        var className2 = (function() {
+          var $235 = isEditingOppositeSide && (shouldShowValue && absValue > 0);
+          if ($235) {
+            return baseClassName + " field-warning";
+          }
+          ;
+          return baseClassName;
+        })();
+        var displayValue = (function() {
+          var $236 = shouldShowValue && absValue > 0;
+          if ($236) {
+            return formatNumberForEdit(absValue);
+          }
+          ;
+          return "";
+        })();
+        var editValue = (function() {
+          if (state3.editing instanceof Just && (state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(FieldMoney.value) && state3.editing.value0.isDebitSide === isDebit))) {
+            return state3.editing.value0.value;
+          }
+          ;
+          return displayValue;
+        })();
+        if (isEditingThisSide) {
+          return span2([class_(baseClassName)])([input([type_4(InputText.value), class_("money-input"), value3(editValue), onValueInput(UpdateEditValue.create), onKeyDown(SaveEditOnEnter.create)])]);
+        }
+        ;
+        return span2([class_(className2 + " editable-field"), onClick(function(e) {
+          return new StartEditFieldWithEvent(customer.id, FieldMoney.value, displayValue, isDebit, e);
+        })])([(function() {
+          var $240 = shouldShowValue && absValue > 0;
+          if ($240) {
+            return renderMoney(customer.money);
+          }
+          ;
+          return text(" ");
+        })()]);
+      };
+    };
+  };
+  var defaultRowHeight = 37;
+  var getCustomerHeight = function(customer) {
+    if (customer.rowHeight instanceof Just) {
+      return customer.rowHeight.value0;
+    }
+    ;
+    if (customer.rowHeight instanceof Nothing) {
+      return defaultRowHeight;
+    }
+    ;
+    throw new Error("Failed pattern match at Component.CustomerList (line 399, column 3 - line 401, column 32): " + [customer.rowHeight.constructor.name]);
+  };
+  var calculateHeightRange = function(customers) {
+    return function(start2) {
+      return function(end) {
+        var slice$prime = slice(start2)(end)(customers);
+        return foldl2(function(acc) {
+          return function(c2) {
+            return acc + getCustomerHeight(c2);
+          };
+        })(0)(slice$prime);
+      };
+    };
+  };
+  var calculateVisibleRange = function(state3) {
+    return function(customers) {
+      var totalRows = length(customers);
+      var findStartRow = function($copy_idx) {
+        return function($copy_accHeight) {
+          var $tco_var_idx = $copy_idx;
+          var $tco_done = false;
+          var $tco_result;
+          function $tco_loop(idx, accHeight) {
+            var $243 = idx >= totalRows;
+            if ($243) {
+              $tco_done = true;
+              return totalRows;
+            }
+            ;
+            var v2 = index(customers)(idx);
+            if (v2 instanceof Just) {
+              var rowHeight = getCustomerHeight(v2.value0);
+              var nextHeight = accHeight + rowHeight;
+              var $245 = nextHeight > state3.scrollTop;
+              if ($245) {
+                $tco_done = true;
+                return idx;
+              }
+              ;
+              $tco_var_idx = idx + 1 | 0;
+              $copy_accHeight = nextHeight;
+              return;
+            }
+            ;
+            if (v2 instanceof Nothing) {
+              $tco_done = true;
+              return totalRows;
+            }
+            ;
+            throw new Error("Failed pattern match at Component.CustomerList (line 422, column 9 - line 429, column 31): " + [v2.constructor.name]);
+          }
+          ;
+          while (!$tco_done) {
+            $tco_result = $tco_loop($tco_var_idx, $copy_accHeight);
+          }
+          ;
+          return $tco_result;
+        };
+      };
+      var start2 = max4(0)(findStartRow(0)(0) - overscan | 0);
+      var topSpacerHeight = calculateHeightRange(customers)(0)(start2);
+      var findEndRow = function($copy_idx) {
+        return function($copy_accHeight) {
+          var $tco_var_idx = $copy_idx;
+          var $tco_done1 = false;
+          var $tco_result;
+          function $tco_loop(idx, accHeight) {
+            var $247 = idx >= totalRows;
+            if ($247) {
+              $tco_done1 = true;
+              return totalRows;
+            }
+            ;
+            var v2 = index(customers)(idx);
+            if (v2 instanceof Just) {
+              var rowHeight = getCustomerHeight(v2.value0);
+              var nextHeight = accHeight + rowHeight;
+              var $249 = nextHeight > state3.containerHeight + toNumber(overscan) * defaultRowHeight;
+              if ($249) {
+                $tco_done1 = true;
+                return idx + 1 | 0;
+              }
+              ;
+              $tco_var_idx = idx + 1 | 0;
+              $copy_accHeight = nextHeight;
+              return;
+            }
+            ;
+            if (v2 instanceof Nothing) {
+              $tco_done1 = true;
+              return totalRows;
+            }
+            ;
+            throw new Error("Failed pattern match at Component.CustomerList (line 438, column 9 - line 445, column 31): " + [v2.constructor.name]);
+          }
+          ;
+          while (!$tco_done1) {
+            $tco_result = $tco_loop($tco_var_idx, $copy_accHeight);
+          }
+          ;
+          return $tco_result;
+        };
+      };
+      var end = min4(totalRows)(findEndRow(start2)(0));
+      return {
+        start: start2,
+        end,
+        topSpacerHeight
       };
     };
   };
@@ -6422,7 +8680,7 @@
       if (v2.field instanceof Just && v2.field.value0 instanceof SortById) {
         var sorted = sortBy(function(a3) {
           return function(b2) {
-            return compare2(a3.id)(b2.id);
+            return compare12(a3.id)(b2.id);
           };
         })(v1);
         if (v2.direction instanceof Ascending) {
@@ -6432,18 +8690,18 @@
         if (v2.direction instanceof Descending) {
           return sortBy(function(a3) {
             return function(b2) {
-              return compare2(b2.id)(a3.id);
+              return compare12(b2.id)(a3.id);
             };
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 153, column 5 - line 155, column 65): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 465, column 6 - line 467, column 65): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByName) {
         var sorted = sortBy(function(a3) {
           return function(b2) {
-            return compare12(toLower(a3.name))(toLower(b2.name));
+            return compare2(toLower(a3.name))(toLower(b2.name));
           };
         })(v1);
         if (v2.direction instanceof Ascending) {
@@ -6453,220 +8711,766 @@
         if (v2.direction instanceof Descending) {
           return sortBy(function(a3) {
             return function(b2) {
-              return compare12(toLower(b2.name))(toLower(a3.name));
+              return compare2(toLower(b2.name))(toLower(a3.name));
             };
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 160, column 5 - line 162, column 89): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 470, column 6 - line 472, column 89): " + [v2.direction.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Component.CustomerList (line 147, column 1 - line 147, column 62): " + [v2.constructor.name, v1.constructor.name]);
+      if (v2.field instanceof Just && v2.field.value0 instanceof SortByMoneyDebit) {
+        var debitValue = function(c2) {
+          var $262 = c2.money < 0;
+          if ($262) {
+            return -c2.money;
+          }
+          ;
+          return 0;
+        };
+        var sorted = sortBy(function(a3) {
+          return function(b2) {
+            return compare22(debitValue(a3))(debitValue(b2));
+          };
+        })(v1);
+        if (v2.direction instanceof Ascending) {
+          return sorted;
+        }
+        ;
+        if (v2.direction instanceof Descending) {
+          return sortBy(function(a3) {
+            return function(b2) {
+              return compare22(debitValue(b2))(debitValue(a3));
+            };
+          })(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 480, column 6 - line 482, column 85): " + [v2.direction.constructor.name]);
+      }
+      ;
+      if (v2.field instanceof Just && v2.field.value0 instanceof SortByMoneyCredit) {
+        var creditValue = function(c2) {
+          var $267 = c2.money > 0;
+          if ($267) {
+            return c2.money;
+          }
+          ;
+          return 0;
+        };
+        var sorted = sortBy(function(a3) {
+          return function(b2) {
+            return compare22(creditValue(a3))(creditValue(b2));
+          };
+        })(v1);
+        if (v2.direction instanceof Ascending) {
+          return sorted;
+        }
+        ;
+        if (v2.direction instanceof Descending) {
+          return sortBy(function(a3) {
+            return function(b2) {
+              return compare22(creditValue(b2))(creditValue(a3));
+            };
+          })(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 487, column 6 - line 489, column 87): " + [v2.direction.constructor.name]);
+      }
+      ;
+      if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldJewelryDebit) {
+        var netWeight = function(c2) {
+          return c2.gram_jewelry + c2.baht_jewelry * gramsPerBahtJewelry;
+        };
+        var debitValue = function(c2) {
+          var $272 = netWeight(c2) < 0;
+          if ($272) {
+            return -netWeight(c2);
+          }
+          ;
+          return 0;
+        };
+        var sorted = sortBy(function(a3) {
+          return function(b2) {
+            return compare22(debitValue(a3))(debitValue(b2));
+          };
+        })(v1);
+        if (v2.direction instanceof Ascending) {
+          return sorted;
+        }
+        ;
+        if (v2.direction instanceof Descending) {
+          return sortBy(function(a3) {
+            return function(b2) {
+              return compare22(debitValue(b2))(debitValue(a3));
+            };
+          })(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 496, column 6 - line 498, column 85): " + [v2.direction.constructor.name]);
+      }
+      ;
+      if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldJewelryCredit) {
+        var netWeight = function(c2) {
+          return c2.gram_jewelry + c2.baht_jewelry * gramsPerBahtJewelry;
+        };
+        var creditValue = function(c2) {
+          var $277 = netWeight(c2) > 0;
+          if ($277) {
+            return netWeight(c2);
+          }
+          ;
+          return 0;
+        };
+        var sorted = sortBy(function(a3) {
+          return function(b2) {
+            return compare22(creditValue(a3))(creditValue(b2));
+          };
+        })(v1);
+        if (v2.direction instanceof Ascending) {
+          return sorted;
+        }
+        ;
+        if (v2.direction instanceof Descending) {
+          return sortBy(function(a3) {
+            return function(b2) {
+              return compare22(creditValue(b2))(creditValue(a3));
+            };
+          })(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 504, column 6 - line 506, column 87): " + [v2.direction.constructor.name]);
+      }
+      ;
+      if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldBar96Debit) {
+        var netWeight = function(c2) {
+          return c2.gram_bar96 + c2.baht_bar96 * gramsPerBahtBar96;
+        };
+        var debitValue = function(c2) {
+          var $282 = netWeight(c2) < 0;
+          if ($282) {
+            return -netWeight(c2);
+          }
+          ;
+          return 0;
+        };
+        var sorted = sortBy(function(a3) {
+          return function(b2) {
+            return compare22(debitValue(a3))(debitValue(b2));
+          };
+        })(v1);
+        if (v2.direction instanceof Ascending) {
+          return sorted;
+        }
+        ;
+        if (v2.direction instanceof Descending) {
+          return sortBy(function(a3) {
+            return function(b2) {
+              return compare22(debitValue(b2))(debitValue(a3));
+            };
+          })(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 513, column 6 - line 515, column 85): " + [v2.direction.constructor.name]);
+      }
+      ;
+      if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldBar96Credit) {
+        var netWeight = function(c2) {
+          return c2.gram_bar96 + c2.baht_bar96 * gramsPerBahtBar96;
+        };
+        var creditValue = function(c2) {
+          var $287 = netWeight(c2) > 0;
+          if ($287) {
+            return netWeight(c2);
+          }
+          ;
+          return 0;
+        };
+        var sorted = sortBy(function(a3) {
+          return function(b2) {
+            return compare22(creditValue(a3))(creditValue(b2));
+          };
+        })(v1);
+        if (v2.direction instanceof Ascending) {
+          return sorted;
+        }
+        ;
+        if (v2.direction instanceof Descending) {
+          return sortBy(function(a3) {
+            return function(b2) {
+              return compare22(creditValue(b2))(creditValue(a3));
+            };
+          })(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 521, column 6 - line 523, column 87): " + [v2.direction.constructor.name]);
+      }
+      ;
+      if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldBar99Debit) {
+        var netWeight = function(c2) {
+          return c2.gram_bar99 + c2.baht_bar99 * gramsPerBahtBar99;
+        };
+        var debitValue = function(c2) {
+          var $292 = netWeight(c2) < 0;
+          if ($292) {
+            return -netWeight(c2);
+          }
+          ;
+          return 0;
+        };
+        var sorted = sortBy(function(a3) {
+          return function(b2) {
+            return compare22(debitValue(a3))(debitValue(b2));
+          };
+        })(v1);
+        if (v2.direction instanceof Ascending) {
+          return sorted;
+        }
+        ;
+        if (v2.direction instanceof Descending) {
+          return sortBy(function(a3) {
+            return function(b2) {
+              return compare22(debitValue(b2))(debitValue(a3));
+            };
+          })(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 530, column 6 - line 532, column 85): " + [v2.direction.constructor.name]);
+      }
+      ;
+      if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldBar99Credit) {
+        var netWeight = function(c2) {
+          return c2.gram_bar99 + c2.baht_bar99 * gramsPerBahtBar99;
+        };
+        var creditValue = function(c2) {
+          var $297 = netWeight(c2) > 0;
+          if ($297) {
+            return netWeight(c2);
+          }
+          ;
+          return 0;
+        };
+        var sorted = sortBy(function(a3) {
+          return function(b2) {
+            return compare22(creditValue(a3))(creditValue(b2));
+          };
+        })(v1);
+        if (v2.direction instanceof Ascending) {
+          return sorted;
+        }
+        ;
+        if (v2.direction instanceof Descending) {
+          return sortBy(function(a3) {
+            return function(b2) {
+              return compare22(creditValue(b2))(creditValue(a3));
+            };
+          })(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 538, column 6 - line 540, column 87): " + [v2.direction.constructor.name]);
+      }
+      ;
+      if (v2.field instanceof Just && v2.field.value0 instanceof SortByUpdated) {
+        var dateOnly = function(c2) {
+          return extractDatePart(c2.updated_at);
+        };
+        var sorted = sortBy(function(a3) {
+          return function(b2) {
+            return compare2(dateOnly(a3))(dateOnly(b2));
+          };
+        })(v1);
+        if (v2.direction instanceof Ascending) {
+          return sorted;
+        }
+        ;
+        if (v2.direction instanceof Descending) {
+          return sortBy(function(a3) {
+            return function(b2) {
+              return compare2(dateOnly(b2))(dateOnly(a3));
+            };
+          })(v1);
+        }
+        ;
+        throw new Error("Failed pattern match at Component.CustomerList (line 546, column 6 - line 548, column 81): " + [v2.direction.constructor.name]);
+      }
+      ;
+      throw new Error("Failed pattern match at Component.CustomerList (line 461, column 1 - line 461, column 62): " + [v2.constructor.name, v1.constructor.name]);
     };
-  };
-  var calculateVisibleRange = function(state3) {
-    var filteredCustomers = filterCustomers(state3.searchQuery)(state3.customers);
-    var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
-    return calculateVisibleRangeForCustomers(sortedCustomers)(state3.scrollTop)(state3.containerHeight);
   };
   var handleAction = function(dictMonadAff) {
     var MonadEffect0 = dictMonadAff.MonadEffect0();
-    var monadEffectHalogenM2 = monadEffectHalogenM(MonadEffect0);
-    var log4 = log3(monadEffectHalogenM2);
     var lift1 = lift3(MonadEffect0.Monad0());
-    var liftEffect7 = liftEffect(monadEffectHalogenM2);
+    var liftAff2 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftEffect7 = liftEffect(monadEffectHalogenM(MonadEffect0));
     return function(db) {
       return function(v2) {
         if (v2 instanceof Initialize2) {
-          return discard2(log4("Initialize action triggered"))(function() {
-            return handleAction(dictMonadAff)(db)(LoadCustomers.value);
-          });
+          return handleAction(dictMonadAff)(db)(LoadCustomers.value);
         }
         ;
         if (v2 instanceof LoadCustomers) {
-          return discard2(log4("LoadCustomers action triggered"))(function() {
-            return bind3(lift1(db.getAllCustomers))(function(customers) {
-              return discard2(log4("Loaded " + (show3(length(customers)) + " customers")))(function() {
-                return modify_3(function(v12) {
-                  var $105 = {};
-                  for (var $106 in v12) {
-                    if ({}.hasOwnProperty.call(v12, $106)) {
-                      $105[$106] = v12[$106];
-                    }
-                    ;
+          return bind3(lift1(db.getAllCustomers))(function(customers) {
+            var latestTime = getLatestTimestamp(customers);
+            return discard2(modify_3(function(v12) {
+              var $307 = {};
+              for (var $308 in v12) {
+                if ({}.hasOwnProperty.call(v12, $308)) {
+                  $307[$308] = v12[$308];
+                }
+                ;
+              }
+              ;
+              $307.customers = customers;
+              $307.lastSyncTime = latestTime;
+              return $307;
+            }))(function() {
+              return handleAction(dictMonadAff)(db)(PollForChanges.value);
+            });
+          });
+        }
+        ;
+        if (v2 instanceof PollForChanges) {
+          return bind3(get2)(function(state3) {
+            return when2(state3.pollingEnabled)(discard2((function() {
+              if (state3.lastSyncTime instanceof Just) {
+                return bind3(lift1(db.getChangesSince(state3.lastSyncTime.value0)))(function(changes) {
+                  return when2(length(changes) > 0)(handleAction(dictMonadAff)(db)(new ApplyChanges(changes)));
+                });
+              }
+              ;
+              if (state3.lastSyncTime instanceof Nothing) {
+                return pure1(unit);
+              }
+              ;
+              throw new Error("Failed pattern match at Component.CustomerList (line 1759, column 7 - line 1764, column 29): " + [state3.lastSyncTime.constructor.name]);
+            })())(function() {
+              return $$void5(fork(discard2(liftAff2(delay(3e3)))(function() {
+                return handleAction(dictMonadAff)(db)(PollForChanges.value);
+              })));
+            }));
+          });
+        }
+        ;
+        if (v2 instanceof ApplyChanges) {
+          return bind3(get2)(function(state3) {
+            var mergedCustomers = mergeCustomers(state3.customers)(v2.value0);
+            var latestTime = getLatestTimestamp(v2.value0);
+            return discard2(modify_3(function(v12) {
+              var $312 = {};
+              for (var $313 in v12) {
+                if ({}.hasOwnProperty.call(v12, $313)) {
+                  $312[$313] = v12[$313];
+                }
+                ;
+              }
+              ;
+              $312.customers = mergedCustomers;
+              $312.lastSyncTime = latestTime;
+              return $312;
+            }))(function() {
+              return $$void5(fork(bind3(liftEffect7(requestAnimationFrameAction(unit)))(function(promise2) {
+                return discard2($$void5(liftAff2(toAff(promise2))))(function() {
+                  return handleAction(dictMonadAff)(db)(MeasureRenderedRows.value);
+                });
+              })));
+            });
+          });
+        }
+        ;
+        if (v2 instanceof StartEditFieldWithEvent) {
+          return discard2(liftEffect7(stopPropagation(toEvent(v2.value4))))(function() {
+            return handleAction(dictMonadAff)(db)(new StartEditField(v2.value0, v2.value1, v2.value2, v2.value3));
+          });
+        }
+        ;
+        if (v2 instanceof StartEditField) {
+          return bind3(get2)(function(state3) {
+            return discard2((function() {
+              if (state3.editing instanceof Just && (state3.editing.value0.customerId !== v2.value0 || notEq4(state3.editing.value0.field)(v2.value1))) {
+                return handleAction(dictMonadAff)(db)(SaveEditField.value);
+              }
+              ;
+              return pure1(unit);
+            })())(function() {
+              return discard2(modify_3(function(v12) {
+                var $323 = {};
+                for (var $324 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $324)) {
+                    $323[$324] = v12[$324];
                   }
                   ;
-                  $105.customers = customers;
-                  return $105;
+                }
+                ;
+                $323.editing = new Just({
+                  customerId: v2.value0,
+                  field: v2.value1,
+                  value: v2.value2,
+                  originalValue: v2.value2,
+                  isDebitSide: v2.value3
                 });
+                return $323;
+              }))(function() {
+                return handleAction(dictMonadAff)(db)(FocusEditInput.value);
               });
             });
           });
         }
         ;
-        if (v2 instanceof StartEdit) {
-          return modify_3(function(v12) {
-            var $108 = {};
-            for (var $109 in v12) {
-              if ({}.hasOwnProperty.call(v12, $109)) {
-                $108[$109] = v12[$109];
-              }
-              ;
-            }
-            ;
-            $108.editingId = new Just(v2.value0);
-            $108.editingName = v2.value1;
-            return $108;
-          });
-        }
-        ;
-        if (v2 instanceof UpdateEditName) {
-          return modify_3(function(v12) {
-            var $113 = {};
-            for (var $114 in v12) {
-              if ({}.hasOwnProperty.call(v12, $114)) {
-                $113[$114] = v12[$114];
-              }
-              ;
-            }
-            ;
-            $113.editingName = v2.value0;
-            return $113;
-          });
-        }
-        ;
-        if (v2 instanceof SaveEdit) {
+        if (v2 instanceof UpdateEditValue) {
           return bind3(get2)(function(state3) {
-            var filteredCustomers = filterCustomers(state3.searchQuery)(state3.customers);
-            var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
-            var v12 = findIndex(function(c2) {
-              return c2.id === v2.value0;
-            })(sortedCustomers);
-            if (v12 instanceof Just) {
-              var relativeScrollPos = state3.scrollTop - toNumber(v12.value0) * rowHeight;
-              return discard2(lift1(db.updateCustomerName({
-                id: v2.value0,
-                name: state3.editingName
-              })))(function() {
-                return discard2(modify_3(function(v22) {
-                  var $118 = {};
-                  for (var $119 in v22) {
-                    if ({}.hasOwnProperty.call(v22, $119)) {
-                      $118[$119] = v22[$119];
+            if (state3.editing instanceof Just) {
+              return modify_3(function(v12) {
+                var $334 = {};
+                for (var $335 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $335)) {
+                    $334[$335] = v12[$335];
+                  }
+                  ;
+                }
+                ;
+                $334.editing = new Just((function() {
+                  var $331 = {};
+                  for (var $332 in state3.editing.value0) {
+                    if ({}.hasOwnProperty.call(state3.editing.value0, $332)) {
+                      $331[$332] = state3["editing"]["value0"][$332];
                     }
                     ;
                   }
                   ;
-                  $118.editingId = Nothing.value;
-                  $118.editingName = "";
-                  $118.searchQuery = "";
-                  return $118;
-                }))(function() {
-                  return discard2(handleAction(dictMonadAff)(db)(LoadCustomers.value))(function() {
-                    return handleAction(dictMonadAff)(db)(new ScrollToCustomerId(v2.value0));
+                  $331.value = v2.value0;
+                  return $331;
+                })());
+                return $334;
+              });
+            }
+            ;
+            if (state3.editing instanceof Nothing) {
+              return pure1(unit);
+            }
+            ;
+            throw new Error("Failed pattern match at Component.CustomerList (line 1806, column 5 - line 1808, column 27): " + [state3.editing.constructor.name]);
+          });
+        }
+        ;
+        if (v2 instanceof SaveEditField) {
+          return bind3(get2)(function(state3) {
+            if (state3.editing instanceof Nothing) {
+              return pure1(unit);
+            }
+            ;
+            if (state3.editing instanceof Just) {
+              var valueChanged = state3.editing.value0.value !== state3.editing.value0.originalValue;
+              var v12 = parseFieldValue(state3.editing.value0.field)(state3.editing.value0.value);
+              if (v12 instanceof Nothing) {
+                return handleAction(dictMonadAff)(db)(CancelEdit.value);
+              }
+              ;
+              if (v12 instanceof Just) {
+                var finalValue = (function() {
+                  if (state3.editing.value0.field instanceof FieldMoney) {
+                    if (state3.editing.value0.isDebitSide) {
+                      return "-" + v12.value0;
+                    }
+                    ;
+                    return v12.value0;
+                  }
+                  ;
+                  if (state3.editing.value0.isDebitSide) {
+                    return "-" + v12.value0;
+                  }
+                  ;
+                  return v12.value0;
+                })();
+                return bind3(lift1(db.updateCustomerField({
+                  id: state3.editing.value0.customerId,
+                  field: getDbFieldName(state3.editing.value0.field),
+                  value: finalValue
+                })))(function(updatedCustomer) {
+                  return discard2(modify_3(function(v22) {
+                    var $346 = {};
+                    for (var $347 in v22) {
+                      if ({}.hasOwnProperty.call(v22, $347)) {
+                        $346[$347] = v22[$347];
+                      }
+                      ;
+                    }
+                    ;
+                    $346.editing = Nothing.value;
+                    $346.searchQuery = "";
+                    $346.customers = map16(function(c2) {
+                      var $344 = c2.id === state3.editing.value0.customerId;
+                      if ($344) {
+                        return updatedCustomer;
+                      }
+                      ;
+                      return c2;
+                    })(state3.customers);
+                    $346.lastSyncTime = updatedCustomer.updated_at;
+                    $346.highlightedCustomerId = (function() {
+                      if (valueChanged) {
+                        return new Just(state3.editing.value0.customerId);
+                      }
+                      ;
+                      return Nothing.value;
+                    })();
+                    return $346;
+                  }))(function() {
+                    return when2(valueChanged)(handleAction(dictMonadAff)(db)(new RenderAroundAndScrollTo(state3.editing.value0.customerId)));
                   });
                 });
-              });
+              }
+              ;
+              throw new Error("Failed pattern match at Component.CustomerList (line 1817, column 9 - line 1846, column 72): " + [v12.constructor.name]);
             }
             ;
-            if (v12 instanceof Nothing) {
-              return discard2(lift1(db.updateCustomerName({
-                id: v2.value0,
-                name: state3.editingName
-              })))(function() {
-                return discard2(modify_3(function(v22) {
-                  var $122 = {};
-                  for (var $123 in v22) {
-                    if ({}.hasOwnProperty.call(v22, $123)) {
-                      $122[$123] = v22[$123];
-                    }
-                    ;
-                  }
-                  ;
-                  $122.editingId = Nothing.value;
-                  $122.editingName = "";
-                  $122.searchQuery = "";
-                  return $122;
-                }))(function() {
-                  return handleAction(dictMonadAff)(db)(LoadCustomers.value);
-                });
-              });
-            }
-            ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 636, column 5 - line 654, column 38): " + [v12.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 1812, column 5 - line 1846, column 72): " + [state3.editing.constructor.name]);
           });
         }
         ;
         if (v2 instanceof SaveEditOnEnter) {
-          return when2(key(v2.value1) === "Enter")(handleAction(dictMonadAff)(db)(new SaveEdit(v2.value0)));
+          var v1 = key(v2.value0);
+          if (v1 === "Enter") {
+            return handleAction(dictMonadAff)(db)(SaveEditField.value);
+          }
+          ;
+          if (v1 === "Escape") {
+            return handleAction(dictMonadAff)(db)(CancelEdit.value);
+          }
+          ;
+          return pure1(unit);
         }
         ;
         if (v2 instanceof CancelEdit) {
           return modify_3(function(v12) {
-            var $128 = {};
-            for (var $129 in v12) {
-              if ({}.hasOwnProperty.call(v12, $129)) {
-                $128[$129] = v12[$129];
+            var $353 = {};
+            for (var $354 in v12) {
+              if ({}.hasOwnProperty.call(v12, $354)) {
+                $353[$354] = v12[$354];
               }
               ;
             }
             ;
-            $128.editingId = Nothing.value;
-            $128.editingName = "";
-            return $128;
+            $353.editing = Nothing.value;
+            return $353;
+          });
+        }
+        ;
+        if (v2 instanceof CancelEditOnClickOutside) {
+          return bind3(get2)(function(state3) {
+            if (state3.editing instanceof Just) {
+              var eventTarget = toEvent(v2.value0);
+              var v12 = target(eventTarget);
+              if (v12 instanceof Just) {
+                return bind3(liftEffect7(checkClickOutsideInput(v12.value0)))(function(isOutside) {
+                  return when2(isOutside)(handleAction(dictMonadAff)(db)(SaveEditField.value));
+                });
+              }
+              ;
+              if (v12 instanceof Nothing) {
+                return pure1(unit);
+              }
+              ;
+              throw new Error("Failed pattern match at Component.CustomerList (line 1863, column 9 - line 1868, column 31): " + [v12.constructor.name]);
+            }
+            ;
+            if (state3.editing instanceof Nothing) {
+              return pure1(unit);
+            }
+            ;
+            throw new Error("Failed pattern match at Component.CustomerList (line 1859, column 5 - line 1869, column 27): " + [state3.editing.constructor.name]);
           });
         }
         ;
         if (v2 instanceof UpdateNewName) {
           return modify_3(function(v12) {
-            var $131 = {};
-            for (var $132 in v12) {
-              if ({}.hasOwnProperty.call(v12, $132)) {
-                $131[$132] = v12[$132];
+            var $361 = {};
+            for (var $362 in v12) {
+              if ({}.hasOwnProperty.call(v12, $362)) {
+                $361[$362] = v12[$362];
               }
               ;
             }
             ;
-            $131.newCustomerName = v2.value0;
-            return $131;
+            $361.newCustomerName = v2.value0;
+            return $361;
           });
         }
         ;
         if (v2 instanceof AddCustomer) {
           return discard2(liftEffect7(preventDefault(v2.value0)))(function() {
             return bind3(get2)(function(state3) {
-              return when2(state3.newCustomerName !== "")(discard2(lift1(db.addNewCustomer(state3.newCustomerName)))(function() {
+              return when2(state3.newCustomerName !== "")(bind3(lift1(db.addNewCustomer(state3.newCustomerName)))(function(newCustomer) {
                 return discard2(modify_3(function(v12) {
-                  var $135 = {};
-                  for (var $136 in v12) {
-                    if ({}.hasOwnProperty.call(v12, $136)) {
-                      $135[$136] = v12[$136];
+                  var $365 = {};
+                  for (var $366 in v12) {
+                    if ({}.hasOwnProperty.call(v12, $366)) {
+                      $365[$366] = v12[$366];
                     }
                     ;
                   }
                   ;
-                  $135.newCustomerName = "";
-                  return $135;
+                  $365.newCustomerName = "";
+                  $365.searchQuery = "";
+                  $365.customers = snoc(state3.customers)(newCustomer);
+                  $365.lastSyncTime = newCustomer.updated_at;
+                  $365.highlightedCustomerId = new Just(newCustomer.id);
+                  return $365;
                 }))(function() {
-                  return discard2(handleAction(dictMonadAff)(db)(LoadCustomers.value))(function() {
-                    return handleAction(dictMonadAff)(db)(new ScrollToCustomer(state3.newCustomerName));
-                  });
+                  return handleAction(dictMonadAff)(db)(new RenderAroundAndScrollTo(newCustomer.id));
                 });
               }));
             });
           });
         }
         ;
-        if (v2 instanceof DeleteCustomer) {
-          return discard2(lift1(db.deleteCustomer(v2.value0)))(function() {
-            return handleAction(dictMonadAff)(db)(LoadCustomers.value);
+        if (v2 instanceof ShowDeleteConfirmation) {
+          return bind3(liftEffect7(generateRandomCode))(function(randomCode) {
+            return discard2(modify_3(function(v12) {
+              var $369 = {};
+              for (var $370 in v12) {
+                if ({}.hasOwnProperty.call(v12, $370)) {
+                  $369[$370] = v12[$370];
+                }
+                ;
+              }
+              ;
+              $369.deleteConfirmation = new Just({
+                customerId: v2.value0,
+                confirmCode: randomCode,
+                inputValue: ""
+              });
+              return $369;
+            }))(function() {
+              return handleAction(dictMonadAff)(db)(FocusDeleteInput.value);
+            });
           });
+        }
+        ;
+        if (v2 instanceof UpdateDeleteConfirmInput) {
+          return bind3(get2)(function(state3) {
+            if (state3.deleteConfirmation instanceof Just) {
+              return modify_3(function(v12) {
+                var $377 = {};
+                for (var $378 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $378)) {
+                    $377[$378] = v12[$378];
+                  }
+                  ;
+                }
+                ;
+                $377.deleteConfirmation = new Just((function() {
+                  var $374 = {};
+                  for (var $375 in state3.deleteConfirmation.value0) {
+                    if ({}.hasOwnProperty.call(state3.deleteConfirmation.value0, $375)) {
+                      $374[$375] = state3["deleteConfirmation"]["value0"][$375];
+                    }
+                    ;
+                  }
+                  ;
+                  $374.inputValue = v2.value0;
+                  return $374;
+                })());
+                return $377;
+              });
+            }
+            ;
+            if (state3.deleteConfirmation instanceof Nothing) {
+              return pure1(unit);
+            }
+            ;
+            throw new Error("Failed pattern match at Component.CustomerList (line 1898, column 5 - line 1901, column 27): " + [state3.deleteConfirmation.constructor.name]);
+          });
+        }
+        ;
+        if (v2 instanceof ConfirmDelete) {
+          return bind3(get2)(function(state3) {
+            if (state3.deleteConfirmation instanceof Just && state3.deleteConfirmation.value0.customerId === v2.value0) {
+              var $383 = state3.deleteConfirmation.value0.inputValue === show4(state3.deleteConfirmation.value0.confirmCode);
+              if ($383) {
+                return discard2(lift1(db.deleteCustomer(v2.value0)))(function() {
+                  var newCustomers = filter(function(c2) {
+                    return c2.id !== v2.value0;
+                  })(state3.customers);
+                  return discard2(modify_3(function(v12) {
+                    var $384 = {};
+                    for (var $385 in v12) {
+                      if ({}.hasOwnProperty.call(v12, $385)) {
+                        $384[$385] = v12[$385];
+                      }
+                      ;
+                    }
+                    ;
+                    $384.customers = newCustomers;
+                    $384.highlightedCustomerId = Nothing.value;
+                    $384.deleteConfirmation = Nothing.value;
+                    return $384;
+                  }))(function() {
+                    return $$void5(fork(bind3(liftEffect7(getCustomerListElement))(function(mbContainer) {
+                      if (mbContainer instanceof Just) {
+                        return bind3(liftEffect7(getScrollTop(mbContainer.value0)))(function(scrollTop2) {
+                          return bind3(liftEffect7(getClientHeight(mbContainer.value0)))(function(clientHeight2) {
+                            return discard2(modify_3(function(v12) {
+                              var $388 = {};
+                              for (var $389 in v12) {
+                                if ({}.hasOwnProperty.call(v12, $389)) {
+                                  $388[$389] = v12[$389];
+                                }
+                                ;
+                              }
+                              ;
+                              $388.scrollTop = scrollTop2;
+                              $388.containerHeight = clientHeight2;
+                              return $388;
+                            }))(function() {
+                              return handleAction(dictMonadAff)(db)(MeasureRenderedRows.value);
+                            });
+                          });
+                        });
+                      }
+                      ;
+                      if (mbContainer instanceof Nothing) {
+                        return pure1(unit);
+                      }
+                      ;
+                      throw new Error("Failed pattern match at Component.CustomerList (line 1919, column 13 - line 1928, column 35): " + [mbContainer.constructor.name]);
+                    })));
+                  });
+                });
+              }
+              ;
+              return pure1(unit);
+            }
+            ;
+            return pure1(unit);
+          });
+        }
+        ;
+        if (v2 instanceof CancelDelete) {
+          return modify_3(function(v12) {
+            var $394 = {};
+            for (var $395 in v12) {
+              if ({}.hasOwnProperty.call(v12, $395)) {
+                $394[$395] = v12[$395];
+              }
+              ;
+            }
+            ;
+            $394.deleteConfirmation = Nothing.value;
+            return $394;
+          });
+        }
+        ;
+        if (v2 instanceof FocusDeleteInput) {
+          return liftEffect7(focusDeleteConfirmInput);
+        }
+        ;
+        if (v2 instanceof FocusEditInput) {
+          return liftEffect7(focusEditInput);
         }
         ;
         if (v2 instanceof SortBy) {
           return bind3(get2)(function(state3) {
             var newSortState = (function() {
-              if (state3.sortState.field instanceof Just && eq3(state3.sortState.field.value0)(v2.value0)) {
+              if (state3.sortState.field instanceof Just && eq5(state3.sortState.field.value0)(v2.value0)) {
                 return {
                   field: new Just(v2.value0),
                   direction: toggleDirection(state3.sortState.direction)
@@ -6679,16 +9483,16 @@
               };
             })();
             return modify_3(function(v12) {
-              var $142 = {};
-              for (var $143 in v12) {
-                if ({}.hasOwnProperty.call(v12, $143)) {
-                  $142[$143] = v12[$143];
+              var $399 = {};
+              for (var $400 in v12) {
+                if ({}.hasOwnProperty.call(v12, $400)) {
+                  $399[$400] = v12[$400];
                 }
                 ;
               }
               ;
-              $142.sortState = newSortState;
-              return $142;
+              $399.sortState = newSortState;
+              return $399;
             });
           });
         }
@@ -6699,96 +9503,290 @@
           if (v1 instanceof Just) {
             return bind3(liftEffect7(getScrollTop(v1.value0)))(function(scrollTop2) {
               return bind3(liftEffect7(getClientHeight(v1.value0)))(function(clientHeight2) {
-                return modify_3(function(v22) {
-                  var $147 = {};
-                  for (var $148 in v22) {
-                    if ({}.hasOwnProperty.call(v22, $148)) {
-                      $147[$148] = v22[$148];
+                return discard2(modify_3(function(v22) {
+                  var $404 = {};
+                  for (var $405 in v22) {
+                    if ({}.hasOwnProperty.call(v22, $405)) {
+                      $404[$405] = v22[$405];
                     }
                     ;
                   }
                   ;
-                  $147.scrollTop = scrollTop2;
-                  $147.containerHeight = clientHeight2;
-                  return $147;
+                  $404.scrollTop = scrollTop2;
+                  $404.containerHeight = clientHeight2;
+                  return $404;
+                }))(function() {
+                  return handleAction(dictMonadAff)(db)(MeasureRenderedRows.value);
                 });
               });
             });
           }
           ;
           if (v1 instanceof Nothing) {
-            return pure6(unit);
+            return pure1(unit);
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 697, column 5 - line 705, column 27): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 1957, column 5 - line 1966, column 27): " + [v1.constructor.name]);
+        }
+        ;
+        if (v2 instanceof MeasureRenderedRows) {
+          return bind3(liftEffect7(measureRowHeights))(function(measurements) {
+            return bind3(get2)(function(state3) {
+              var updateCustomer = function(customer) {
+                var v12 = find2(function(m2) {
+                  return m2.customerId === customer.id;
+                })(measurements);
+                if (v12 instanceof Just) {
+                  return {
+                    id: customer.id,
+                    name: customer.name,
+                    money: customer.money,
+                    gram_jewelry: customer.gram_jewelry,
+                    baht_jewelry: customer.baht_jewelry,
+                    gram_bar96: customer.gram_bar96,
+                    baht_bar96: customer.baht_bar96,
+                    gram_bar99: customer.gram_bar99,
+                    baht_bar99: customer.baht_bar99,
+                    created_at: customer.created_at,
+                    updated_at: customer.updated_at,
+                    rowHeight: new Just(v12.value0.height)
+                  };
+                }
+                ;
+                if (v12 instanceof Nothing) {
+                  return customer;
+                }
+                ;
+                throw new Error("Failed pattern match at Component.CustomerList (line 1975, column 9 - line 1977, column 30): " + [v12.constructor.name]);
+              };
+              var updatedCustomers = map16(updateCustomer)(state3.customers);
+              return modify_3(function(v12) {
+                var $411 = {};
+                for (var $412 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $412)) {
+                    $411[$412] = v12[$412];
+                  }
+                  ;
+                }
+                ;
+                $411.customers = updatedCustomers;
+                return $411;
+              });
+            });
+          });
+        }
+        ;
+        if (v2 instanceof UpdateRenderedRange) {
+          return modify_3(function(v12) {
+            var $414 = {};
+            for (var $415 in v12) {
+              if ({}.hasOwnProperty.call(v12, $415)) {
+                $414[$415] = v12[$415];
+              }
+              ;
+            }
+            ;
+            $414.renderedRange = {
+              start: v2.value0,
+              end: v2.value1
+            };
+            return $414;
+          });
+        }
+        ;
+        if (v2 instanceof RenderAroundAndScrollTo) {
+          return $$void5(fork(bind3(get2)(function(state3) {
+            var filteredCustomers = filterCustomers(state3.searchQuery)(state3.customers);
+            var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
+            var v12 = findIndex(function(c2) {
+              return c2.id === v2.value0;
+            })(sortedCustomers);
+            if (v12 instanceof Just) {
+              return bind3(liftEffect7(getCustomerListElement))(function(mbContainer) {
+                return bind3((function() {
+                  if (mbContainer instanceof Just) {
+                    return liftEffect7(getClientHeight(mbContainer.value0));
+                  }
+                  ;
+                  if (mbContainer instanceof Nothing) {
+                    return pure1(state3.containerHeight);
+                  }
+                  ;
+                  throw new Error("Failed pattern match at Component.CustomerList (line 2011, column 27 - line 2013, column 50): " + [mbContainer.constructor.name]);
+                })())(function(actualHeight) {
+                  return discard2(when2(actualHeight !== state3.containerHeight)(modify_3(function(v22) {
+                    var $422 = {};
+                    for (var $423 in v22) {
+                      if ({}.hasOwnProperty.call(v22, $423)) {
+                        $422[$423] = v22[$423];
+                      }
+                      ;
+                    }
+                    ;
+                    $422.containerHeight = actualHeight;
+                    return $422;
+                  })))(function() {
+                    var roughYPosition = calculateHeightRange(sortedCustomers)(0)(v12.value0);
+                    var roughScrollTop = max1(0)(roughYPosition - actualHeight + 100);
+                    return discard2(liftEffect7(scrollToPosition(roughScrollTop)))(function() {
+                      return bind3(liftEffect7(waitForRowAndMeasureImpl(v12.value0)))(function(promise2) {
+                        return bind3(liftAff2(toAff(promise2)))(function(result) {
+                          return discard2(handleAction(dictMonadAff)(db)(MeasureRenderedRows.value))(function() {
+                            var targetScrollTop = max1(0)(result.offsetTop + result.height - actualHeight);
+                            return liftEffect7(scrollToPosition(targetScrollTop));
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            }
+            ;
+            if (v12 instanceof Nothing) {
+              return pure1(unit);
+            }
+            ;
+            throw new Error("Failed pattern match at Component.CustomerList (line 2007, column 7 - line 2034, column 29): " + [v12.constructor.name]);
+          })));
         }
         ;
         if (v2 instanceof ScrollToCustomer) {
           return bind3(get2)(function(state3) {
             var filteredCustomers = filterCustomers(state3.searchQuery)(state3.customers);
             var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
-            var v12 = findIndex(function(c2) {
+            var v12 = find2(function(c2) {
               return c2.name === v2.value0;
             })(sortedCustomers);
             if (v12 instanceof Just) {
-              var targetScrollTop = max1(0)(toNumber(v12.value0) * rowHeight - state3.containerHeight + rowHeight + 60);
-              return liftEffect7(scrollToPosition(targetScrollTop));
+              return handleAction(dictMonadAff)(db)(new RenderAroundAndScrollTo(v12.value0.id));
             }
             ;
             if (v12 instanceof Nothing) {
-              return pure6(unit);
+              return pure1(unit);
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 711, column 5 - line 716, column 27): " + [v12.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 2040, column 5 - line 2042, column 27): " + [v12.constructor.name]);
           });
         }
         ;
         if (v2 instanceof ScrollToCustomerId) {
-          return bind3(get2)(function(state3) {
-            var filteredCustomers = filterCustomers("")(state3.customers);
-            var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
-            var v12 = findIndex(function(c2) {
-              return c2.id === v2.value0;
-            })(sortedCustomers);
-            if (v12 instanceof Just) {
-              var targetScrollTop = max1(0)(toNumber(v12.value0) * rowHeight - state3.containerHeight / 2);
-              return liftEffect7(scrollToPosition(targetScrollTop));
-            }
-            ;
-            if (v12 instanceof Nothing) {
-              return pure6(unit);
-            }
-            ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 723, column 5 - line 729, column 27): " + [v12.constructor.name]);
-          });
+          return handleAction(dictMonadAff)(db)(new RenderAroundAndScrollTo(v2.value0));
         }
         ;
         if (v2 instanceof UpdateSearchQuery) {
           return modify_3(function(v12) {
-            var $158 = {};
-            for (var $159 in v12) {
-              if ({}.hasOwnProperty.call(v12, $159)) {
-                $158[$159] = v12[$159];
+            var $431 = {};
+            for (var $432 in v12) {
+              if ({}.hasOwnProperty.call(v12, $432)) {
+                $431[$432] = v12[$432];
               }
               ;
             }
             ;
-            $158.searchQuery = v2.value0;
-            return $158;
+            $431.searchQuery = v2.value0;
+            return $431;
           });
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 611, column 19 - line 732, column 40): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 1743, column 19 - line 2048, column 40): " + [v2.constructor.name]);
+      };
+    };
+  };
+  var renderCustomerRow = function(state3) {
+    return function(customer) {
+      return function(startIdx) {
+        var isPendingDelete = (function() {
+          if (state3.deleteConfirmation instanceof Just) {
+            return state3.deleteConfirmation.value0.customerId === customer.id;
+          }
+          ;
+          if (state3.deleteConfirmation instanceof Nothing) {
+            return false;
+          }
+          ;
+          throw new Error("Failed pattern match at Component.CustomerList (line 871, column 23 - line 873, column 23): " + [state3.deleteConfirmation.constructor.name]);
+        })();
+        var isHighlighted = eq4(state3.highlightedCustomerId)(new Just(customer.id));
+        var isEditingField = function(field) {
+          if (state3.editing instanceof Just) {
+            return state3.editing.value0.customerId === customer.id && eq6(state3.editing.value0.field)(field);
+          }
+          ;
+          if (state3.editing instanceof Nothing) {
+            return false;
+          }
+          ;
+          throw new Error("Failed pattern match at Component.CustomerList (line 867, column 28 - line 869, column 23): " + [state3.editing.constructor.name]);
+        };
+        var filteredCustomers = filterCustomers(state3.searchQuery)(state3.customers);
+        var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
+        var customerIndex = (function() {
+          var v2 = findIndex(function(c2) {
+            return c2.id === customer.id;
+          })(sortedCustomers);
+          if (v2 instanceof Just) {
+            return v2.value0;
+          }
+          ;
+          if (v2 instanceof Nothing) {
+            return 0;
+          }
+          ;
+          throw new Error("Failed pattern match at Component.CustomerList (line 877, column 21 - line 879, column 19): " + [v2.constructor.name]);
+        })();
+        var isEvenRow = mod2(customerIndex)(2) === 0;
+        var rowClasses = (function() {
+          if (isPendingDelete) {
+            return "customer-row customer-row-pending-delete";
+          }
+          ;
+          if (isHighlighted) {
+            return "customer-row customer-row-highlighted";
+          }
+          ;
+          if (isEvenRow) {
+            return "customer-row customer-row-even";
+          }
+          ;
+          return "customer-row customer-row-odd";
+        })();
+        return div2([class_(rowClasses), attr2("data-row-index")(show4(customerIndex)), attr2("data-customer-id")(show4(customer.id))])([span2([class_("customer-id")])([text(show4(customer.id))]), renderEditableField(state3)(customer)(FieldName.value)("customer-name")("customer-name-input"), renderMoneyField(state3)(customer)(true), renderMoneyField(state3)(customer)(false), div2([class_("customer-gold-debit")])([div_([div2([class_("gold-grams")])([renderGoldField(state3)(customer)(FieldGoldJewelryGrams.value)(true)(textConstants.unitGrams)(renderGrams)(customer.gram_jewelry)]), div2([class_("gold-baht")])([renderGoldField(state3)(customer)(FieldGoldJewelryBaht.value)(true)(textConstants.unitBaht)(renderBaht)(customer.baht_jewelry)])])]), div2([class_("customer-gold-credit")])([div_([div2([class_("gold-grams")])([renderGoldField(state3)(customer)(FieldGoldJewelryGrams.value)(false)(textConstants.unitGrams)(renderGrams)(customer.gram_jewelry)]), div2([class_("gold-baht")])([renderGoldField(state3)(customer)(FieldGoldJewelryBaht.value)(false)(textConstants.unitBaht)(renderBaht)(customer.baht_jewelry)])])]), div2([class_("customer-gold-debit")])([div_([div2([class_("gold-grams")])([renderGoldField(state3)(customer)(FieldGoldBar96Grams.value)(true)(textConstants.unitGrams)(renderGrams)(customer.gram_bar96)]), div2([class_("gold-baht")])([renderGoldField(state3)(customer)(FieldGoldBar96Baht.value)(true)(textConstants.unitBaht)(renderBaht)(customer.baht_bar96)])])]), div2([class_("customer-gold-credit")])([div_([div2([class_("gold-grams")])([renderGoldField(state3)(customer)(FieldGoldBar96Grams.value)(false)(textConstants.unitGrams)(renderGrams)(customer.gram_bar96)]), div2([class_("gold-baht")])([renderGoldField(state3)(customer)(FieldGoldBar96Baht.value)(false)(textConstants.unitBaht)(renderBaht)(customer.baht_bar96)])])]), div2([class_("customer-gold-debit")])([div_([div2([class_("gold-grams")])([renderGoldField(state3)(customer)(FieldGoldBar99Grams.value)(true)(textConstants.unitGrams)(renderGrams)(customer.gram_bar99)]), div2([class_("gold-baht")])([renderGoldField(state3)(customer)(FieldGoldBar99Baht.value)(true)(textConstants.unitBaht)(renderBaht)(customer.baht_bar99)])])]), div2([class_("customer-gold-credit")])([div_([div2([class_("gold-grams")])([renderGoldField(state3)(customer)(FieldGoldBar99Grams.value)(false)(textConstants.unitGrams)(renderGrams)(customer.gram_bar99)]), div2([class_("gold-baht")])([renderGoldField(state3)(customer)(FieldGoldBar99Baht.value)(false)(textConstants.unitBaht)(renderBaht)(customer.baht_bar99)])])]), span2([class_("customer-updated")])([text((function() {
+          if (customer.updated_at instanceof Just) {
+            return formatDateString(customer.updated_at.value0);
+          }
+          ;
+          if (customer.updated_at instanceof Nothing) {
+            return "";
+          }
+          ;
+          throw new Error("Failed pattern match at Component.CustomerList (line 959, column 23 - line 961, column 28): " + [customer.updated_at.constructor.name]);
+        })())]), div2([class_("customer-actions")])([button([class_("btn btn-delete"), onClick(function(v2) {
+          return new ShowDeleteConfirmation(customer.id);
+        }), title("Delete")])([deleteIcon])])]);
       };
     };
   };
   var render = function(state3) {
     var filteredCustomers = filterCustomers(state3.searchQuery)(state3.customers);
     var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
-    var v2 = calculateVisibleRange(state3);
+    var totalRows = length(sortedCustomers);
+    var v2 = (function() {
+      if (state3.forceRenderRange) {
+        return {
+          start: state3.renderedRange.start,
+          end: state3.renderedRange.end,
+          topSpacerHeight: calculateHeightRange(sortedCustomers)(0)(state3.renderedRange.start)
+        };
+      }
+      ;
+      return calculateVisibleRange(state3)(sortedCustomers);
+    })();
     var visibleCustomers = slice(v2.start)(v2.end)(sortedCustomers);
-    var offsetTop2 = toNumber(v2.start) * rowHeight;
-    return div2([class_("customer-app")])([h1([class_("app-title")])([text("Customer Management"), span2([class_("customer-count")])([text(" (" + (show3(length(sortedCustomers)) + " customers)"))])]), div2([class_("customer-list-container")])([renderTableHeader(state3), div2([class_("customer-list"), onScroll(HandleScroll.create)])([div2([class_("scroll-spacer"), attr2("style")("height: " + (show1(v2.totalHeight) + "px"))])([]), div2([class_("visible-rows"), attr2("style")("transform: translateY(" + (show1(offsetTop2) + "px)"))])(map11(renderCustomerRow(state3))(visibleCustomers))]), renderTableFooter(state3)]), renderStyles]);
+    var totalHeight = calculateHeightRange(sortedCustomers)(0)(totalRows);
+    return div2([class_("app-wrapper"), onClick(CancelEditOnClickOutside.create)])([div2([class_("customer-app")])([h1([class_("app-title")])([text(textConstants.appTitle), span2([class_("customer-count")])([text(" (" + (textConstants.customersCount(length(sortedCustomers)) + ")"))])]), div2([class_("customer-list-container")])([renderTableHeader(state3), div2([class_("customer-list"), onScroll(HandleScroll.create)])([div2([class_("scroll-spacer"), attr2("style")("height: " + (show12(totalHeight) + "px"))])([]), div2([class_("visible-rows"), attr2("style")("transform: translateY(" + (show12(v2.topSpacerHeight) + "px)")), id2("visible-rows-container")])(map16(function(c2) {
+      return renderCustomerRow(state3)(c2)(v2.start);
+    })(visibleCustomers))]), renderTableFooter(state3)]), renderDeleteConfirmationDialog(state3), renderStyles])]);
   };
   var component = function(dictMonadAff) {
     var handleAction1 = handleAction(dictMonadAff);
@@ -6797,8 +9795,7 @@
         initialState: function(v2) {
           return {
             customers: [],
-            editingId: Nothing.value,
-            editingName: "",
+            editing: Nothing.value,
             newCustomerName: "",
             sortState: {
               field: new Just(SortByName.value),
@@ -6806,7 +9803,17 @@
             },
             scrollTop: 0,
             containerHeight: 600,
-            searchQuery: ""
+            searchQuery: "",
+            renderedRange: {
+              start: 0,
+              end: 20
+            },
+            topSpacerHeight: 0,
+            lastSyncTime: Nothing.value,
+            pollingEnabled: true,
+            forceRenderRange: false,
+            highlightedCustomerId: Nothing.value,
+            deleteConfirmation: Nothing.value
           };
         },
         render,
@@ -6821,358 +9828,1560 @@
     };
   };
 
-  // output/Database.Mock/index.js
-  var map13 = /* @__PURE__ */ map(functorArray);
-  var initialCustomers = [{
-    id: 1,
-    name: "Alice Johnson"
-  }, {
-    id: 2,
-    name: "Bob Smith"
-  }, {
-    id: 3,
-    name: "Charlie Brown"
-  }, {
-    id: 4,
-    name: "Diana Prince"
-  }, {
-    id: 5,
-    name: "Edward Norton"
-  }, {
-    id: 6,
-    name: "Fiona Apple"
-  }, {
-    id: 7,
-    name: "George Wilson"
-  }, {
-    id: 8,
-    name: "Hannah Montana"
-  }, {
-    id: 9,
-    name: "Isaac Newton"
-  }, {
-    id: 10,
-    name: "Julia Roberts"
-  }, {
-    id: 11,
-    name: "Kevin Hart"
-  }, {
-    id: 12,
-    name: "Laura Palmer"
-  }, {
-    id: 13,
-    name: "Michael Scott"
-  }, {
-    id: 14,
-    name: "Nancy Drew"
-  }, {
-    id: 15,
-    name: "Oliver Twist"
-  }, {
-    id: 16,
-    name: "Patricia Moore"
-  }, {
-    id: 17,
-    name: "Quincy Jones"
-  }, {
-    id: 18,
-    name: "Rachel Green"
-  }, {
-    id: 19,
-    name: "Samuel Jackson"
-  }, {
-    id: 20,
-    name: "Tina Turner"
-  }, {
-    id: 21,
-    name: "Uma Thurman"
-  }, {
-    id: 22,
-    name: "Victor Hugo"
-  }, {
-    id: 23,
-    name: "Wendy Williams"
-  }, {
-    id: 24,
-    name: "Xavier Woods"
-  }, {
-    id: 25,
-    name: "Yolanda Adams"
-  }, {
-    id: 26,
-    name: "Zachary Taylor"
-  }, {
-    id: 27,
-    name: "Amanda Bynes"
-  }, {
-    id: 28,
-    name: "Brandon Lee"
-  }, {
-    id: 29,
-    name: "Catherine Zeta"
-  }, {
-    id: 30,
-    name: "Daniel Craig"
-  }, {
-    id: 31,
-    name: "Emma Watson"
-  }, {
-    id: 32,
-    name: "Frank Sinatra"
-  }, {
-    id: 33,
-    name: "Grace Kelly"
-  }, {
-    id: 34,
-    name: "Henry Ford"
-  }, {
-    id: 35,
-    name: "Iris West"
-  }, {
-    id: 36,
-    name: "Jack Ryan"
-  }, {
-    id: 37,
-    name: "Karen Page"
-  }, {
-    id: 38,
-    name: "Leonard Cohen"
-  }, {
-    id: 39,
-    name: "Monica Geller"
-  }, {
-    id: 40,
-    name: "Nathan Drake"
-  }, {
-    id: 41,
-    name: "Olivia Pope"
-  }, {
-    id: 42,
-    name: "Peter Parker"
-  }, {
-    id: 43,
-    name: "Quinn Fabray"
-  }, {
-    id: 44,
-    name: "Ross Geller"
-  }, {
-    id: 45,
-    name: "Sarah Connor"
-  }, {
-    id: 46,
-    name: "Tony Stark"
-  }, {
-    id: 47,
-    name: "Ursula Buffay"
-  }, {
-    id: 48,
-    name: "Vincent Vega"
-  }, {
-    id: 49,
-    name: "Walter White"
-  }, {
-    id: 50,
-    name: "Xena Warrior"
-  }, {
-    id: 51,
-    name: "Yvonne Strahovski"
-  }, {
-    id: 52,
-    name: "Zoe Saldana"
-  }, {
-    id: 53,
-    name: "Aaron Paul"
-  }, {
-    id: 54,
-    name: "Bella Swan"
-  }, {
-    id: 55,
-    name: "Clark Kent"
-  }, {
-    id: 56,
-    name: "Daenerys Targaryen"
-  }, {
-    id: 57,
-    name: "Ethan Hunt"
-  }, {
-    id: 58,
-    name: "Felicity Smoak"
-  }, {
-    id: 59,
-    name: "Gandalf Grey"
-  }, {
-    id: 60,
-    name: "Hermione Granger"
-  }, {
-    id: 61,
-    name: "Indiana Jones"
-  }, {
-    id: 62,
-    name: "Jessica Jones"
-  }, {
-    id: 63,
-    name: "Katniss Everdeen"
-  }, {
-    id: 64,
-    name: "Luke Skywalker"
-  }, {
-    id: 65,
-    name: "Marty McFly"
-  }, {
-    id: 66,
-    name: "Neo Anderson"
-  }, {
-    id: 67,
-    name: "Optimus Prime"
-  }, {
-    id: 68,
-    name: "Princess Leia"
-  }, {
-    id: 69,
-    name: "Quentin Tarantino"
-  }, {
-    id: 70,
-    name: "Rick Grimes"
-  }, {
-    id: 71,
-    name: "Sherlock Holmes"
-  }, {
-    id: 72,
-    name: "Thor Odinson"
-  }, {
-    id: 73,
-    name: "Ulysses Grant"
-  }, {
-    id: 74,
-    name: "Violet Baudelaire"
-  }, {
-    id: 75,
-    name: "Wade Wilson"
-  }, {
-    id: 76,
-    name: "Xander Harris"
-  }, {
-    id: 77,
-    name: "Yoda Master"
-  }, {
-    id: 78,
-    name: "Zelda Princess"
-  }, {
-    id: 79,
-    name: "Arthur Dent"
-  }, {
-    id: 80,
-    name: "Bruce Wayne"
-  }, {
-    id: 81,
-    name: "Carol Danvers"
-  }, {
-    id: 82,
-    name: "David Bowie"
-  }, {
-    id: 83,
-    name: "Ellen Ripley"
-  }, {
-    id: 84,
-    name: "Frodo Baggins"
-  }, {
-    id: 85,
-    name: "Gwen Stacy"
-  }, {
-    id: 86,
-    name: "Harry Potter"
-  }, {
-    id: 87,
-    name: "Ilsa Lund"
-  }, {
-    id: 88,
-    name: "James Bond"
-  }, {
-    id: 89,
-    name: "Kara Danvers"
-  }, {
-    id: 90,
-    name: "Lara Croft"
-  }, {
-    id: 91,
-    name: "Mary Poppins"
-  }, {
-    id: 92,
-    name: "Nick Fury"
-  }, {
-    id: 93,
-    name: "Obi-Wan Kenobi"
-  }, {
-    id: 94,
-    name: "Phoebe Buffay"
-  }, {
-    id: 95,
-    name: "Qui-Gon Jinn"
-  }, {
-    id: 96,
-    name: "Rey Skywalker"
-  }, {
-    id: 97,
-    name: "Steve Rogers"
-  }, {
-    id: 98,
-    name: "Trinity Matrix"
-  }, {
-    id: 99,
-    name: "Uhura Nyota"
-  }, {
-    id: 100,
-    name: "Vito Corleone"
-  }, {
-    id: 101,
-    name: "The Association for Overseas Technical Cooperation and Sustainable Partnerships (AOTS)"
-  }];
-  var createMockDatabase = function(dictMonadEffect) {
-    var liftEffect7 = liftEffect(dictMonadEffect);
-    return function __do3() {
-      var customersRef = $$new(initialCustomers)();
-      var nextIdRef = $$new(102)();
-      return {
-        getAllCustomers: liftEffect7(read(customersRef)),
-        addNewCustomer: function(name15) {
-          return liftEffect7(function __do4() {
-            var customers = read(customersRef)();
-            var nextId = read(nextIdRef)();
-            var newCustomer = {
-              id: nextId,
-              name: name15
+  // output/Affjax/foreign.js
+  function _ajax(platformSpecificDriver, timeoutErrorMessageIdent, requestFailedMessageIdent, mkHeader, options2) {
+    return function(errback, callback) {
+      var xhr = platformSpecificDriver.newXHR();
+      var fixedUrl = platformSpecificDriver.fixupUrl(options2.url, xhr);
+      xhr.open(options2.method || "GET", fixedUrl, true, options2.username, options2.password);
+      if (options2.headers) {
+        try {
+          for (var i2 = 0, header2; (header2 = options2.headers[i2]) != null; i2++) {
+            xhr.setRequestHeader(header2.field, header2.value);
+          }
+        } catch (e) {
+          errback(e);
+        }
+      }
+      var onerror = function(msgIdent) {
+        return function() {
+          errback(new Error(msgIdent));
+        };
+      };
+      xhr.onerror = onerror(requestFailedMessageIdent);
+      xhr.ontimeout = onerror(timeoutErrorMessageIdent);
+      xhr.onload = function() {
+        callback({
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: xhr.getAllResponseHeaders().split("\r\n").filter(function(header3) {
+            return header3.length > 0;
+          }).map(function(header3) {
+            var i3 = header3.indexOf(":");
+            return mkHeader(header3.substring(0, i3))(header3.substring(i3 + 2));
+          }),
+          body: xhr.response
+        });
+      };
+      xhr.responseType = options2.responseType;
+      xhr.withCredentials = options2.withCredentials;
+      xhr.timeout = options2.timeout;
+      xhr.send(options2.content);
+      return function(error4, cancelErrback, cancelCallback) {
+        try {
+          xhr.abort();
+        } catch (e) {
+          return cancelErrback(e);
+        }
+        return cancelCallback();
+      };
+    };
+  }
+
+  // output/Data.MediaType.Common/index.js
+  var applicationJSON = "application/json";
+  var applicationFormURLEncoded = "application/x-www-form-urlencoded";
+
+  // output/Affjax.RequestBody/index.js
+  var ArrayView = /* @__PURE__ */ (function() {
+    function ArrayView2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ArrayView2.create = function(value0) {
+      return new ArrayView2(value0);
+    };
+    return ArrayView2;
+  })();
+  var Blob = /* @__PURE__ */ (function() {
+    function Blob3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Blob3.create = function(value0) {
+      return new Blob3(value0);
+    };
+    return Blob3;
+  })();
+  var Document = /* @__PURE__ */ (function() {
+    function Document3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Document3.create = function(value0) {
+      return new Document3(value0);
+    };
+    return Document3;
+  })();
+  var $$String = /* @__PURE__ */ (function() {
+    function $$String3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    $$String3.create = function(value0) {
+      return new $$String3(value0);
+    };
+    return $$String3;
+  })();
+  var FormData = /* @__PURE__ */ (function() {
+    function FormData2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    FormData2.create = function(value0) {
+      return new FormData2(value0);
+    };
+    return FormData2;
+  })();
+  var FormURLEncoded = /* @__PURE__ */ (function() {
+    function FormURLEncoded2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    FormURLEncoded2.create = function(value0) {
+      return new FormURLEncoded2(value0);
+    };
+    return FormURLEncoded2;
+  })();
+  var Json = /* @__PURE__ */ (function() {
+    function Json3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Json3.create = function(value0) {
+      return new Json3(value0);
+    };
+    return Json3;
+  })();
+  var toMediaType = function(v2) {
+    if (v2 instanceof FormURLEncoded) {
+      return new Just(applicationFormURLEncoded);
+    }
+    ;
+    if (v2 instanceof Json) {
+      return new Just(applicationJSON);
+    }
+    ;
+    return Nothing.value;
+  };
+  var json = /* @__PURE__ */ (function() {
+    return Json.create;
+  })();
+
+  // output/Affjax.RequestHeader/index.js
+  var unwrap4 = /* @__PURE__ */ unwrap();
+  var Accept = /* @__PURE__ */ (function() {
+    function Accept2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Accept2.create = function(value0) {
+      return new Accept2(value0);
+    };
+    return Accept2;
+  })();
+  var ContentType = /* @__PURE__ */ (function() {
+    function ContentType2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ContentType2.create = function(value0) {
+      return new ContentType2(value0);
+    };
+    return ContentType2;
+  })();
+  var RequestHeader = /* @__PURE__ */ (function() {
+    function RequestHeader2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    RequestHeader2.create = function(value0) {
+      return function(value1) {
+        return new RequestHeader2(value0, value1);
+      };
+    };
+    return RequestHeader2;
+  })();
+  var value4 = function(v2) {
+    if (v2 instanceof Accept) {
+      return unwrap4(v2.value0);
+    }
+    ;
+    if (v2 instanceof ContentType) {
+      return unwrap4(v2.value0);
+    }
+    ;
+    if (v2 instanceof RequestHeader) {
+      return v2.value1;
+    }
+    ;
+    throw new Error("Failed pattern match at Affjax.RequestHeader (line 26, column 1 - line 26, column 33): " + [v2.constructor.name]);
+  };
+  var name3 = function(v2) {
+    if (v2 instanceof Accept) {
+      return "Accept";
+    }
+    ;
+    if (v2 instanceof ContentType) {
+      return "Content-Type";
+    }
+    ;
+    if (v2 instanceof RequestHeader) {
+      return v2.value0;
+    }
+    ;
+    throw new Error("Failed pattern match at Affjax.RequestHeader (line 21, column 1 - line 21, column 32): " + [v2.constructor.name]);
+  };
+
+  // output/Affjax.ResponseFormat/index.js
+  var identity10 = /* @__PURE__ */ identity(categoryFn);
+  var $$ArrayBuffer = /* @__PURE__ */ (function() {
+    function $$ArrayBuffer2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    $$ArrayBuffer2.create = function(value0) {
+      return new $$ArrayBuffer2(value0);
+    };
+    return $$ArrayBuffer2;
+  })();
+  var Blob2 = /* @__PURE__ */ (function() {
+    function Blob3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Blob3.create = function(value0) {
+      return new Blob3(value0);
+    };
+    return Blob3;
+  })();
+  var Document2 = /* @__PURE__ */ (function() {
+    function Document3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Document3.create = function(value0) {
+      return new Document3(value0);
+    };
+    return Document3;
+  })();
+  var Json2 = /* @__PURE__ */ (function() {
+    function Json3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Json3.create = function(value0) {
+      return new Json3(value0);
+    };
+    return Json3;
+  })();
+  var $$String2 = /* @__PURE__ */ (function() {
+    function $$String3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    $$String3.create = function(value0) {
+      return new $$String3(value0);
+    };
+    return $$String3;
+  })();
+  var Ignore = /* @__PURE__ */ (function() {
+    function Ignore2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Ignore2.create = function(value0) {
+      return new Ignore2(value0);
+    };
+    return Ignore2;
+  })();
+  var toResponseType = function(v2) {
+    if (v2 instanceof $$ArrayBuffer) {
+      return "arraybuffer";
+    }
+    ;
+    if (v2 instanceof Blob2) {
+      return "blob";
+    }
+    ;
+    if (v2 instanceof Document2) {
+      return "document";
+    }
+    ;
+    if (v2 instanceof Json2) {
+      return "text";
+    }
+    ;
+    if (v2 instanceof $$String2) {
+      return "text";
+    }
+    ;
+    if (v2 instanceof Ignore) {
+      return "";
+    }
+    ;
+    throw new Error("Failed pattern match at Affjax.ResponseFormat (line 44, column 3 - line 50, column 19): " + [v2.constructor.name]);
+  };
+  var toMediaType2 = function(v2) {
+    if (v2 instanceof Json2) {
+      return new Just(applicationJSON);
+    }
+    ;
+    return Nothing.value;
+  };
+  var json2 = /* @__PURE__ */ (function() {
+    return new Json2(identity10);
+  })();
+  var ignore = /* @__PURE__ */ (function() {
+    return new Ignore(identity10);
+  })();
+
+  // output/Affjax.ResponseHeader/index.js
+  var ResponseHeader = /* @__PURE__ */ (function() {
+    function ResponseHeader2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ResponseHeader2.create = function(value0) {
+      return function(value1) {
+        return new ResponseHeader2(value0, value1);
+      };
+    };
+    return ResponseHeader2;
+  })();
+
+  // output/Data.Argonaut.Core/foreign.js
+  function id3(x) {
+    return x;
+  }
+  function stringify(j) {
+    return JSON.stringify(j);
+  }
+  function _caseJson(isNull3, isBool, isNum, isStr, isArr, isObj, j) {
+    if (j == null) return isNull3();
+    else if (typeof j === "boolean") return isBool(j);
+    else if (typeof j === "number") return isNum(j);
+    else if (typeof j === "string") return isStr(j);
+    else if (Object.prototype.toString.call(j) === "[object Array]")
+      return isArr(j);
+    else return isObj(j);
+  }
+
+  // output/Data.Argonaut.Core/index.js
+  var verbJsonType = function(def) {
+    return function(f) {
+      return function(g) {
+        return g(def)(f);
+      };
+    };
+  };
+  var toJsonType = /* @__PURE__ */ (function() {
+    return verbJsonType(Nothing.value)(Just.create);
+  })();
+  var jsonEmptyObject = /* @__PURE__ */ id3(empty2);
+  var isJsonType = /* @__PURE__ */ verbJsonType(false)(/* @__PURE__ */ $$const(true));
+  var caseJsonString = function(d) {
+    return function(f) {
+      return function(j) {
+        return _caseJson($$const(d), $$const(d), $$const(d), f, $$const(d), $$const(d), j);
+      };
+    };
+  };
+  var caseJsonObject = function(d) {
+    return function(f) {
+      return function(j) {
+        return _caseJson($$const(d), $$const(d), $$const(d), $$const(d), $$const(d), f, j);
+      };
+    };
+  };
+  var toObject = /* @__PURE__ */ toJsonType(caseJsonObject);
+  var caseJsonNumber = function(d) {
+    return function(f) {
+      return function(j) {
+        return _caseJson($$const(d), $$const(d), f, $$const(d), $$const(d), $$const(d), j);
+      };
+    };
+  };
+  var caseJsonNull = function(d) {
+    return function(f) {
+      return function(j) {
+        return _caseJson(f, $$const(d), $$const(d), $$const(d), $$const(d), $$const(d), j);
+      };
+    };
+  };
+  var isNull2 = /* @__PURE__ */ isJsonType(caseJsonNull);
+  var caseJsonArray = function(d) {
+    return function(f) {
+      return function(j) {
+        return _caseJson($$const(d), $$const(d), $$const(d), $$const(d), f, $$const(d), j);
+      };
+    };
+  };
+  var toArray = /* @__PURE__ */ toJsonType(caseJsonArray);
+
+  // output/Data.Argonaut.Parser/foreign.js
+  function _jsonParser(fail3, succ, s2) {
+    try {
+      return succ(JSON.parse(s2));
+    } catch (e) {
+      return fail3(e.message);
+    }
+  }
+
+  // output/Data.Argonaut.Parser/index.js
+  var jsonParser = function(j) {
+    return _jsonParser(Left.create, Right.create, j);
+  };
+
+  // output/JSURI/foreign.js
+  function encodeURIComponent_to_RFC3986(input3) {
+    return input3.replace(/[!'()*]/g, function(c2) {
+      return "%" + c2.charCodeAt(0).toString(16);
+    });
+  }
+  function _encodeFormURLComponent(fail3, succeed, input3) {
+    try {
+      return succeed(encodeURIComponent_to_RFC3986(encodeURIComponent(input3)).replace(/%20/g, "+"));
+    } catch (err) {
+      return fail3(err);
+    }
+  }
+
+  // output/JSURI/index.js
+  var encodeFormURLComponent = /* @__PURE__ */ (function() {
+    return runFn3(_encodeFormURLComponent)($$const(Nothing.value))(Just.create);
+  })();
+
+  // output/Data.FormURLEncoded/index.js
+  var apply2 = /* @__PURE__ */ apply(applyMaybe);
+  var map17 = /* @__PURE__ */ map(functorMaybe);
+  var traverse2 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
+  var toArray2 = function(v2) {
+    return v2;
+  };
+  var encode = /* @__PURE__ */ (function() {
+    var encodePart = function(v2) {
+      if (v2.value1 instanceof Nothing) {
+        return encodeFormURLComponent(v2.value0);
+      }
+      ;
+      if (v2.value1 instanceof Just) {
+        return apply2(map17(function(key2) {
+          return function(val) {
+            return key2 + ("=" + val);
+          };
+        })(encodeFormURLComponent(v2.value0)))(encodeFormURLComponent(v2.value1.value0));
+      }
+      ;
+      throw new Error("Failed pattern match at Data.FormURLEncoded (line 37, column 16 - line 39, column 114): " + [v2.constructor.name]);
+    };
+    var $37 = map17(joinWith("&"));
+    var $38 = traverse2(encodePart);
+    return function($39) {
+      return $37($38(toArray2($39)));
+    };
+  })();
+
+  // output/Data.HTTP.Method/index.js
+  var OPTIONS = /* @__PURE__ */ (function() {
+    function OPTIONS2() {
+    }
+    ;
+    OPTIONS2.value = new OPTIONS2();
+    return OPTIONS2;
+  })();
+  var GET2 = /* @__PURE__ */ (function() {
+    function GET3() {
+    }
+    ;
+    GET3.value = new GET3();
+    return GET3;
+  })();
+  var HEAD = /* @__PURE__ */ (function() {
+    function HEAD2() {
+    }
+    ;
+    HEAD2.value = new HEAD2();
+    return HEAD2;
+  })();
+  var POST2 = /* @__PURE__ */ (function() {
+    function POST3() {
+    }
+    ;
+    POST3.value = new POST3();
+    return POST3;
+  })();
+  var PUT = /* @__PURE__ */ (function() {
+    function PUT2() {
+    }
+    ;
+    PUT2.value = new PUT2();
+    return PUT2;
+  })();
+  var DELETE = /* @__PURE__ */ (function() {
+    function DELETE2() {
+    }
+    ;
+    DELETE2.value = new DELETE2();
+    return DELETE2;
+  })();
+  var TRACE = /* @__PURE__ */ (function() {
+    function TRACE2() {
+    }
+    ;
+    TRACE2.value = new TRACE2();
+    return TRACE2;
+  })();
+  var CONNECT = /* @__PURE__ */ (function() {
+    function CONNECT2() {
+    }
+    ;
+    CONNECT2.value = new CONNECT2();
+    return CONNECT2;
+  })();
+  var PROPFIND = /* @__PURE__ */ (function() {
+    function PROPFIND2() {
+    }
+    ;
+    PROPFIND2.value = new PROPFIND2();
+    return PROPFIND2;
+  })();
+  var PROPPATCH = /* @__PURE__ */ (function() {
+    function PROPPATCH2() {
+    }
+    ;
+    PROPPATCH2.value = new PROPPATCH2();
+    return PROPPATCH2;
+  })();
+  var MKCOL = /* @__PURE__ */ (function() {
+    function MKCOL2() {
+    }
+    ;
+    MKCOL2.value = new MKCOL2();
+    return MKCOL2;
+  })();
+  var COPY = /* @__PURE__ */ (function() {
+    function COPY2() {
+    }
+    ;
+    COPY2.value = new COPY2();
+    return COPY2;
+  })();
+  var MOVE = /* @__PURE__ */ (function() {
+    function MOVE2() {
+    }
+    ;
+    MOVE2.value = new MOVE2();
+    return MOVE2;
+  })();
+  var LOCK = /* @__PURE__ */ (function() {
+    function LOCK2() {
+    }
+    ;
+    LOCK2.value = new LOCK2();
+    return LOCK2;
+  })();
+  var UNLOCK = /* @__PURE__ */ (function() {
+    function UNLOCK2() {
+    }
+    ;
+    UNLOCK2.value = new UNLOCK2();
+    return UNLOCK2;
+  })();
+  var PATCH = /* @__PURE__ */ (function() {
+    function PATCH2() {
+    }
+    ;
+    PATCH2.value = new PATCH2();
+    return PATCH2;
+  })();
+  var unCustomMethod = function(v2) {
+    return v2;
+  };
+  var showMethod = {
+    show: function(v2) {
+      if (v2 instanceof OPTIONS) {
+        return "OPTIONS";
+      }
+      ;
+      if (v2 instanceof GET2) {
+        return "GET";
+      }
+      ;
+      if (v2 instanceof HEAD) {
+        return "HEAD";
+      }
+      ;
+      if (v2 instanceof POST2) {
+        return "POST";
+      }
+      ;
+      if (v2 instanceof PUT) {
+        return "PUT";
+      }
+      ;
+      if (v2 instanceof DELETE) {
+        return "DELETE";
+      }
+      ;
+      if (v2 instanceof TRACE) {
+        return "TRACE";
+      }
+      ;
+      if (v2 instanceof CONNECT) {
+        return "CONNECT";
+      }
+      ;
+      if (v2 instanceof PROPFIND) {
+        return "PROPFIND";
+      }
+      ;
+      if (v2 instanceof PROPPATCH) {
+        return "PROPPATCH";
+      }
+      ;
+      if (v2 instanceof MKCOL) {
+        return "MKCOL";
+      }
+      ;
+      if (v2 instanceof COPY) {
+        return "COPY";
+      }
+      ;
+      if (v2 instanceof MOVE) {
+        return "MOVE";
+      }
+      ;
+      if (v2 instanceof LOCK) {
+        return "LOCK";
+      }
+      ;
+      if (v2 instanceof UNLOCK) {
+        return "UNLOCK";
+      }
+      ;
+      if (v2 instanceof PATCH) {
+        return "PATCH";
+      }
+      ;
+      throw new Error("Failed pattern match at Data.HTTP.Method (line 43, column 1 - line 59, column 23): " + [v2.constructor.name]);
+    }
+  };
+  var print2 = /* @__PURE__ */ either(/* @__PURE__ */ show(showMethod))(unCustomMethod);
+
+  // output/Effect.Aff.Compat/index.js
+  var fromEffectFnAff = function(v2) {
+    return makeAff(function(k) {
+      return function __do3() {
+        var v1 = v2(function($9) {
+          return k(Left.create($9))();
+        }, function($10) {
+          return k(Right.create($10))();
+        });
+        return function(e) {
+          return makeAff(function(k2) {
+            return function __do4() {
+              v1(e, function($11) {
+                return k2(Left.create($11))();
+              }, function($12) {
+                return k2(Right.create($12))();
+              });
+              return nonCanceler;
             };
-            write(snoc(customers)(newCustomer))(customersRef)();
-            return write(nextId + 1 | 0)(nextIdRef)();
           });
-        },
-        updateCustomerName: function(v2) {
-          return liftEffect7(function __do4() {
-            var customers = read(customersRef)();
-            var updatedCustomers = map13(function(c2) {
-              var $13 = c2.id === v2.id;
-              if ($13) {
-                return {
-                  id: c2.id,
-                  name: v2.name
-                };
+        };
+      };
+    });
+  };
+
+  // output/Affjax/index.js
+  var pure6 = /* @__PURE__ */ pure(/* @__PURE__ */ applicativeExceptT(monadIdentity));
+  var fail2 = /* @__PURE__ */ fail(monadIdentity);
+  var unsafeReadTagged3 = /* @__PURE__ */ unsafeReadTagged(monadIdentity);
+  var alt4 = /* @__PURE__ */ alt(/* @__PURE__ */ altExceptT(semigroupNonEmptyList)(monadIdentity));
+  var composeKleisliFlipped3 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
+  var map18 = /* @__PURE__ */ map(functorMaybe);
+  var any2 = /* @__PURE__ */ any(foldableArray)(heytingAlgebraBoolean);
+  var eq3 = /* @__PURE__ */ eq(eqString);
+  var bindFlipped4 = /* @__PURE__ */ bindFlipped(bindMaybe);
+  var map19 = /* @__PURE__ */ map(functorArray);
+  var mapFlipped2 = /* @__PURE__ */ mapFlipped(functorAff);
+  var $$try3 = /* @__PURE__ */ $$try(monadErrorAff);
+  var pure12 = /* @__PURE__ */ pure(applicativeAff);
+  var map22 = /* @__PURE__ */ map(functorAff);
+  var $$void6 = /* @__PURE__ */ $$void(functorEither);
+  var RequestContentError = /* @__PURE__ */ (function() {
+    function RequestContentError2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    RequestContentError2.create = function(value0) {
+      return new RequestContentError2(value0);
+    };
+    return RequestContentError2;
+  })();
+  var ResponseBodyError = /* @__PURE__ */ (function() {
+    function ResponseBodyError2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ResponseBodyError2.create = function(value0) {
+      return function(value1) {
+        return new ResponseBodyError2(value0, value1);
+      };
+    };
+    return ResponseBodyError2;
+  })();
+  var TimeoutError = /* @__PURE__ */ (function() {
+    function TimeoutError2() {
+    }
+    ;
+    TimeoutError2.value = new TimeoutError2();
+    return TimeoutError2;
+  })();
+  var RequestFailedError = /* @__PURE__ */ (function() {
+    function RequestFailedError2() {
+    }
+    ;
+    RequestFailedError2.value = new RequestFailedError2();
+    return RequestFailedError2;
+  })();
+  var XHROtherError = /* @__PURE__ */ (function() {
+    function XHROtherError2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    XHROtherError2.create = function(value0) {
+      return new XHROtherError2(value0);
+    };
+    return XHROtherError2;
+  })();
+  var request = function(driver2) {
+    return function(req) {
+      var parseJSON = function(v3) {
+        if (v3 === "") {
+          return pure6(jsonEmptyObject);
+        }
+        ;
+        return either(function($74) {
+          return fail2(ForeignError.create($74));
+        })(pure6)(jsonParser(v3));
+      };
+      var fromResponse = (function() {
+        if (req.responseFormat instanceof $$ArrayBuffer) {
+          return unsafeReadTagged3("ArrayBuffer");
+        }
+        ;
+        if (req.responseFormat instanceof Blob2) {
+          return unsafeReadTagged3("Blob");
+        }
+        ;
+        if (req.responseFormat instanceof Document2) {
+          return function(x) {
+            return alt4(unsafeReadTagged3("Document")(x))(alt4(unsafeReadTagged3("XMLDocument")(x))(unsafeReadTagged3("HTMLDocument")(x)));
+          };
+        }
+        ;
+        if (req.responseFormat instanceof Json2) {
+          return composeKleisliFlipped3(function($75) {
+            return req.responseFormat.value0(parseJSON($75));
+          })(unsafeReadTagged3("String"));
+        }
+        ;
+        if (req.responseFormat instanceof $$String2) {
+          return unsafeReadTagged3("String");
+        }
+        ;
+        if (req.responseFormat instanceof Ignore) {
+          return $$const(req.responseFormat.value0(pure6(unit)));
+        }
+        ;
+        throw new Error("Failed pattern match at Affjax (line 274, column 18 - line 283, column 57): " + [req.responseFormat.constructor.name]);
+      })();
+      var extractContent = function(v3) {
+        if (v3 instanceof ArrayView) {
+          return new Right(v3.value0(unsafeToForeign));
+        }
+        ;
+        if (v3 instanceof Blob) {
+          return new Right(unsafeToForeign(v3.value0));
+        }
+        ;
+        if (v3 instanceof Document) {
+          return new Right(unsafeToForeign(v3.value0));
+        }
+        ;
+        if (v3 instanceof $$String) {
+          return new Right(unsafeToForeign(v3.value0));
+        }
+        ;
+        if (v3 instanceof FormData) {
+          return new Right(unsafeToForeign(v3.value0));
+        }
+        ;
+        if (v3 instanceof FormURLEncoded) {
+          return note("Body contains values that cannot be encoded as application/x-www-form-urlencoded")(map18(unsafeToForeign)(encode(v3.value0)));
+        }
+        ;
+        if (v3 instanceof Json) {
+          return new Right(unsafeToForeign(stringify(v3.value0)));
+        }
+        ;
+        throw new Error("Failed pattern match at Affjax (line 235, column 20 - line 250, column 69): " + [v3.constructor.name]);
+      };
+      var addHeader = function(mh) {
+        return function(hs) {
+          if (mh instanceof Just && !any2(on(eq3)(name3)(mh.value0))(hs)) {
+            return snoc(hs)(mh.value0);
+          }
+          ;
+          return hs;
+        };
+      };
+      var headers = function(reqContent) {
+        return addHeader(map18(ContentType.create)(bindFlipped4(toMediaType)(reqContent)))(addHeader(map18(Accept.create)(toMediaType2(req.responseFormat)))(req.headers));
+      };
+      var ajaxRequest = function(v3) {
+        return {
+          method: print2(req.method),
+          url: req.url,
+          headers: map19(function(h7) {
+            return {
+              field: name3(h7),
+              value: value4(h7)
+            };
+          })(headers(req.content)),
+          content: v3,
+          responseType: toResponseType(req.responseFormat),
+          username: toNullable(req.username),
+          password: toNullable(req.password),
+          withCredentials: req.withCredentials,
+          timeout: fromMaybe(0)(map18(function(v1) {
+            return v1;
+          })(req.timeout))
+        };
+      };
+      var send = function(content3) {
+        return mapFlipped2($$try3(fromEffectFnAff(_ajax(driver2, "AffjaxTimeoutErrorMessageIdent", "AffjaxRequestFailedMessageIdent", ResponseHeader.create, ajaxRequest(content3)))))(function(v3) {
+          if (v3 instanceof Right) {
+            var v1 = runExcept(fromResponse(v3.value0.body));
+            if (v1 instanceof Left) {
+              return new Left(new ResponseBodyError(head(v1.value0), v3.value0));
+            }
+            ;
+            if (v1 instanceof Right) {
+              return new Right({
+                headers: v3.value0.headers,
+                status: v3.value0.status,
+                statusText: v3.value0.statusText,
+                body: v1.value0
+              });
+            }
+            ;
+            throw new Error("Failed pattern match at Affjax (line 209, column 9 - line 211, column 52): " + [v1.constructor.name]);
+          }
+          ;
+          if (v3 instanceof Left) {
+            return new Left((function() {
+              var message2 = message(v3.value0);
+              var $61 = message2 === "AffjaxTimeoutErrorMessageIdent";
+              if ($61) {
+                return TimeoutError.value;
               }
               ;
-              return c2;
-            })(customers);
-            return write(updatedCustomers)(customersRef)();
+              var $62 = message2 === "AffjaxRequestFailedMessageIdent";
+              if ($62) {
+                return RequestFailedError.value;
+              }
+              ;
+              return new XHROtherError(v3.value0);
+            })());
+          }
+          ;
+          throw new Error("Failed pattern match at Affjax (line 207, column 144 - line 219, column 28): " + [v3.constructor.name]);
+        });
+      };
+      if (req.content instanceof Nothing) {
+        return send(toNullable(Nothing.value));
+      }
+      ;
+      if (req.content instanceof Just) {
+        var v2 = extractContent(req.content.value0);
+        if (v2 instanceof Right) {
+          return send(toNullable(new Just(v2.value0)));
+        }
+        ;
+        if (v2 instanceof Left) {
+          return pure12(new Left(new RequestContentError(v2.value0)));
+        }
+        ;
+        throw new Error("Failed pattern match at Affjax (line 199, column 7 - line 203, column 48): " + [v2.constructor.name]);
+      }
+      ;
+      throw new Error("Failed pattern match at Affjax (line 195, column 3 - line 203, column 48): " + [req.content.constructor.name]);
+    };
+  };
+  var printError = function(v2) {
+    if (v2 instanceof RequestContentError) {
+      return "There was a problem with the request content: " + v2.value0;
+    }
+    ;
+    if (v2 instanceof ResponseBodyError) {
+      return "There was a problem with the response body: " + renderForeignError(v2.value0);
+    }
+    ;
+    if (v2 instanceof TimeoutError) {
+      return "There was a problem making the request: timeout";
+    }
+    ;
+    if (v2 instanceof RequestFailedError) {
+      return "There was a problem making the request: request failed";
+    }
+    ;
+    if (v2 instanceof XHROtherError) {
+      return "There was a problem making the request: " + message(v2.value0);
+    }
+    ;
+    throw new Error("Failed pattern match at Affjax (line 113, column 14 - line 123, column 66): " + [v2.constructor.name]);
+  };
+  var defaultRequest = /* @__PURE__ */ (function() {
+    return {
+      method: new Left(GET2.value),
+      url: "/",
+      headers: [],
+      content: Nothing.value,
+      username: Nothing.value,
+      password: Nothing.value,
+      withCredentials: false,
+      responseFormat: ignore,
+      timeout: Nothing.value
+    };
+  })();
+  var $$delete2 = function(driver2) {
+    return function(rf) {
+      return function(u2) {
+        return request(driver2)({
+          headers: defaultRequest.headers,
+          content: defaultRequest.content,
+          username: defaultRequest.username,
+          password: defaultRequest.password,
+          withCredentials: defaultRequest.withCredentials,
+          timeout: defaultRequest.timeout,
+          method: new Left(DELETE.value),
+          url: u2,
+          responseFormat: rf
+        });
+      };
+    };
+  };
+  var delete_ = function(driver2) {
+    var $76 = map22($$void6);
+    var $77 = $$delete2(driver2)(ignore);
+    return function($78) {
+      return $76($77($78));
+    };
+  };
+  var get3 = function(driver2) {
+    return function(rf) {
+      return function(u2) {
+        return request(driver2)({
+          method: defaultRequest.method,
+          headers: defaultRequest.headers,
+          content: defaultRequest.content,
+          username: defaultRequest.username,
+          password: defaultRequest.password,
+          withCredentials: defaultRequest.withCredentials,
+          timeout: defaultRequest.timeout,
+          url: u2,
+          responseFormat: rf
+        });
+      };
+    };
+  };
+  var post = function(driver2) {
+    return function(rf) {
+      return function(u2) {
+        return function(c2) {
+          return request(driver2)({
+            headers: defaultRequest.headers,
+            username: defaultRequest.username,
+            password: defaultRequest.password,
+            withCredentials: defaultRequest.withCredentials,
+            timeout: defaultRequest.timeout,
+            method: new Left(POST2.value),
+            url: u2,
+            content: c2,
+            responseFormat: rf
           });
-        },
-        deleteCustomer: function(id2) {
-          return liftEffect7(function __do4() {
-            var customers = read(customersRef)();
-            var filteredCustomers = filter(function(c2) {
-              return c2.id !== id2;
-            })(customers);
-            return write(filteredCustomers)(customersRef)();
+        };
+      };
+    };
+  };
+  var put2 = function(driver2) {
+    return function(rf) {
+      return function(u2) {
+        return function(c2) {
+          return request(driver2)({
+            headers: defaultRequest.headers,
+            username: defaultRequest.username,
+            password: defaultRequest.password,
+            withCredentials: defaultRequest.withCredentials,
+            timeout: defaultRequest.timeout,
+            method: new Left(PUT.value),
+            url: u2,
+            content: c2,
+            responseFormat: rf
           });
+        };
+      };
+    };
+  };
+
+  // output/Affjax.Web/foreign.js
+  var driver = {
+    newXHR: function() {
+      return new XMLHttpRequest();
+    },
+    fixupUrl: function(url) {
+      return url || "/";
+    }
+  };
+
+  // output/Affjax.Web/index.js
+  var put3 = /* @__PURE__ */ put2(driver);
+  var post2 = /* @__PURE__ */ post(driver);
+  var get4 = /* @__PURE__ */ get3(driver);
+  var delete_2 = /* @__PURE__ */ delete_(driver);
+
+  // output/Data.Argonaut.Decode.Error/index.js
+  var show5 = /* @__PURE__ */ show(showString);
+  var show13 = /* @__PURE__ */ show(showInt);
+  var TypeMismatch2 = /* @__PURE__ */ (function() {
+    function TypeMismatch3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    TypeMismatch3.create = function(value0) {
+      return new TypeMismatch3(value0);
+    };
+    return TypeMismatch3;
+  })();
+  var UnexpectedValue = /* @__PURE__ */ (function() {
+    function UnexpectedValue2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    UnexpectedValue2.create = function(value0) {
+      return new UnexpectedValue2(value0);
+    };
+    return UnexpectedValue2;
+  })();
+  var AtIndex = /* @__PURE__ */ (function() {
+    function AtIndex2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    AtIndex2.create = function(value0) {
+      return function(value1) {
+        return new AtIndex2(value0, value1);
+      };
+    };
+    return AtIndex2;
+  })();
+  var AtKey = /* @__PURE__ */ (function() {
+    function AtKey2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    AtKey2.create = function(value0) {
+      return function(value1) {
+        return new AtKey2(value0, value1);
+      };
+    };
+    return AtKey2;
+  })();
+  var Named2 = /* @__PURE__ */ (function() {
+    function Named3(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    Named3.create = function(value0) {
+      return function(value1) {
+        return new Named3(value0, value1);
+      };
+    };
+    return Named3;
+  })();
+  var MissingValue = /* @__PURE__ */ (function() {
+    function MissingValue2() {
+    }
+    ;
+    MissingValue2.value = new MissingValue2();
+    return MissingValue2;
+  })();
+  var showJsonDecodeError = {
+    show: function(v2) {
+      if (v2 instanceof TypeMismatch2) {
+        return "(TypeMismatch " + (show5(v2.value0) + ")");
+      }
+      ;
+      if (v2 instanceof UnexpectedValue) {
+        return "(UnexpectedValue " + (stringify(v2.value0) + ")");
+      }
+      ;
+      if (v2 instanceof AtIndex) {
+        return "(AtIndex " + (show13(v2.value0) + (" " + (show(showJsonDecodeError)(v2.value1) + ")")));
+      }
+      ;
+      if (v2 instanceof AtKey) {
+        return "(AtKey " + (show5(v2.value0) + (" " + (show(showJsonDecodeError)(v2.value1) + ")")));
+      }
+      ;
+      if (v2 instanceof Named2) {
+        return "(Named " + (show5(v2.value0) + (" " + (show(showJsonDecodeError)(v2.value1) + ")")));
+      }
+      ;
+      if (v2 instanceof MissingValue) {
+        return "MissingValue";
+      }
+      ;
+      throw new Error("Failed pattern match at Data.Argonaut.Decode.Error (line 24, column 10 - line 30, column 35): " + [v2.constructor.name]);
+    }
+  };
+
+  // output/Data.Argonaut.Decode.Decoders/index.js
+  var pure7 = /* @__PURE__ */ pure(applicativeEither);
+  var map20 = /* @__PURE__ */ map(functorEither);
+  var lmap2 = /* @__PURE__ */ lmap(bifunctorEither);
+  var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(bindEither);
+  var traverseWithIndex2 = /* @__PURE__ */ traverseWithIndex(traversableWithIndexArray)(applicativeEither);
+  var decodeString = /* @__PURE__ */ (function() {
+    return caseJsonString(new Left(new TypeMismatch2("String")))(Right.create);
+  })();
+  var decodeNumber = /* @__PURE__ */ (function() {
+    return caseJsonNumber(new Left(new TypeMismatch2("Number")))(Right.create);
+  })();
+  var decodeMaybe = function(decoder) {
+    return function(json3) {
+      if (isNull2(json3)) {
+        return pure7(Nothing.value);
+      }
+      ;
+      if (otherwise) {
+        return map20(Just.create)(decoder(json3));
+      }
+      ;
+      throw new Error("Failed pattern match at Data.Argonaut.Decode.Decoders (line 37, column 1 - line 41, column 38): " + [decoder.constructor.name, json3.constructor.name]);
+    };
+  };
+  var decodeJArray = /* @__PURE__ */ (function() {
+    var $52 = note(new TypeMismatch2("Array"));
+    return function($53) {
+      return $52(toArray($53));
+    };
+  })();
+  var decodeInt = /* @__PURE__ */ composeKleisliFlipped4(/* @__PURE__ */ (function() {
+    var $84 = note(new TypeMismatch2("Integer"));
+    return function($85) {
+      return $84(fromNumber($85));
+    };
+  })())(decodeNumber);
+  var decodeArray = function(decoder) {
+    return composeKleisliFlipped4((function() {
+      var $89 = lmap2(Named2.create("Array"));
+      var $90 = traverseWithIndex2(function(i2) {
+        var $92 = lmap2(AtIndex.create(i2));
+        return function($93) {
+          return $92(decoder($93));
+        };
+      });
+      return function($91) {
+        return $89($90($91));
+      };
+    })())(decodeJArray);
+  };
+
+  // output/Record/index.js
+  var insert5 = function(dictIsSymbol) {
+    var reflectSymbol2 = reflectSymbol(dictIsSymbol);
+    return function() {
+      return function() {
+        return function(l2) {
+          return function(a3) {
+            return function(r) {
+              return unsafeSet(reflectSymbol2(l2))(a3)(r);
+            };
+          };
+        };
+      };
+    };
+  };
+  var get5 = function(dictIsSymbol) {
+    var reflectSymbol2 = reflectSymbol(dictIsSymbol);
+    return function() {
+      return function(l2) {
+        return function(r) {
+          return unsafeGet(reflectSymbol2(l2))(r);
+        };
+      };
+    };
+  };
+
+  // output/Data.Argonaut.Decode.Class/index.js
+  var bind4 = /* @__PURE__ */ bind(bindEither);
+  var lmap3 = /* @__PURE__ */ lmap(bifunctorEither);
+  var map21 = /* @__PURE__ */ map(functorMaybe);
+  var gDecodeJsonNil = {
+    gDecodeJson: function(v2) {
+      return function(v1) {
+        return new Right({});
+      };
+    }
+  };
+  var gDecodeJson = function(dict) {
+    return dict.gDecodeJson;
+  };
+  var decodeRecord = function(dictGDecodeJson) {
+    var gDecodeJson1 = gDecodeJson(dictGDecodeJson);
+    return function() {
+      return {
+        decodeJson: function(json3) {
+          var v2 = toObject(json3);
+          if (v2 instanceof Just) {
+            return gDecodeJson1(v2.value0)($$Proxy.value);
+          }
+          ;
+          if (v2 instanceof Nothing) {
+            return new Left(new TypeMismatch2("Object"));
+          }
+          ;
+          throw new Error("Failed pattern match at Data.Argonaut.Decode.Class (line 103, column 5 - line 105, column 46): " + [v2.constructor.name]);
         }
       };
+    };
+  };
+  var decodeJsonString = {
+    decodeJson: decodeString
+  };
+  var decodeJsonNumber = {
+    decodeJson: decodeNumber
+  };
+  var decodeJsonInt = {
+    decodeJson: decodeInt
+  };
+  var decodeJsonField = function(dict) {
+    return dict.decodeJsonField;
+  };
+  var gDecodeJsonCons = function(dictDecodeJsonField) {
+    var decodeJsonField1 = decodeJsonField(dictDecodeJsonField);
+    return function(dictGDecodeJson) {
+      var gDecodeJson1 = gDecodeJson(dictGDecodeJson);
+      return function(dictIsSymbol) {
+        var reflectSymbol2 = reflectSymbol(dictIsSymbol);
+        var insert7 = insert5(dictIsSymbol)()();
+        return function() {
+          return function() {
+            return {
+              gDecodeJson: function(object2) {
+                return function(v2) {
+                  var fieldName = reflectSymbol2($$Proxy.value);
+                  var fieldValue = lookup(fieldName)(object2);
+                  var v1 = decodeJsonField1(fieldValue);
+                  if (v1 instanceof Just) {
+                    return bind4(lmap3(AtKey.create(fieldName))(v1.value0))(function(val) {
+                      return bind4(gDecodeJson1(object2)($$Proxy.value))(function(rest) {
+                        return new Right(insert7($$Proxy.value)(val)(rest));
+                      });
+                    });
+                  }
+                  ;
+                  if (v1 instanceof Nothing) {
+                    return new Left(new AtKey(fieldName, MissingValue.value));
+                  }
+                  ;
+                  throw new Error("Failed pattern match at Data.Argonaut.Decode.Class (line 127, column 5 - line 134, column 44): " + [v1.constructor.name]);
+                };
+              }
+            };
+          };
+        };
+      };
+    };
+  };
+  var decodeJson = function(dict) {
+    return dict.decodeJson;
+  };
+  var decodeJsonMaybe = function(dictDecodeJson) {
+    return {
+      decodeJson: decodeMaybe(decodeJson(dictDecodeJson))
+    };
+  };
+  var decodeFieldMaybe = function(dictDecodeJson) {
+    var decodeJson12 = decodeJson(decodeJsonMaybe(dictDecodeJson));
+    return {
+      decodeJsonField: function(v2) {
+        if (v2 instanceof Nothing) {
+          return new Just(new Right(Nothing.value));
+        }
+        ;
+        if (v2 instanceof Just) {
+          return new Just(decodeJson12(v2.value0));
+        }
+        ;
+        throw new Error("Failed pattern match at Data.Argonaut.Decode.Class (line 139, column 1 - line 143, column 49): " + [v2.constructor.name]);
+      }
+    };
+  };
+  var decodeFieldId = function(dictDecodeJson) {
+    var decodeJson12 = decodeJson(dictDecodeJson);
+    return {
+      decodeJsonField: function(j) {
+        return map21(decodeJson12)(j);
+      }
+    };
+  };
+  var decodeArray2 = function(dictDecodeJson) {
+    return {
+      decodeJson: decodeArray(decodeJson(dictDecodeJson))
+    };
+  };
+
+  // output/Data.Argonaut.Encode.Encoders/index.js
+  var encodeString = id3;
+
+  // output/Data.Argonaut.Encode.Class/index.js
+  var gEncodeJsonNil = {
+    gEncodeJson: function(v2) {
+      return function(v1) {
+        return empty2;
+      };
+    }
+  };
+  var gEncodeJson = function(dict) {
+    return dict.gEncodeJson;
+  };
+  var encodeRecord = function(dictGEncodeJson) {
+    var gEncodeJson1 = gEncodeJson(dictGEncodeJson);
+    return function() {
+      return {
+        encodeJson: function(rec) {
+          return id3(gEncodeJson1(rec)($$Proxy.value));
+        }
+      };
+    };
+  };
+  var encodeJsonJString = {
+    encodeJson: encodeString
+  };
+  var encodeJson = function(dict) {
+    return dict.encodeJson;
+  };
+  var gEncodeJsonCons = function(dictEncodeJson) {
+    var encodeJson12 = encodeJson(dictEncodeJson);
+    return function(dictGEncodeJson) {
+      var gEncodeJson1 = gEncodeJson(dictGEncodeJson);
+      return function(dictIsSymbol) {
+        var reflectSymbol2 = reflectSymbol(dictIsSymbol);
+        var get6 = get5(dictIsSymbol)();
+        return function() {
+          return {
+            gEncodeJson: function(row) {
+              return function(v2) {
+                return insert(reflectSymbol2($$Proxy.value))(encodeJson12(get6($$Proxy.value)(row)))(gEncodeJson1(row)($$Proxy.value));
+              };
+            }
+          };
+        };
+      };
+    };
+  };
+
+  // output/Database.API/index.js
+  var bind5 = /* @__PURE__ */ bind(bindAff);
+  var throwError2 = /* @__PURE__ */ throwError(monadThrowAff);
+  var gDecodeJsonCons2 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonNumber));
+  var gDecodeJsonCons1 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldMaybe(decodeJsonString));
+  var nameIsSymbol = {
+    reflectSymbol: function() {
+      return "name";
+    }
+  };
+  var decodeRecord2 = /* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonInt))(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonString))(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldMaybe(decodeJsonNumber))(/* @__PURE__ */ gDecodeJsonCons1(gDecodeJsonNil)({
+    reflectSymbol: function() {
+      return "updated_at";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "rowHeight";
+    }
+  })()())(nameIsSymbol)()())({
+    reflectSymbol: function() {
+      return "money";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "id";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "gram_jewelry";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "gram_bar99";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "gram_bar96";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "created_at";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "baht_jewelry";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "baht_bar99";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "baht_bar96";
+    }
+  })()())();
+  var decodeJson2 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeArray2(decodeRecord2));
+  var show6 = /* @__PURE__ */ show(showJsonDecodeError);
+  var pure8 = /* @__PURE__ */ pure(applicativeAff);
+  var gEncodeJsonCons2 = /* @__PURE__ */ gEncodeJsonCons(encodeJsonJString);
+  var gEncodeJsonCons1 = /* @__PURE__ */ gEncodeJsonCons2(gEncodeJsonNil);
+  var encodeJson2 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons1(nameIsSymbol)())());
+  var decodeJson1 = /* @__PURE__ */ decodeJson(decodeRecord2);
+  var show14 = /* @__PURE__ */ show(showInt);
+  var encodeJson1 = /* @__PURE__ */ encodeJson(/* @__PURE__ */ encodeRecord(/* @__PURE__ */ gEncodeJsonCons2(/* @__PURE__ */ gEncodeJsonCons1({
+    reflectSymbol: function() {
+      return "value";
+    }
+  })())({
+    reflectSymbol: function() {
+      return "field";
+    }
+  })())());
+  var apiUrl = "/api/customers";
+  var createAPIDatabase = function(dictMonadAff) {
+    var liftAff2 = liftAff(dictMonadAff);
+    return {
+      getAllCustomers: liftAff2(bind5(get4(json2)(apiUrl))(function(result) {
+        if (result instanceof Left) {
+          return throwError2(error("API error: " + printError(result.value0)));
+        }
+        ;
+        if (result instanceof Right) {
+          var v2 = decodeJson2(result.value0.body);
+          if (v2 instanceof Left) {
+            return throwError2(error("JSON decode error: " + show6(v2.value0)));
+          }
+          ;
+          if (v2 instanceof Right) {
+            return pure8(v2.value0);
+          }
+          ;
+          throw new Error("Failed pattern match at Database.API (line 26, column 27 - line 28, column 44): " + [v2.constructor.name]);
+        }
+        ;
+        throw new Error("Failed pattern match at Database.API (line 24, column 7 - line 28, column 44): " + [result.constructor.name]);
+      })),
+      getChangesSince: function(since) {
+        return liftAff2(bind5(get4(json2)(apiUrl + ("/changes?since=" + since)))(function(result) {
+          if (result instanceof Left) {
+            return throwError2(error("API error: " + printError(result.value0)));
+          }
+          ;
+          if (result instanceof Right) {
+            var v2 = decodeJson2(result.value0.body);
+            if (v2 instanceof Left) {
+              return throwError2(error("JSON decode error: " + show6(v2.value0)));
+            }
+            ;
+            if (v2 instanceof Right) {
+              return pure8(v2.value0);
+            }
+            ;
+            throw new Error("Failed pattern match at Database.API (line 34, column 27 - line 36, column 44): " + [v2.constructor.name]);
+          }
+          ;
+          throw new Error("Failed pattern match at Database.API (line 32, column 7 - line 36, column 44): " + [result.constructor.name]);
+        }));
+      },
+      addNewCustomer: function(name16) {
+        return liftAff2(bind5(post2(json2)(apiUrl)(new Just(json(encodeJson2({
+          name: name16
+        })))))(function(result) {
+          if (result instanceof Left) {
+            return throwError2(error("API error: " + printError(result.value0)));
+          }
+          ;
+          if (result instanceof Right) {
+            var v2 = decodeJson1(result.value0.body);
+            if (v2 instanceof Left) {
+              return throwError2(error("JSON decode error: " + show6(v2.value0)));
+            }
+            ;
+            if (v2 instanceof Right) {
+              return pure8(v2.value0);
+            }
+            ;
+            throw new Error("Failed pattern match at Database.API (line 42, column 27 - line 44, column 42): " + [v2.constructor.name]);
+          }
+          ;
+          throw new Error("Failed pattern match at Database.API (line 40, column 7 - line 44, column 42): " + [result.constructor.name]);
+        }));
+      },
+      updateCustomerField: function(v2) {
+        return liftAff2(bind5(put3(json2)(apiUrl + ("/" + show14(v2.id)))(new Just(json(encodeJson1({
+          field: v2.field,
+          value: v2.value
+        })))))(function(result) {
+          if (result instanceof Left) {
+            return throwError2(error("API error: " + printError(result.value0)));
+          }
+          ;
+          if (result instanceof Right) {
+            var v1 = decodeJson1(result.value0.body);
+            if (v1 instanceof Left) {
+              return throwError2(error("JSON decode error: " + show6(v1.value0)));
+            }
+            ;
+            if (v1 instanceof Right) {
+              return pure8(v1.value0);
+            }
+            ;
+            throw new Error("Failed pattern match at Database.API (line 50, column 27 - line 52, column 42): " + [v1.constructor.name]);
+          }
+          ;
+          throw new Error("Failed pattern match at Database.API (line 48, column 7 - line 52, column 42): " + [result.constructor.name]);
+        }));
+      },
+      deleteCustomer: function(id4) {
+        return liftAff2(bind5(delete_2(apiUrl + ("/" + show14(id4))))(function(result) {
+          if (result instanceof Left) {
+            return throwError2(error("API error: " + printError(result.value0)));
+          }
+          ;
+          if (result instanceof Right) {
+            return pure8(unit);
+          }
+          ;
+          throw new Error("Failed pattern match at Database.API (line 56, column 7 - line 58, column 29): " + [result.constructor.name]);
+        }));
+      }
     };
   };
 
@@ -7225,11 +11434,11 @@
   };
 
   // output/Web.HTML.HTMLDocument/index.js
-  var map14 = /* @__PURE__ */ map(functorEffect);
+  var map23 = /* @__PURE__ */ map(functorEffect);
   var toParentNode = unsafeCoerce2;
   var toDocument = unsafeCoerce2;
   var readyState = function(doc) {
-    return map14((function() {
+    return map23((function() {
       var $4 = fromMaybe(Loading.value);
       return function($5) {
         return $4(parse($5));
@@ -7250,32 +11459,32 @@
   var toEventTarget = unsafeCoerce2;
 
   // output/Halogen.Aff.Util/index.js
-  var bind4 = /* @__PURE__ */ bind(bindAff);
+  var bind6 = /* @__PURE__ */ bind(bindAff);
   var liftEffect3 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var bindFlipped4 = /* @__PURE__ */ bindFlipped(bindEffect);
-  var composeKleisliFlipped3 = /* @__PURE__ */ composeKleisliFlipped(bindEffect);
-  var pure7 = /* @__PURE__ */ pure(applicativeAff);
+  var bindFlipped5 = /* @__PURE__ */ bindFlipped(bindEffect);
+  var composeKleisliFlipped5 = /* @__PURE__ */ composeKleisliFlipped(bindEffect);
+  var pure9 = /* @__PURE__ */ pure(applicativeAff);
   var bindFlipped1 = /* @__PURE__ */ bindFlipped(bindMaybe);
-  var pure1 = /* @__PURE__ */ pure(applicativeEffect);
-  var map15 = /* @__PURE__ */ map(functorEffect);
+  var pure13 = /* @__PURE__ */ pure(applicativeEffect);
+  var map24 = /* @__PURE__ */ map(functorEffect);
   var discard3 = /* @__PURE__ */ discard(discardUnit);
-  var throwError2 = /* @__PURE__ */ throwError(monadThrowAff);
+  var throwError3 = /* @__PURE__ */ throwError(monadThrowAff);
   var selectElement = function(query2) {
-    return bind4(liftEffect3(bindFlipped4(composeKleisliFlipped3((function() {
+    return bind6(liftEffect3(bindFlipped5(composeKleisliFlipped5((function() {
       var $16 = querySelector(query2);
       return function($17) {
         return $16(toParentNode($17));
       };
     })())(document2))(windowImpl)))(function(mel) {
-      return pure7(bindFlipped1(fromElement)(mel));
+      return pure9(bindFlipped1(fromElement)(mel));
     });
   };
-  var runHalogenAff = /* @__PURE__ */ runAff_(/* @__PURE__ */ either(throwException)(/* @__PURE__ */ $$const(/* @__PURE__ */ pure1(unit))));
+  var runHalogenAff = /* @__PURE__ */ runAff_(/* @__PURE__ */ either(throwException)(/* @__PURE__ */ $$const(/* @__PURE__ */ pure13(unit))));
   var awaitLoad = /* @__PURE__ */ makeAff(function(callback) {
     return function __do3() {
-      var rs = bindFlipped4(readyState)(bindFlipped4(document2)(windowImpl))();
+      var rs = bindFlipped5(readyState)(bindFlipped5(document2)(windowImpl))();
       if (rs instanceof Loading) {
-        var et = map15(toEventTarget)(windowImpl)();
+        var et = map24(toEventTarget)(windowImpl)();
         var listener = eventListener(function(v2) {
           return callback(new Right(unit));
         })();
@@ -7288,8 +11497,8 @@
     };
   });
   var awaitBody = /* @__PURE__ */ discard3(bindAff)(awaitLoad)(function() {
-    return bind4(selectElement("body"))(function(body2) {
-      return maybe(throwError2(error("Could not find body")))(pure7)(body2);
+    return bind6(selectElement("body"))(function(body2) {
+      return maybe(throwError3(error("Could not find body")))(pure9)(body2);
     });
   });
 
@@ -7305,8 +11514,15 @@
       return functorFiber;
     }
   };
-  var fork = function(dict) {
+  var fork2 = function(dict) {
     return dict.fork;
+  };
+
+  // output/Effect.Console/foreign.js
+  var warn = function(s2) {
+    return function() {
+      console.warn(s2);
+    };
   };
 
   // output/Halogen.Aff.Driver.State/index.js
@@ -7377,7 +11593,7 @@
 
   // output/Halogen.Aff.Driver.Eval/index.js
   var traverse_4 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
-  var bindFlipped5 = /* @__PURE__ */ bindFlipped(bindMaybe);
+  var bindFlipped6 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var lookup4 = /* @__PURE__ */ lookup2(ordSubscriptionId);
   var bind13 = /* @__PURE__ */ bind(bindAff);
   var liftEffect4 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -7385,19 +11601,19 @@
   var discard1 = /* @__PURE__ */ discard4(bindAff);
   var traverse_12 = /* @__PURE__ */ traverse_(applicativeAff);
   var traverse_22 = /* @__PURE__ */ traverse_12(foldableList);
-  var fork3 = /* @__PURE__ */ fork(monadForkAff);
-  var parSequence_2 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
-  var pure8 = /* @__PURE__ */ pure(applicativeAff);
-  var map17 = /* @__PURE__ */ map(functorCoyoneda);
+  var fork3 = /* @__PURE__ */ fork2(monadForkAff);
+  var parSequence_3 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
+  var pure10 = /* @__PURE__ */ pure(applicativeAff);
+  var map26 = /* @__PURE__ */ map(functorCoyoneda);
   var parallel3 = /* @__PURE__ */ parallel(parallelAff);
-  var map18 = /* @__PURE__ */ map(functorAff);
+  var map110 = /* @__PURE__ */ map(functorAff);
   var sequential2 = /* @__PURE__ */ sequential(parallelAff);
-  var map22 = /* @__PURE__ */ map(functorMaybe);
-  var insert3 = /* @__PURE__ */ insert(ordSubscriptionId);
+  var map27 = /* @__PURE__ */ map(functorMaybe);
+  var insert6 = /* @__PURE__ */ insert2(ordSubscriptionId);
   var retractFreeAp2 = /* @__PURE__ */ retractFreeAp(applicativeParAff);
-  var $$delete2 = /* @__PURE__ */ $$delete(ordForkId);
+  var $$delete4 = /* @__PURE__ */ $$delete(ordForkId);
   var unlessM2 = /* @__PURE__ */ unlessM(monadEffect);
-  var insert1 = /* @__PURE__ */ insert(ordForkId);
+  var insert1 = /* @__PURE__ */ insert2(ordForkId);
   var traverse_32 = /* @__PURE__ */ traverse_12(foldableMaybe);
   var lookup1 = /* @__PURE__ */ lookup2(ordForkId);
   var lookup22 = /* @__PURE__ */ lookup2(ordString);
@@ -7408,7 +11624,7 @@
       return function __do3() {
         var v2 = read(ref2)();
         var subs = read(v2.subscriptions)();
-        return traverse_4(unsubscribe)(bindFlipped5(lookup4(sid))(subs))();
+        return traverse_4(unsubscribe)(bindFlipped6(lookup4(sid))(subs))();
       };
     };
   };
@@ -7436,8 +11652,8 @@
         return bind13(liftEffect4(f))(function(result) {
           return bind13(liftEffect4(read(lchs)))(function(v2) {
             return discard1(traverse_22(fork3)(v2.finalizers))(function() {
-              return discard1(parSequence_2(v2.initializers))(function() {
-                return pure8(result);
+              return discard1(parSequence_3(v2.initializers))(function() {
+                return pure10(result);
               });
             });
           });
@@ -7462,7 +11678,7 @@
     return function(ref2) {
       return function(q3) {
         return bind13(liftEffect4(read(ref2)))(function(v2) {
-          return evalM(render2)(ref2)(v2["component"]["eval"](new Query(map17(Just.create)(liftCoyoneda(q3)), $$const(Nothing.value))));
+          return evalM(render2)(ref2)(v2["component"]["eval"](new Query(map26(Just.create)(liftCoyoneda(q3)), $$const(Nothing.value))));
         });
       };
     };
@@ -7481,7 +11697,7 @@
                     })(dsx);
                   }));
                 };
-                return map18(v22.value2)(sequential2(v22.value0(applicativeParAff)(evalChild)(v1.children)));
+                return map110(v22.value2)(sequential2(v22.value0(applicativeParAff)(evalChild)(v1.children)));
               })(cqb);
             });
           };
@@ -7492,7 +11708,7 @@
               return bind13(liftEffect4(read(ref2)))(function(v22) {
                 var v3 = v1.value0(v22.state);
                 if (unsafeRefEq(v22.state)(v3.value1)) {
-                  return pure8(v3.value0);
+                  return pure10(v3.value0);
                 }
                 ;
                 if (otherwise) {
@@ -7515,7 +11731,7 @@
                     state: v3.value1
                   })(ref2)))(function() {
                     return discard1(handleLifecycle(v22.lifecycleHandlers)(render2(v22.lifecycleHandlers)(ref2)))(function() {
-                      return pure8(v3.value0);
+                      return pure10(v3.value0);
                     });
                   });
                 }
@@ -7530,8 +11746,8 @@
                   return handleAff(evalF(render2)(ref2)(new Action(act)));
                 })))(function(finalize) {
                   return bind13(liftEffect4(read(ref2)))(function(v22) {
-                    return discard1(liftEffect4(modify_(map22(insert3(sid)(finalize)))(v22.subscriptions)))(function() {
-                      return pure8(v1.value1(sid));
+                    return discard1(liftEffect4(modify_(map27(insert6(sid)(finalize)))(v22.subscriptions)))(function() {
+                      return pure10(v1.value1(sid));
                     });
                   });
                 });
@@ -7540,7 +11756,7 @@
             ;
             if (v1 instanceof Unsubscribe) {
               return discard1(liftEffect4(unsubscribe3(v1.value0)(ref2)))(function() {
-                return pure8(v1.value1);
+                return pure10(v1.value1);
               });
             }
             ;
@@ -7556,7 +11772,7 @@
               return bind13(liftEffect4(read(ref2)))(function(v22) {
                 return bind13(liftEffect4(read(v22.handlerRef)))(function(handler3) {
                   return discard1(queueOrRun(v22.pendingOuts)(handler3(v1.value0)))(function() {
-                    return pure8(v1.value1);
+                    return pure10(v1.value1);
                   });
                 });
               });
@@ -7576,11 +11792,11 @@
                 return bind13(liftEffect4(read(ref2)))(function(v22) {
                   return bind13(liftEffect4($$new(false)))(function(doneRef) {
                     return bind13(fork3($$finally(liftEffect4(function __do3() {
-                      modify_($$delete2(fid))(v22.forks)();
+                      modify_($$delete4(fid))(v22.forks)();
                       return write(true)(doneRef)();
                     }))(evalM(render2)(ref2)(v1.value0))))(function(fiber) {
                       return discard1(liftEffect4(unlessM2(read(doneRef))(modify_(insert1(fid)(fiber))(v22.forks))))(function() {
-                        return pure8(v1.value1(fid));
+                        return pure10(v1.value1(fid));
                       });
                     });
                   });
@@ -7592,7 +11808,7 @@
               return bind13(liftEffect4(read(ref2)))(function(v22) {
                 return bind13(liftEffect4(read(v22.forks)))(function(forkMap) {
                   return discard1(traverse_32(joinFiber)(lookup1(v1.value0)(forkMap)))(function() {
-                    return pure8(v1.value1);
+                    return pure10(v1.value1);
                   });
                 });
               });
@@ -7602,7 +11818,7 @@
               return bind13(liftEffect4(read(ref2)))(function(v22) {
                 return bind13(liftEffect4(read(v22.forks)))(function(forkMap) {
                   return discard1(traverse_32(killFiber(error("Cancelled")))(lookup1(v1.value0)(forkMap)))(function() {
-                    return pure8(v1.value1);
+                    return pure10(v1.value1);
                   });
                 });
               });
@@ -7610,7 +11826,7 @@
             ;
             if (v1 instanceof GetRef) {
               return bind13(liftEffect4(read(ref2)))(function(v22) {
-                return pure8(v1.value1(lookup22(v1.value0)(v22.refs)));
+                return pure10(v1.value1(lookup22(v1.value0)(v22.refs)));
               });
             }
             ;
@@ -7659,24 +11875,24 @@
   };
 
   // output/Halogen.Aff.Driver/index.js
-  var bind5 = /* @__PURE__ */ bind(bindEffect);
+  var bind7 = /* @__PURE__ */ bind(bindEffect);
   var discard5 = /* @__PURE__ */ discard(discardUnit);
   var for_2 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var traverse_5 = /* @__PURE__ */ traverse_(applicativeAff)(foldableList);
-  var fork4 = /* @__PURE__ */ fork(monadForkAff);
-  var bindFlipped6 = /* @__PURE__ */ bindFlipped(bindEffect);
+  var fork4 = /* @__PURE__ */ fork2(monadForkAff);
+  var bindFlipped7 = /* @__PURE__ */ bindFlipped(bindEffect);
   var traverse_13 = /* @__PURE__ */ traverse_(applicativeEffect);
   var traverse_23 = /* @__PURE__ */ traverse_13(foldableMaybe);
   var traverse_33 = /* @__PURE__ */ traverse_13(foldableMap);
   var discard22 = /* @__PURE__ */ discard5(bindAff);
-  var parSequence_3 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
+  var parSequence_4 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var liftEffect5 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var pure9 = /* @__PURE__ */ pure(applicativeEffect);
-  var map19 = /* @__PURE__ */ map(functorEffect);
-  var pure12 = /* @__PURE__ */ pure(applicativeAff);
+  var pure11 = /* @__PURE__ */ pure(applicativeEffect);
+  var map28 = /* @__PURE__ */ map(functorEffect);
+  var pure14 = /* @__PURE__ */ pure(applicativeAff);
   var when3 = /* @__PURE__ */ when(applicativeEffect);
   var renderStateX2 = /* @__PURE__ */ renderStateX(functorEffect);
-  var $$void5 = /* @__PURE__ */ $$void(functorAff);
+  var $$void7 = /* @__PURE__ */ $$void(functorAff);
   var foreachSlot2 = /* @__PURE__ */ foreachSlot(applicativeEffect);
   var renderStateX_2 = /* @__PURE__ */ renderStateX_(applicativeEffect);
   var tailRecM3 = /* @__PURE__ */ tailRecM(monadRecEffect);
@@ -7703,9 +11919,9 @@
   };
   var cleanupSubscriptionsAndForks = function(v2) {
     return function __do3() {
-      bindFlipped6(traverse_23(traverse_33(unsubscribe)))(read(v2.subscriptions))();
+      bindFlipped7(traverse_23(traverse_33(unsubscribe)))(read(v2.subscriptions))();
       write(Nothing.value)(v2.subscriptions)();
-      bindFlipped6(traverse_33((function() {
+      bindFlipped7(traverse_33((function() {
         var $61 = killFiber(error("finalized"));
         return function($62) {
           return handleAff($61($62));
@@ -7723,7 +11939,7 @@
               var parentInitializer = evalM(render2)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
               return modify_(function(handlers) {
                 return {
-                  initializers: new Cons(discard22(parSequence_3(reverse2(handlers.initializers)))(function() {
+                  initializers: new Cons(discard22(parSequence_4(reverse2(handlers.initializers)))(function() {
                     return discard22(parentInitializer)(function() {
                       return liftEffect5(function __do3() {
                         handlePending(st.pendingQueries)();
@@ -7749,7 +11965,7 @@
                     initializers: Nil.value,
                     finalizers: pre2.finalizers
                   })(lchs)();
-                  bindFlipped6(unDriverStateX((function() {
+                  bindFlipped7(unDriverStateX((function() {
                     var $63 = render2(lchs);
                     return function($64) {
                       return $63((function(v2) {
@@ -7757,7 +11973,7 @@
                       })($64));
                     };
                   })()))(read($$var2))();
-                  bindFlipped6(squashChildInitializers(lchs)(pre2.initializers))(read($$var2))();
+                  bindFlipped7(squashChildInitializers(lchs)(pre2.initializers))(read($$var2))();
                   return $$var2;
                 };
               });
@@ -7770,7 +11986,7 @@
               return function(childrenOutRef) {
                 return unComponentSlot(function(slot) {
                   return function __do3() {
-                    var childrenIn = map19(slot.pop)(read(childrenInRef))();
+                    var childrenIn = map28(slot.pop)(read(childrenInRef))();
                     var $$var2 = (function() {
                       if (childrenIn instanceof Just) {
                         write(childrenIn.value0.value1)(childrenInRef)();
@@ -7778,7 +11994,7 @@
                         unDriverStateX(function(st) {
                           return function __do4() {
                             flip(write)(st.handlerRef)((function() {
-                              var $65 = maybe(pure12(unit))(handler3);
+                              var $65 = maybe(pure14(unit))(handler3);
                               return function($66) {
                                 return $65(slot.output($66));
                               };
@@ -7791,7 +12007,7 @@
                       ;
                       if (childrenIn instanceof Nothing) {
                         return runComponent(lchs)((function() {
-                          var $67 = maybe(pure12(unit))(handler3);
+                          var $67 = maybe(pure14(unit))(handler3);
                           return function($68) {
                             return $67(slot.output($68));
                           };
@@ -7800,18 +12016,18 @@
                       ;
                       throw new Error("Failed pattern match at Halogen.Aff.Driver (line 213, column 14 - line 222, column 98): " + [childrenIn.constructor.name]);
                     })();
-                    var isDuplicate = map19(function($69) {
+                    var isDuplicate = map28(function($69) {
                       return isJust(slot.get($69));
                     })(read(childrenOutRef))();
                     when3(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
                     modify_(slot.set($$var2))(childrenOutRef)();
-                    return bind5(read($$var2))(renderStateX2(function(v2) {
+                    return bind7(read($$var2))(renderStateX2(function(v2) {
                       if (v2 instanceof Nothing) {
                         return $$throw("Halogen internal error: child was not initialized in renderChild");
                       }
                       ;
                       if (v2 instanceof Just) {
-                        return pure9(renderSpec2.renderChild(v2.value0));
+                        return pure11(renderSpec2.renderChild(v2.value0));
                       }
                       ;
                       throw new Error("Failed pattern match at Halogen.Aff.Driver (line 227, column 37 - line 229, column 50): " + [v2.constructor.name]);
@@ -7826,7 +12042,7 @@
           return function($$var2) {
             return function __do3() {
               var v2 = read($$var2)();
-              var shouldProcessHandlers = map19(isNothing)(read(v2.pendingHandlers))();
+              var shouldProcessHandlers = map28(isNothing)(read(v2.pendingHandlers))();
               when3(shouldProcessHandlers)(write(new Just(Nil.value))(v2.pendingHandlers))();
               write(empty4)(v2.childrenOut)();
               write(v2.children)(v2.childrenIn)();
@@ -7834,7 +12050,7 @@
                 var $70 = queueOrRun(v2.pendingHandlers);
                 var $71 = evalF(render2)(v2.selfRef);
                 return function($72) {
-                  return $70($$void5($71($72)));
+                  return $70($$void7($71($72)));
                 };
               })();
               var childHandler = (function() {
@@ -7922,7 +12138,7 @@
             return function(q3) {
               return bind14(liftEffect5(read(disposed)))(function(v2) {
                 if (v2) {
-                  return pure12(Nothing.value);
+                  return pure14(Nothing.value);
                 }
                 ;
                 return evalQ(render2)(ref2)(q3);
@@ -7955,14 +12171,14 @@
           return bind14(liftEffect5($$new(false)))(function(disposed) {
             return handleLifecycle(lchs)(function __do3() {
               var sio = create();
-              var dsx = bindFlipped6(read)(runComponent(lchs)((function() {
+              var dsx = bindFlipped7(read)(runComponent(lchs)((function() {
                 var $78 = notify(sio.listener);
                 return function($79) {
                   return liftEffect5($78($79));
                 };
               })())(i2)(component3))();
               return unDriverStateX(function(st) {
-                return pure9({
+                return pure11({
                   query: evalDriver(disposed)(st.selfRef),
                   messages: sio.emitter,
                   dispose: dispose(disposed)(lchs)(dsx)
@@ -7976,10 +12192,10 @@
   };
 
   // output/Web.DOM.Node/foreign.js
-  var getEffProp2 = function(name15) {
+  var getEffProp2 = function(name16) {
     return function(node) {
       return function() {
-        return node[name15];
+        return node[name16];
       };
     };
   };
@@ -8019,56 +12235,56 @@
   }
 
   // output/Web.DOM.Node/index.js
-  var map20 = /* @__PURE__ */ map(functorEffect);
+  var map29 = /* @__PURE__ */ map(functorEffect);
   var parentNode2 = /* @__PURE__ */ (function() {
-    var $6 = map20(toMaybe);
+    var $6 = map29(toMaybe);
     return function($7) {
       return $6(_parentNode($7));
     };
   })();
   var nextSibling = /* @__PURE__ */ (function() {
-    var $15 = map20(toMaybe);
+    var $15 = map29(toMaybe);
     return function($16) {
       return $15(_nextSibling($16));
     };
   })();
 
   // output/Halogen.VDom.Driver/index.js
-  var $runtime_lazy8 = function(name15, moduleName, init2) {
+  var $runtime_lazy8 = function(name16, moduleName, init3) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
       if (state3 === 2) return val;
-      if (state3 === 1) throw new ReferenceError(name15 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
+      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
       state3 = 1;
-      val = init2();
+      val = init3();
       state3 = 2;
       return val;
     };
   };
-  var $$void6 = /* @__PURE__ */ $$void(functorEffect);
-  var pure10 = /* @__PURE__ */ pure(applicativeEffect);
+  var $$void8 = /* @__PURE__ */ $$void(functorEffect);
+  var pure15 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_6 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
-  var unwrap4 = /* @__PURE__ */ unwrap();
+  var unwrap5 = /* @__PURE__ */ unwrap();
   var when4 = /* @__PURE__ */ when(applicativeEffect);
   var not2 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean)));
-  var identity6 = /* @__PURE__ */ identity(categoryFn);
+  var identity11 = /* @__PURE__ */ identity(categoryFn);
   var bind15 = /* @__PURE__ */ bind(bindAff);
   var liftEffect6 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var map21 = /* @__PURE__ */ map(functorEffect);
-  var bindFlipped7 = /* @__PURE__ */ bindFlipped(bindEffect);
+  var map30 = /* @__PURE__ */ map(functorEffect);
+  var bindFlipped8 = /* @__PURE__ */ bindFlipped(bindEffect);
   var substInParent = function(v2) {
     return function(v1) {
       return function(v22) {
         if (v1 instanceof Just && v22 instanceof Just) {
-          return $$void6(insertBefore(v2)(v1.value0)(v22.value0));
+          return $$void8(insertBefore(v2)(v1.value0)(v22.value0));
         }
         ;
         if (v1 instanceof Nothing && v22 instanceof Just) {
-          return $$void6(appendChild(v2)(v22.value0));
+          return $$void8(appendChild(v2)(v22.value0));
         }
         ;
-        return pure10(unit);
+        return pure15(unit);
       };
     };
   };
@@ -8094,7 +12310,7 @@
           return unit;
         };
         var buildWidget2 = function(spec) {
-          var buildThunk2 = buildThunk(unwrap4)(spec);
+          var buildThunk2 = buildThunk(unwrap5)(spec);
           var $lazy_patch = $runtime_lazy8("patch", "Halogen.VDom.Driver", function() {
             return function(st, slot) {
               if (st instanceof Just) {
@@ -8136,7 +12352,7 @@
               return mkStep(new Step(node, Nothing.value, $lazy_patch(117), done));
             };
           });
-          var patch = $lazy_patch(91);
+          var patch2 = $lazy_patch(91);
           var render2 = $lazy_render(82);
           var renderComponentSlot = $lazy_renderComponentSlot(109);
           return render2;
@@ -8162,7 +12378,7 @@
                   var spec = mkSpec(handler3)(renderChildRef)(document3);
                   var machine = buildVDom(spec)(v2);
                   var node = extract2(machine);
-                  $$void6(appendChild(node)(toNode2(container)))();
+                  $$void8(appendChild(node)(toNode2(container)))();
                   return {
                     machine,
                     node,
@@ -8194,7 +12410,7 @@
       };
       return {
         render: render2,
-        renderChild: identity6,
+        renderChild: identity11,
         removeChild: removeChild3,
         dispose: removeChild3
       };
@@ -8203,7 +12419,7 @@
   var runUI2 = function(component3) {
     return function(i2) {
       return function(element4) {
-        return bind15(liftEffect6(map21(toDocument)(bindFlipped7(document2)(windowImpl))))(function(document3) {
+        return bind15(liftEffect6(map30(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
           return runUI(renderSpec(document3)(element4))(component3)(i2);
         });
       };
@@ -8211,14 +12427,11 @@
   };
 
   // output/Main/index.js
-  var bind6 = /* @__PURE__ */ bind(bindAff);
   var component2 = /* @__PURE__ */ component(monadAffAff);
-  var main2 = function __do2() {
-    var db = createMockDatabase(monadEffectAff)();
-    return runHalogenAff(bind6(awaitBody)(function(body2) {
-      return runUI2(component2(db))(unit)(body2);
-    }))();
-  };
+  var createAPIDatabase2 = /* @__PURE__ */ createAPIDatabase(monadAffAff);
+  var main2 = /* @__PURE__ */ runHalogenAff(/* @__PURE__ */ bind(bindAff)(awaitBody)(function(body2) {
+    return runUI2(component2(createAPIDatabase2))(unit)(body2);
+  }));
 
   // <stdin>
   main2();
