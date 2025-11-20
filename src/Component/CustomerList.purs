@@ -684,22 +684,15 @@ renderGrams n =
        ]
 
 -- Helper to render baht weight with smaller fraction
+-- Note: formatBahtValue now returns special Thai units (½ส, 1ส, 2ส, 3ส, 6สล) or value with "บ" suffix
 renderBaht :: forall w i. Number -> HH.HTML w i
 renderBaht n =
   let absN = if n < 0.0 then -n else n
       formatted = formatBahtValue absN
   in if formatted.integer == "" then HH.text ""
-     else if not formatted.hasFraction then
-       HH.span [ HP.class_ (HH.ClassName "baht-value") ]
-         [ HH.span [ HP.class_ (HH.ClassName "baht-integer") ] [ HH.text formatted.integer ]
-         , HH.span [ HP.class_ (HH.ClassName "baht-unit") ] [ HH.text textConstants.unitBaht ]
-         ]
-     else
-       HH.span [ HP.class_ (HH.ClassName "baht-value") ]
-         [ HH.span [ HP.class_ (HH.ClassName "baht-integer") ] [ HH.text formatted.integer ]
-         , HH.span [ HP.class_ (HH.ClassName "baht-fraction") ] [ HH.text formatted.fraction ]
-         , HH.span [ HP.class_ (HH.ClassName "baht-unit") ] [ HH.text textConstants.unitBaht ]
-         ]
+     else HH.span [ HP.class_ (HH.ClassName "baht-value") ]
+            [ HH.span [ HP.class_ (HH.ClassName "baht-integer") ] [ HH.text formatted.integer ]
+            ]
 
 -- Helper to trim trailing zeros from string
 trimTrailingZeros :: String -> String

@@ -7571,7 +7571,7 @@
   var $$void5 = /* @__PURE__ */ $$void(functorHalogenM);
   var bind12 = /* @__PURE__ */ bind(bindMaybe);
   var max1 = /* @__PURE__ */ max(ordNumber);
-  var eq4 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
+  var eq3 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
   var mod2 = /* @__PURE__ */ mod(euclideanRingInt);
   var SortById = /* @__PURE__ */ (function() {
     function SortById2() {
@@ -7992,14 +7992,14 @@
     var $tco_result;
     function $tco_loop(s2) {
       var len = length3(s2);
-      var $143 = len === 0;
-      if ($143) {
+      var $140 = len === 0;
+      if ($140) {
         $tco_done = true;
         return s2;
       }
       ;
-      var $144 = takeRight(1)(s2) === "0";
-      if ($144) {
+      var $141 = takeRight(1)(s2) === "0";
+      if ($141) {
         $copy_s = dropRight(1)(s2);
         return;
       }
@@ -8055,8 +8055,8 @@
   var renderStyles = /* @__PURE__ */ style_([/* @__PURE__ */ text("\n      * {\n        box-sizing: border-box;\n      }\n      \n      body {\n        margin: 0;\n        padding: 0;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',\n          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',\n          sans-serif;\n        -webkit-font-smoothing: antialiased;\n        -moz-osx-font-smoothing: grayscale;\n        overflow: hidden;\n        height: 100vh;\n      }\n      \n      .app-wrapper {\n        width: 100%;\n        height: 100vh;\n        overflow: hidden;\n      }\n      \n      .customer-app {\n        width: 100%;\n        padding: 8px;\n        height: 100vh;\n        display: flex;\n        flex-direction: column;\n      }\n      \n      h1 {\n        color: #333;\n        margin: 0 0 8px 0;\n        font-size: 20px;\n      }\n      \n      .customer-list-container {\n        border: 1px solid #ddd;\n        border-radius: 4px;\n        overflow: hidden;\n        flex: 1;\n        display: flex;\n        flex-direction: column;\n        min-height: 0;\n      }\n      \n      .table-header-container {\n        background-color: #f8f9fa;\n        border-bottom: 2px solid #dee2e6;\n      }\n      \n      .table-header-row1,\n      .table-header-row2 {\n        display: grid;\n        grid-template-columns: 50px 200px 90px 90px 100px 100px 100px 100px 100px 100px 90px 100px;\n        align-items: center;\n        padding: 4px 8px;\n        font-weight: 600;\n        color: #495057;\n        gap: 8px;\n        font-size: 12px;\n      }\n      \n      .table-header-row1 {\n        border-bottom: 1px solid #dee2e6;\n      }\n      \n      .table-header-row1 .header-cell {\n        justify-content: center;\n      }\n      \n      .header-money-merged {\n        grid-column: span 2;\n        text-align: center;\n      }\n      \n      .header-gold-acc-merged {\n        grid-column: span 2;\n        text-align: center;\n      }\n      \n      .header-gold-965-merged {\n        grid-column: span 2;\n        text-align: center;\n      }\n      \n      .header-gold-9999-merged {\n        grid-column: span 2;\n        text-align: center;\n      }\n      \n      .header-cell {\n        display: flex;\n        align-items: center;\n        padding: 2px;\n        border-right: 1px solid #dee2e6;\n      }\n      \n      .header-cell:last-child {\n        border-right: none;\n      }\n      \n      .header-debit,\n      .header-credit {\n        justify-content: flex-end;\n      }\n      \n      .header-id {\n        min-width: 50px;\n      }\n      \n      .header-name {\n        min-width: 150px;\n      }\n      \n      .header-name-content {\n        display: flex;\n        align-items: center;\n        gap: 6px;\n        width: 100%;\n      }\n      \n      .search-input {\n        flex: 1;\n        padding: 3px 6px;\n        border: 1px solid #ced4da;\n        border-radius: 3px;\n        font-size: 12px;\n        min-width: 80px;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n      }\n      \n      .search-input:focus {\n        outline: none;\n        border-color: #007bff;\n        box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.2);\n      }\n      \n      .header-actions {\n        min-width: 100px;\n        justify-content: center;\n      }\n      \n      .sort-button {\n        background: none;\n        border: none;\n        cursor: pointer;\n        padding: 2px 4px;\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        color: #495057;\n        font-weight: 600;\n        font-size: 12px;\n        transition: color 0.2s;\n      }\n      \n      .sort-button:hover {\n        color: #007bff;\n      }\n      \n      .app-title {\n        display: flex;\n        align-items: baseline;\n        gap: 10px;\n      }\n      \n      .customer-count {\n        font-size: 12px;\n        color: #666;\n        font-weight: normal;\n      }\n      \n      .customer-list {\n        flex: 1;\n        overflow-y: scroll;\n        overflow-x: auto;\n        background-color: #fff;\n        position: relative;\n        min-height: 0;\n      }\n      \n      .scroll-spacer {\n        width: 100%;\n        pointer-events: none;\n      }\n      \n      .visible-rows {\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        will-change: transform;\n      }\n      \n      .customer-row {\n        display: grid;\n        grid-template-columns: 50px 200px 90px 90px 100px 100px 100px 100px 100px 100px 90px 100px;\n        align-items: center;\n        padding: 6px 8px;\n        border-bottom: 1px solid #eee;\n        gap: 8px;\n        min-height: 36px;\n        box-sizing: border-box;\n        font-size: 12px;\n      }\n      \n      .customer-row > * {\n        border-right: 1px solid #eee;\n        padding-right: 8px;\n      }\n      \n      .customer-row > *:last-child {\n        border-right: none;\n      }\n      \n      .customer-row:last-child {\n        border-bottom: none;\n      }\n      \n      .customer-row-even {\n        background-color: #ffffff;\n      }\n      \n      .customer-row-odd {\n        background-color: #f9f9f9;\n      }\n      \n      .customer-row:hover {\n        background-color: #f0f0f0 !important;\n      }\n      \n      .customer-row-highlighted {\n        background-color: #f5e6d3 !important;\n        transition: background-color 0.3s ease;\n      }\n      \n      .customer-row-highlighted:hover {\n        background-color: #ead5bb !important;\n      }\n      \n      .customer-row-pending-delete {\n        background-color: #d4a59a !important;\n        transition: background-color 0.3s ease;\n      }\n      \n      .customer-row-pending-delete:hover {\n        background-color: #c99388 !important;\n      }\n      \n      .customer-id {\n        font-weight: bold;\n        color: #666;\n        padding: 2px;\n        text-align: right;\n      }\n      \n      .customer-name {\n        color: #333;\n        word-wrap: break-word;\n        overflow-wrap: break-word;\n        hyphens: auto;\n        padding: 2px;\n        cursor: pointer;\n        border-radius: 3px;\n        transition: background-color 0.2s ease;\n      }\n      \n      .customer-name:hover {\n        background-color: #e3f2fd;\n        box-shadow: 0 0 0 1px #90caf9;\n      }\n      \n      .editable-field {\n        cursor: pointer;\n        border-radius: 3px;\n        transition: background-color 0.2s ease;\n        padding: 2px 4px;\n        min-height: 20px;\n        display: inline-block;\n      }\n      \n      .editable-field:hover {\n        background-color: #e3f2fd;\n        box-shadow: 0 0 0 1px #90caf9;\n      }\n      \n      .gold-grams .editable-field,\n      .gold-baht .editable-field {\n        display: block;\n        width: 100%;\n        box-sizing: border-box;\n      }\n      \n      .field-warning {\n        background-color: #d4a59a !important;\n        animation: pulse-warning 1s ease-in-out infinite;\n      }\n      \n      @keyframes pulse-warning {\n        0%, 100% {\n          background-color: #d4a59a;\n        }\n        50% {\n          background-color: #c99388;\n        }\n      }\n      \n      .money-input {\n        width: 80px;\n        padding: 2px 4px;\n        border: 2px solid #007bff;\n        border-radius: 3px;\n        font-size: 12px;\n        text-align: right;\n      }\n      \n      .gold-input-container {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n      }\n      \n      .gold-input {\n        width: 70px;\n        padding: 2px 4px;\n        border: 2px solid #007bff;\n        border-radius: 3px;\n        font-size: 12px;\n        text-align: right;\n      }\n      \n      .gold-unit {\n        font-size: 12px;\n        color: #666;\n        font-weight: 500;\n      }\n      \n      .customer-name-input {\n        width: 100%;\n        padding: 4px 6px;\n        border: 2px solid #007bff;\n        border-radius: 3px;\n        font-size: 12px;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n      }\n      \n      .customer-name-input:focus {\n        outline: none;\n        border-color: #0056b3;\n      }\n      \n      .customer-money-debit,\n      .customer-money-credit {\n        text-align: right;\n        padding: 2px 4px;\n        color: #333;\n      }\n      \n      .customer-money-debit {\n        color: #dc3545;\n      }\n      \n      .customer-money-credit {\n        color: #28a745;\n      }\n      \n      .money-value {\n        white-space: nowrap;\n      }\n      \n      .money-integer {\n        font-size: 12px;\n      }\n      \n      .money-decimal,\n      .money-fraction {\n        font-size: 9px;\n        vertical-align: baseline;\n      }\n      \n      /* Make .00 fraction and decimal point blend with background for right alignment */\n      .money-decimal-zero,\n      .money-fraction-zero {\n        color: transparent;\n      }\n      \n      /* Default row backgrounds */\n      .customer-row-even .money-decimal-zero,\n      .customer-row-even .money-fraction-zero {\n        color: #ffffff;\n      }\n      \n      .customer-row-odd .money-decimal-zero,\n      .customer-row-odd .money-fraction-zero {\n        color: #f9f9f9;\n      }\n      \n      /* Hover state */\n      .customer-row:hover .money-decimal-zero,\n      .customer-row:hover .money-fraction-zero {\n        color: #f0f0f0;\n      }\n      \n      /* Highlighted row (newly added/edited) */\n      .customer-row-highlighted .money-decimal-zero,\n      .customer-row-highlighted .money-fraction-zero {\n        color: #f5e6d3;\n      }\n      \n      .customer-row-highlighted:hover .money-decimal-zero,\n      .customer-row-highlighted:hover .money-fraction-zero {\n        color: #ead5bb;\n      }\n      \n      /* Pending delete row */\n      .customer-row-pending-delete .money-decimal-zero,\n      .customer-row-pending-delete .money-fraction-zero {\n        color: #d4a59a;\n      }\n      \n      .customer-row-pending-delete:hover .money-decimal-zero,\n      .customer-row-pending-delete:hover .money-fraction-zero {\n        color: #c99388;\n      }\n      \n      /* Warning field (opposite side being edited) */\n      .field-warning .money-decimal-zero,\n      .field-warning .money-fraction-zero {\n        color: #d4a59a;\n        animation: pulse-warning-text 1s ease-in-out infinite;\n      }\n      \n      @keyframes pulse-warning-text {\n        0%, 100% {\n          color: #d4a59a;\n        }\n        50% {\n          color: #c99388;\n        }\n      }\n      \n      .customer-gold-debit,\n      .customer-gold-credit {\n        text-align: right;\n        padding: 2px 4px;\n        font-size: 12px;\n        line-height: 1.3;\n      }\n      \n      .customer-gold-debit {\n        color: #dc3545;\n      }\n      \n      .customer-gold-credit {\n        color: #28a745;\n      }\n      \n      .gold-grams {\n        font-weight: 500;\n      }\n      \n      .gold-baht {\n        font-size: 12px;\n      }\n      \n      .customer-gold-debit .gold-baht {\n        color: #dc3545;\n      }\n      \n      .customer-gold-credit .gold-baht {\n        color: #28a745;\n      }\n      \n      .baht-value {\n        white-space: nowrap;\n        font-size: 12px;\n      }\n      \n      .baht-integer,\n      .baht-unit {\n        font-size: 12px;\n      }\n      \n      .baht-fraction {\n        font-size: 12px;\n        vertical-align: baseline;\n      }\n      \n      .grams-value {\n        white-space: nowrap;\n      }\n      \n      .grams-integer,\n      .grams-unit {\n        font-size: 12px;\n      }\n      \n      .grams-decimal,\n      .grams-fraction {\n        font-size: 12px;\n        vertical-align: baseline;\n      }\n      \n      .customer-updated {\n        font-size: 12px;\n        color: #666;\n        padding: 2px;\n        text-align: center;\n      }\n      \n      .customer-actions {\n        display: flex;\n        gap: 4px;\n        justify-content: center;\n      }\n      \n      .btn {\n        padding: 4px 6px;\n        border: none;\n        border-radius: 3px;\n        cursor: pointer;\n        font-size: 12px;\n        font-weight: 500;\n        transition: all 0.2s;\n        display: flex;\n        align-items: center;\n        gap: 4px;\n      }\n      \n      .btn:hover {\n        transform: translateY(-1px);\n        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);\n      }\n      \n      .btn-edit {\n        background-color: #007bff;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-edit:hover {\n        background-color: #0056b3;\n      }\n      \n      .btn-save {\n        background-color: #28a745;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-save:hover {\n        background-color: #218838;\n      }\n      \n      .btn-delete {\n        background-color: #dc3545;\n        color: white;\n        padding: 4px 6px;\n      }\n      \n      .btn-delete:hover {\n        background-color: #c82333;\n      }\n      \n      .table-footer {\n        background-color: #f8f9fa;\n        border-top: 2px solid #dee2e6;\n      }\n      \n      .add-customer-form {\n        display: flex;\n        gap: 6px;\n        padding: 6px 8px;\n        align-items: center;\n      }\n      \n      .new-customer-input {\n        flex: 1;\n        padding: 4px 6px;\n        border: 1px solid #ddd;\n        border-radius: 3px;\n        font-size: 12px;\n        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n      }\n      \n      .new-customer-input:focus {\n        outline: none;\n        border-color: #007bff;\n      }\n      \n      .btn-add {\n        background-color: #28a745;\n        color: white;\n        padding: 4px 6px;\n        min-width: 32px;\n      }\n      \n      .btn-add:hover {\n        background-color: #218838;\n      }\n      \n      /* Modal Dialog Styles */\n      .modal-overlay {\n        position: fixed;\n        top: 0;\n        left: 0;\n        right: 0;\n        bottom: 0;\n        background-color: rgba(0, 0, 0, 0.5);\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        z-index: 1000;\n      }\n      \n      .modal-dialog {\n        background: white;\n        border-radius: 8px;\n        padding: 24px;\n        max-width: 400px;\n        width: 90%;\n        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);\n      }\n      \n      .modal-title {\n        margin: 0 0 16px 0;\n        font-size: 20px;\n        font-weight: 600;\n        color: #333;\n      }\n      \n      .modal-message {\n        margin: 0 0 16px 0;\n        color: #666;\n        line-height: 1.5;\n      }\n      \n      .modal-code {\n        background: #f8f9fa;\n        border: 2px solid #dee2e6;\n        border-radius: 4px;\n        padding: 16px;\n        text-align: center;\n        font-size: 24px;\n        font-weight: 700;\n        color: #dc3545;\n        margin-bottom: 16px;\n        letter-spacing: 2px;\n        font-family: 'Courier New', monospace;\n      }\n      \n      .modal-input {\n        width: 100%;\n        padding: 12px;\n        border: 2px solid #dee2e6;\n        border-radius: 4px;\n        font-size: 16px;\n        margin-bottom: 16px;\n        text-align: center;\n        font-family: 'Courier New', monospace;\n        letter-spacing: 1px;\n      }\n      \n      .modal-input:focus {\n        outline: none;\n        border-color: #0056b3;\n      }\n      \n      .modal-buttons {\n        display: flex;\n        gap: 12px;\n        justify-content: flex-end;\n      }\n      \n      .btn-confirm {\n        background-color: #dc3545;\n        color: white;\n        padding: 10px 20px;\n      }\n      \n      .btn-confirm:hover {\n        background-color: #c82333;\n      }\n      \n      .btn-cancel {\n        background-color: #6c757d;\n        color: white;\n        padding: 10px 20px;\n      }\n      \n      .btn-cancel:hover {\n        background-color: #5a6268;\n      }\n    ")]);
   var renderMoney = function(n) {
     var absN = (function() {
-      var $146 = n < 0;
-      if ($146) {
+      var $143 = n < 0;
+      if ($143) {
         return -n;
       }
       ;
@@ -8082,16 +8082,16 @@
   };
   var renderGrams = function(n) {
     var absN = (function() {
-      var $149 = n < 0;
-      if ($149) {
+      var $146 = n < 0;
+      if ($146) {
         return -n;
       }
       ;
       return n;
     })();
     var formatted = formatGramsValue(absN);
-    var $150 = formatted.integer === "";
-    if ($150) {
+    var $147 = formatted.integer === "";
+    if ($147) {
       return text("");
     }
     ;
@@ -8104,13 +8104,13 @@
     ;
     if (state3.deleteConfirmation instanceof Just) {
       return div2([class_("modal-overlay")])([div2([class_("modal-dialog")])([h2([class_("modal-title")])([text(textConstants.deleteConfirmTitle)]), p([class_("modal-message")])([text(textConstants.deleteConfirmPrompt)]), div2([class_("modal-code")])([text(show4(state3.deleteConfirmation.value0.confirmCode))]), input([type_4(InputText.value), class_("modal-input"), placeholder(textConstants.deleteConfirmPrompt), value3(state3.deleteConfirmation.value0.inputValue), onValueInput(UpdateDeleteConfirmInput.create), onKeyDown(function(e) {
-        var $152 = key(e) === "Enter";
-        if ($152) {
+        var $149 = key(e) === "Enter";
+        if ($149) {
           return new ConfirmDelete(state3.deleteConfirmation.value0.customerId);
         }
         ;
-        var $153 = key(e) === "Escape";
-        if ($153) {
+        var $150 = key(e) === "Escape";
+        if ($150) {
           return CancelDelete.value;
         }
         ;
@@ -8122,29 +8122,24 @@
       })])([text(textConstants.buttonCancel)])])])]);
     }
     ;
-    throw new Error("Failed pattern match at Component.CustomerList (line 996, column 3 - line 1040, column 10): " + [state3.deleteConfirmation.constructor.name]);
+    throw new Error("Failed pattern match at Component.CustomerList (line 966, column 3 - line 1010, column 10): " + [state3.deleteConfirmation.constructor.name]);
   };
   var renderBaht = function(n) {
     var absN = (function() {
-      var $155 = n < 0;
-      if ($155) {
+      var $152 = n < 0;
+      if ($152) {
         return -n;
       }
       ;
       return n;
     })();
     var formatted = formatBahtValue(absN);
-    var $156 = formatted.integer === "";
-    if ($156) {
+    var $153 = formatted.integer === "";
+    if ($153) {
       return text("");
     }
     ;
-    var $157 = !formatted.hasFraction;
-    if ($157) {
-      return span2([class_("baht-value")])([span2([class_("baht-integer")])([text(formatted.integer)]), span2([class_("baht-unit")])([text(textConstants.unitBaht)])]);
-    }
-    ;
-    return span2([class_("baht-value")])([span2([class_("baht-integer")])([text(formatted.integer)]), span2([class_("baht-fraction")])([text(formatted.fraction)]), span2([class_("baht-unit")])([text(textConstants.unitBaht)])]);
+    return span2([class_("baht-value")])([span2([class_("baht-integer")])([text(formatted.integer)])]);
   };
   var parseNumber = function(value1) {
     return function(maxDecimals) {
@@ -8154,8 +8149,8 @@
       }
       ;
       if (v2 instanceof Just) {
-        var $159 = v2.value0 < 0;
-        if ($159) {
+        var $155 = v2.value0 < 0;
+        if ($155) {
           return Nothing.value;
         }
         ;
@@ -8165,8 +8160,8 @@
         }
         ;
         if (parts.length === 2) {
-          var $162 = length4(parts[1]) <= maxDecimals;
-          if ($162) {
+          var $158 = length4(parts[1]) <= maxDecimals;
+          if ($158) {
             return new Just(value1);
           }
           ;
@@ -8182,8 +8177,8 @@
   var parseFieldValue = function(v2) {
     return function(v1) {
       if (v2 instanceof FieldName) {
-        var $168 = v1 === "";
-        if ($168) {
+        var $164 = v1 === "";
+        if ($164) {
           return Nothing.value;
         }
         ;
@@ -8231,8 +8226,8 @@
         if (v2 instanceof Just) {
           var v1 = index(changes)(v2.value0);
           if (v1 instanceof Just) {
-            var $171 = v1.value0.name !== c2.name;
-            if ($171) {
+            var $167 = v1.value0.name !== c2.name;
+            if ($167) {
               return v1.value0;
             }
             ;
@@ -8256,14 +8251,14 @@
             return c2;
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 363, column 21 - line 370, column 23): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 340, column 21 - line 347, column 23): " + [v1.constructor.name]);
         }
         ;
         if (v2 instanceof Nothing) {
           return c2;
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 362, column 7 - line 371, column 21): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 339, column 7 - line 348, column 21): " + [v2.constructor.name]);
       })(existing);
       var newCustomers = filter(function(ch) {
         var v2 = findIndex(function(c2) {
@@ -8277,7 +8272,7 @@
           return true;
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 376, column 7 - line 378, column 24): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 353, column 7 - line 355, column 24): " + [v2.constructor.name]);
       })(changes);
       return append12(updated)(newCustomers);
     };
@@ -8342,8 +8337,8 @@
   var formatNumberForEdit = function(n) {
     var str = show12(n);
     var trimmed = trimTrailingZeros(str);
-    var $179 = takeRight(1)(trimmed) === ".";
-    if ($179) {
+    var $175 = takeRight(1)(trimmed) === ".";
+    if ($175) {
       return dropRight(1)(trimmed);
     }
     ;
@@ -8464,10 +8459,10 @@
       };
     }
   };
-  var eq5 = /* @__PURE__ */ eq(eqSortField);
+  var eq4 = /* @__PURE__ */ eq(eqSortField);
   var renderSortIcon = function(field) {
     return function(v2) {
-      if (v2.field instanceof Just && eq5(v2.field.value0)(field)) {
+      if (v2.field instanceof Just && eq4(v2.field.value0)(field)) {
         if (v2.direction instanceof Ascending) {
           return sortAscIcon;
         }
@@ -8476,7 +8471,7 @@
           return sortDescIcon;
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 673, column 7 - line 675, column 41): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 650, column 7 - line 652, column 41): " + [v2.direction.constructor.name]);
       }
       ;
       return sortNeutralIcon;
@@ -8546,7 +8541,7 @@
       };
     }
   };
-  var eq6 = /* @__PURE__ */ eq(eqEditableField);
+  var eq5 = /* @__PURE__ */ eq(eqEditableField);
   var notEq4 = /* @__PURE__ */ notEq(eqEditableField);
   var renderEditableField = function(state3) {
     return function(customer) {
@@ -8555,18 +8550,18 @@
           return function(inputClass) {
             var isEditing = (function() {
               if (state3.editing instanceof Just) {
-                return state3.editing.value0.customerId === customer.id && eq6(state3.editing.value0.field)(field);
+                return state3.editing.value0.customerId === customer.id && eq5(state3.editing.value0.field)(field);
               }
               ;
               if (state3.editing instanceof Nothing) {
                 return false;
               }
               ;
-              throw new Error("Failed pattern match at Component.CustomerList (line 748, column 17 - line 750, column 23): " + [state3.editing.constructor.name]);
+              throw new Error("Failed pattern match at Component.CustomerList (line 718, column 17 - line 720, column 23): " + [state3.editing.constructor.name]);
             })();
             var currentValue = getFieldValue(field)(customer);
             var editValue = (function() {
-              if (state3.editing instanceof Just && (state3.editing.value0.customerId === customer.id && eq6(state3.editing.value0.field)(field))) {
+              if (state3.editing instanceof Just && (state3.editing.value0.customerId === customer.id && eq5(state3.editing.value0.field)(field))) {
                 return state3.editing.value0.value;
               }
               ;
@@ -8600,25 +8595,25 @@
                 })();
                 var isEditingThisSide = (function() {
                   if (state3.editing instanceof Just) {
-                    return state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(field) && state3.editing.value0.isDebitSide === isDebit);
+                    return state3.editing.value0.customerId === customer.id && (eq5(state3.editing.value0.field)(field) && state3.editing.value0.isDebitSide === isDebit);
                   }
                   ;
                   if (state3.editing instanceof Nothing) {
                     return false;
                   }
                   ;
-                  throw new Error("Failed pattern match at Component.CustomerList (line 776, column 25 - line 778, column 23): " + [state3.editing.constructor.name]);
+                  throw new Error("Failed pattern match at Component.CustomerList (line 746, column 25 - line 748, column 23): " + [state3.editing.constructor.name]);
                 })();
                 var isEditingOppositeSide = (function() {
                   if (state3.editing instanceof Just) {
-                    return state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(field) && state3.editing.value0.isDebitSide !== isDebit);
+                    return state3.editing.value0.customerId === customer.id && (eq5(state3.editing.value0.field)(field) && state3.editing.value0.isDebitSide !== isDebit);
                   }
                   ;
                   if (state3.editing instanceof Nothing) {
                     return false;
                   }
                   ;
-                  throw new Error("Failed pattern match at Component.CustomerList (line 780, column 29 - line 782, column 23): " + [state3.editing.constructor.name]);
+                  throw new Error("Failed pattern match at Component.CustomerList (line 750, column 29 - line 752, column 23): " + [state3.editing.constructor.name]);
                 })();
                 var baseClassName = (function() {
                   if (isDebit) {
@@ -8628,31 +8623,31 @@
                   return "customer-gold-credit";
                 })();
                 var absValue = (function() {
-                  var $221 = value1 < 0;
-                  if ($221) {
+                  var $209 = value1 < 0;
+                  if ($209) {
                     return -value1;
                   }
                   ;
                   return value1;
                 })();
                 var className2 = (function() {
-                  var $222 = isEditingOppositeSide && (shouldShowValue && absValue > 0);
-                  if ($222) {
+                  var $210 = isEditingOppositeSide && (shouldShowValue && absValue > 0);
+                  if ($210) {
                     return baseClassName + " field-warning";
                   }
                   ;
                   return baseClassName;
                 })();
                 var displayValue = (function() {
-                  var $223 = shouldShowValue && absValue > 0;
-                  if ($223) {
+                  var $211 = shouldShowValue && absValue > 0;
+                  if ($211) {
                     return formatNumberForEdit(absValue);
                   }
                   ;
                   return "";
                 })();
                 var editValue = (function() {
-                  if (state3.editing instanceof Just && (state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(field) && state3.editing.value0.isDebitSide === isDebit))) {
+                  if (state3.editing instanceof Just && (state3.editing.value0.customerId === customer.id && (eq5(state3.editing.value0.field)(field) && state3.editing.value0.isDebitSide === isDebit))) {
                     return state3.editing.value0.value;
                   }
                   ;
@@ -8665,8 +8660,8 @@
                 return div2([class_(className2 + " editable-field"), onClick(function(e) {
                   return new StartEditFieldWithEvent(customer.id, field, displayValue, isDebit, e);
                 })])([(function() {
-                  var $227 = shouldShowValue && absValue > 0;
-                  if ($227) {
+                  var $215 = shouldShowValue && absValue > 0;
+                  if ($215) {
                     return renderer(value1);
                   }
                   ;
@@ -8691,25 +8686,25 @@
         })();
         var isEditingThisSide = (function() {
           if (state3.editing instanceof Just) {
-            return state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(FieldMoney.value) && state3.editing.value0.isDebitSide === isDebit);
+            return state3.editing.value0.customerId === customer.id && (eq5(state3.editing.value0.field)(FieldMoney.value) && state3.editing.value0.isDebitSide === isDebit);
           }
           ;
           if (state3.editing instanceof Nothing) {
             return false;
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 823, column 25 - line 825, column 23): " + [state3.editing.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 793, column 25 - line 795, column 23): " + [state3.editing.constructor.name]);
         })();
         var isEditingOppositeSide = (function() {
           if (state3.editing instanceof Just) {
-            return state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(FieldMoney.value) && state3.editing.value0.isDebitSide !== isDebit);
+            return state3.editing.value0.customerId === customer.id && (eq5(state3.editing.value0.field)(FieldMoney.value) && state3.editing.value0.isDebitSide !== isDebit);
           }
           ;
           if (state3.editing instanceof Nothing) {
             return false;
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 827, column 29 - line 829, column 23): " + [state3.editing.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 797, column 29 - line 799, column 23): " + [state3.editing.constructor.name]);
         })();
         var baseClassName = (function() {
           if (isDebit) {
@@ -8719,31 +8714,31 @@
           return "customer-money-credit";
         })();
         var absValue = (function() {
-          var $234 = customer.money < 0;
-          if ($234) {
+          var $222 = customer.money < 0;
+          if ($222) {
             return -customer.money;
           }
           ;
           return customer.money;
         })();
         var className2 = (function() {
-          var $235 = isEditingOppositeSide && (shouldShowValue && absValue > 0);
-          if ($235) {
+          var $223 = isEditingOppositeSide && (shouldShowValue && absValue > 0);
+          if ($223) {
             return baseClassName + " field-warning";
           }
           ;
           return baseClassName;
         })();
         var displayValue = (function() {
-          var $236 = shouldShowValue && absValue > 0;
-          if ($236) {
+          var $224 = shouldShowValue && absValue > 0;
+          if ($224) {
             return formatNumberForEdit(absValue);
           }
           ;
           return "";
         })();
         var editValue = (function() {
-          if (state3.editing instanceof Just && (state3.editing.value0.customerId === customer.id && (eq6(state3.editing.value0.field)(FieldMoney.value) && state3.editing.value0.isDebitSide === isDebit))) {
+          if (state3.editing instanceof Just && (state3.editing.value0.customerId === customer.id && (eq5(state3.editing.value0.field)(FieldMoney.value) && state3.editing.value0.isDebitSide === isDebit))) {
             return state3.editing.value0.value;
           }
           ;
@@ -8756,8 +8751,8 @@
         return span2([class_(className2 + " editable-field"), onClick(function(e) {
           return new StartEditFieldWithEvent(customer.id, FieldMoney.value, displayValue, isDebit, e);
         })])([(function() {
-          var $240 = shouldShowValue && absValue > 0;
-          if ($240) {
+          var $228 = shouldShowValue && absValue > 0;
+          if ($228) {
             return renderMoney(customer.money);
           }
           ;
@@ -8776,7 +8771,7 @@
       return defaultRowHeight;
     }
     ;
-    throw new Error("Failed pattern match at Component.CustomerList (line 399, column 3 - line 401, column 32): " + [customer.rowHeight.constructor.name]);
+    throw new Error("Failed pattern match at Component.CustomerList (line 376, column 3 - line 378, column 32): " + [customer.rowHeight.constructor.name]);
   };
   var calculateHeightRange = function(customers) {
     return function(start2) {
@@ -8799,8 +8794,8 @@
           var $tco_done = false;
           var $tco_result;
           function $tco_loop(idx, accHeight) {
-            var $243 = idx >= totalRows;
-            if ($243) {
+            var $231 = idx >= totalRows;
+            if ($231) {
               $tco_done = true;
               return totalRows;
             }
@@ -8809,8 +8804,8 @@
             if (v2 instanceof Just) {
               var rowHeight = getCustomerHeight(v2.value0);
               var nextHeight = accHeight + rowHeight;
-              var $245 = nextHeight > state3.scrollTop;
-              if ($245) {
+              var $233 = nextHeight > state3.scrollTop;
+              if ($233) {
                 $tco_done = true;
                 return idx;
               }
@@ -8825,7 +8820,7 @@
               return totalRows;
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 422, column 9 - line 429, column 31): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 399, column 9 - line 406, column 31): " + [v2.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -8843,8 +8838,8 @@
           var $tco_done1 = false;
           var $tco_result;
           function $tco_loop(idx, accHeight) {
-            var $247 = idx >= totalRows;
-            if ($247) {
+            var $235 = idx >= totalRows;
+            if ($235) {
               $tco_done1 = true;
               return totalRows;
             }
@@ -8853,8 +8848,8 @@
             if (v2 instanceof Just) {
               var rowHeight = getCustomerHeight(v2.value0);
               var nextHeight = accHeight + rowHeight;
-              var $249 = nextHeight > state3.containerHeight + toNumber(overscan) * defaultRowHeight;
-              if ($249) {
+              var $237 = nextHeight > state3.containerHeight + toNumber(overscan) * defaultRowHeight;
+              if ($237) {
                 $tco_done1 = true;
                 return idx + 1 | 0;
               }
@@ -8869,7 +8864,7 @@
               return totalRows;
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 438, column 9 - line 445, column 31): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 415, column 9 - line 422, column 31): " + [v2.constructor.name]);
           }
           ;
           while (!$tco_done1) {
@@ -8911,7 +8906,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 465, column 6 - line 467, column 65): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 442, column 6 - line 444, column 65): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByName) {
@@ -8932,13 +8927,13 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 470, column 6 - line 472, column 89): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 447, column 6 - line 449, column 89): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByMoneyDebit) {
         var debitValue = function(c2) {
-          var $262 = c2.money < 0;
-          if ($262) {
+          var $250 = c2.money < 0;
+          if ($250) {
             return -c2.money;
           }
           ;
@@ -8961,13 +8956,13 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 480, column 6 - line 482, column 85): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 457, column 6 - line 459, column 85): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByMoneyCredit) {
         var creditValue = function(c2) {
-          var $267 = c2.money > 0;
-          if ($267) {
+          var $255 = c2.money > 0;
+          if ($255) {
             return c2.money;
           }
           ;
@@ -8990,7 +8985,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 487, column 6 - line 489, column 87): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 464, column 6 - line 466, column 87): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldJewelryDebit) {
@@ -8998,8 +8993,8 @@
           return c2.gram_jewelry + c2.baht_jewelry * gramsPerBahtJewelry;
         };
         var debitValue = function(c2) {
-          var $272 = netWeight(c2) < 0;
-          if ($272) {
+          var $260 = netWeight(c2) < 0;
+          if ($260) {
             return -netWeight(c2);
           }
           ;
@@ -9022,7 +9017,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 496, column 6 - line 498, column 85): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 473, column 6 - line 475, column 85): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldJewelryCredit) {
@@ -9030,8 +9025,8 @@
           return c2.gram_jewelry + c2.baht_jewelry * gramsPerBahtJewelry;
         };
         var creditValue = function(c2) {
-          var $277 = netWeight(c2) > 0;
-          if ($277) {
+          var $265 = netWeight(c2) > 0;
+          if ($265) {
             return netWeight(c2);
           }
           ;
@@ -9054,7 +9049,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 504, column 6 - line 506, column 87): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 481, column 6 - line 483, column 87): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldBar96Debit) {
@@ -9062,8 +9057,8 @@
           return c2.gram_bar96 + c2.baht_bar96 * gramsPerBahtBar96;
         };
         var debitValue = function(c2) {
-          var $282 = netWeight(c2) < 0;
-          if ($282) {
+          var $270 = netWeight(c2) < 0;
+          if ($270) {
             return -netWeight(c2);
           }
           ;
@@ -9086,7 +9081,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 513, column 6 - line 515, column 85): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 490, column 6 - line 492, column 85): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldBar96Credit) {
@@ -9094,8 +9089,8 @@
           return c2.gram_bar96 + c2.baht_bar96 * gramsPerBahtBar96;
         };
         var creditValue = function(c2) {
-          var $287 = netWeight(c2) > 0;
-          if ($287) {
+          var $275 = netWeight(c2) > 0;
+          if ($275) {
             return netWeight(c2);
           }
           ;
@@ -9118,7 +9113,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 521, column 6 - line 523, column 87): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 498, column 6 - line 500, column 87): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldBar99Debit) {
@@ -9126,8 +9121,8 @@
           return c2.gram_bar99 + c2.baht_bar99 * gramsPerBahtBar99;
         };
         var debitValue = function(c2) {
-          var $292 = netWeight(c2) < 0;
-          if ($292) {
+          var $280 = netWeight(c2) < 0;
+          if ($280) {
             return -netWeight(c2);
           }
           ;
@@ -9150,7 +9145,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 530, column 6 - line 532, column 85): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 507, column 6 - line 509, column 85): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByGoldBar99Credit) {
@@ -9158,8 +9153,8 @@
           return c2.gram_bar99 + c2.baht_bar99 * gramsPerBahtBar99;
         };
         var creditValue = function(c2) {
-          var $297 = netWeight(c2) > 0;
-          if ($297) {
+          var $285 = netWeight(c2) > 0;
+          if ($285) {
             return netWeight(c2);
           }
           ;
@@ -9182,7 +9177,7 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 538, column 6 - line 540, column 87): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 515, column 6 - line 517, column 87): " + [v2.direction.constructor.name]);
       }
       ;
       if (v2.field instanceof Just && v2.field.value0 instanceof SortByUpdated) {
@@ -9206,10 +9201,10 @@
           })(v1);
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 546, column 6 - line 548, column 81): " + [v2.direction.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 523, column 6 - line 525, column 81): " + [v2.direction.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Component.CustomerList (line 461, column 1 - line 461, column 62): " + [v2.constructor.name, v1.constructor.name]);
+      throw new Error("Failed pattern match at Component.CustomerList (line 438, column 1 - line 438, column 62): " + [v2.constructor.name, v1.constructor.name]);
     };
   };
   var handleAction = function(dictMonadAff) {
@@ -9227,17 +9222,17 @@
           return bind3(lift1(db.getAllCustomers))(function(customers) {
             var latestTime = getLatestTimestamp(customers);
             return discard2(modify_3(function(v12) {
-              var $307 = {};
-              for (var $308 in v12) {
-                if ({}.hasOwnProperty.call(v12, $308)) {
-                  $307[$308] = v12[$308];
+              var $295 = {};
+              for (var $296 in v12) {
+                if ({}.hasOwnProperty.call(v12, $296)) {
+                  $295[$296] = v12[$296];
                 }
                 ;
               }
               ;
-              $307.customers = customers;
-              $307.lastSyncTime = latestTime;
-              return $307;
+              $295.customers = customers;
+              $295.lastSyncTime = latestTime;
+              return $295;
             }))(function() {
               return handleAction(dictMonadAff)(db)(PollForChanges.value);
             });
@@ -9257,7 +9252,7 @@
                 return pure1(unit);
               }
               ;
-              throw new Error("Failed pattern match at Component.CustomerList (line 1759, column 7 - line 1764, column 29): " + [state3.lastSyncTime.constructor.name]);
+              throw new Error("Failed pattern match at Component.CustomerList (line 1729, column 7 - line 1734, column 29): " + [state3.lastSyncTime.constructor.name]);
             })())(function() {
               return $$void5(fork(discard2(liftAff2(delay(3e3)))(function() {
                 return handleAction(dictMonadAff)(db)(PollForChanges.value);
@@ -9271,17 +9266,17 @@
             var mergedCustomers = mergeCustomers(state3.customers)(v2.value0);
             var latestTime = getLatestTimestamp(v2.value0);
             return discard2(modify_3(function(v12) {
-              var $312 = {};
-              for (var $313 in v12) {
-                if ({}.hasOwnProperty.call(v12, $313)) {
-                  $312[$313] = v12[$313];
+              var $300 = {};
+              for (var $301 in v12) {
+                if ({}.hasOwnProperty.call(v12, $301)) {
+                  $300[$301] = v12[$301];
                 }
                 ;
               }
               ;
-              $312.customers = mergedCustomers;
-              $312.lastSyncTime = latestTime;
-              return $312;
+              $300.customers = mergedCustomers;
+              $300.lastSyncTime = latestTime;
+              return $300;
             }))(function() {
               return $$void5(fork(bind3(liftEffect7(requestAnimationFrameAction(unit)))(function(promise2) {
                 return discard2($$void5(liftAff2(toAff(promise2))))(function() {
@@ -9308,22 +9303,22 @@
               return pure1(unit);
             })())(function() {
               return discard2(modify_3(function(v12) {
-                var $323 = {};
-                for (var $324 in v12) {
-                  if ({}.hasOwnProperty.call(v12, $324)) {
-                    $323[$324] = v12[$324];
+                var $311 = {};
+                for (var $312 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $312)) {
+                    $311[$312] = v12[$312];
                   }
                   ;
                 }
                 ;
-                $323.editing = new Just({
+                $311.editing = new Just({
                   customerId: v2.value0,
                   field: v2.value1,
                   value: v2.value2,
                   originalValue: v2.value2,
                   isDebitSide: v2.value3
                 });
-                return $323;
+                return $311;
               }))(function() {
                 return handleAction(dictMonadAff)(db)(FocusEditInput.value);
               });
@@ -9335,27 +9330,27 @@
           return bind3(get2)(function(state3) {
             if (state3.editing instanceof Just) {
               return modify_3(function(v12) {
-                var $334 = {};
-                for (var $335 in v12) {
-                  if ({}.hasOwnProperty.call(v12, $335)) {
-                    $334[$335] = v12[$335];
+                var $322 = {};
+                for (var $323 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $323)) {
+                    $322[$323] = v12[$323];
                   }
                   ;
                 }
                 ;
-                $334.editing = new Just((function() {
-                  var $331 = {};
-                  for (var $332 in state3.editing.value0) {
-                    if ({}.hasOwnProperty.call(state3.editing.value0, $332)) {
-                      $331[$332] = state3["editing"]["value0"][$332];
+                $322.editing = new Just((function() {
+                  var $319 = {};
+                  for (var $320 in state3.editing.value0) {
+                    if ({}.hasOwnProperty.call(state3.editing.value0, $320)) {
+                      $319[$320] = state3["editing"]["value0"][$320];
                     }
                     ;
                   }
                   ;
-                  $331.value = v2.value0;
-                  return $331;
+                  $319.value = v2.value0;
+                  return $319;
                 })());
-                return $334;
+                return $322;
               });
             }
             ;
@@ -9363,7 +9358,7 @@
               return pure1(unit);
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 1806, column 5 - line 1808, column 27): " + [state3.editing.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 1776, column 5 - line 1778, column 27): " + [state3.editing.constructor.name]);
           });
         }
         ;
@@ -9402,43 +9397,43 @@
                   value: finalValue
                 })))(function(updatedCustomer) {
                   return discard2(modify_3(function(v22) {
-                    var $346 = {};
-                    for (var $347 in v22) {
-                      if ({}.hasOwnProperty.call(v22, $347)) {
-                        $346[$347] = v22[$347];
+                    var $334 = {};
+                    for (var $335 in v22) {
+                      if ({}.hasOwnProperty.call(v22, $335)) {
+                        $334[$335] = v22[$335];
                       }
                       ;
                     }
                     ;
-                    $346.editing = Nothing.value;
-                    $346.searchQuery = "";
-                    $346.customers = map17(function(c2) {
-                      var $344 = c2.id === state3.editing.value0.customerId;
-                      if ($344) {
+                    $334.editing = Nothing.value;
+                    $334.searchQuery = "";
+                    $334.customers = map17(function(c2) {
+                      var $332 = c2.id === state3.editing.value0.customerId;
+                      if ($332) {
                         return updatedCustomer;
                       }
                       ;
                       return c2;
                     })(state3.customers);
-                    $346.lastSyncTime = updatedCustomer.updated_at;
-                    $346.highlightedCustomerId = (function() {
+                    $334.lastSyncTime = updatedCustomer.updated_at;
+                    $334.highlightedCustomerId = (function() {
                       if (valueChanged) {
                         return new Just(state3.editing.value0.customerId);
                       }
                       ;
                       return Nothing.value;
                     })();
-                    return $346;
+                    return $334;
                   }))(function() {
                     return when2(valueChanged)(handleAction(dictMonadAff)(db)(new RenderAroundAndScrollTo(state3.editing.value0.customerId)));
                   });
                 });
               }
               ;
-              throw new Error("Failed pattern match at Component.CustomerList (line 1817, column 9 - line 1846, column 72): " + [v12.constructor.name]);
+              throw new Error("Failed pattern match at Component.CustomerList (line 1787, column 9 - line 1816, column 72): " + [v12.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 1812, column 5 - line 1846, column 72): " + [state3.editing.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 1782, column 5 - line 1816, column 72): " + [state3.editing.constructor.name]);
           });
         }
         ;
@@ -9457,16 +9452,16 @@
         ;
         if (v2 instanceof CancelEdit) {
           return modify_3(function(v12) {
-            var $353 = {};
-            for (var $354 in v12) {
-              if ({}.hasOwnProperty.call(v12, $354)) {
-                $353[$354] = v12[$354];
+            var $341 = {};
+            for (var $342 in v12) {
+              if ({}.hasOwnProperty.call(v12, $342)) {
+                $341[$342] = v12[$342];
               }
               ;
             }
             ;
-            $353.editing = Nothing.value;
-            return $353;
+            $341.editing = Nothing.value;
+            return $341;
           });
         }
         ;
@@ -9485,29 +9480,29 @@
                 return pure1(unit);
               }
               ;
-              throw new Error("Failed pattern match at Component.CustomerList (line 1863, column 9 - line 1868, column 31): " + [v12.constructor.name]);
+              throw new Error("Failed pattern match at Component.CustomerList (line 1833, column 9 - line 1838, column 31): " + [v12.constructor.name]);
             }
             ;
             if (state3.editing instanceof Nothing) {
               return pure1(unit);
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 1859, column 5 - line 1869, column 27): " + [state3.editing.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 1829, column 5 - line 1839, column 27): " + [state3.editing.constructor.name]);
           });
         }
         ;
         if (v2 instanceof UpdateNewName) {
           return modify_3(function(v12) {
-            var $361 = {};
-            for (var $362 in v12) {
-              if ({}.hasOwnProperty.call(v12, $362)) {
-                $361[$362] = v12[$362];
+            var $349 = {};
+            for (var $350 in v12) {
+              if ({}.hasOwnProperty.call(v12, $350)) {
+                $349[$350] = v12[$350];
               }
               ;
             }
             ;
-            $361.newCustomerName = v2.value0;
-            return $361;
+            $349.newCustomerName = v2.value0;
+            return $349;
           });
         }
         ;
@@ -9516,20 +9511,20 @@
             return bind3(get2)(function(state3) {
               return when2(state3.newCustomerName !== "")(bind3(lift1(db.addNewCustomer(state3.newCustomerName)))(function(newCustomer) {
                 return discard2(modify_3(function(v12) {
-                  var $365 = {};
-                  for (var $366 in v12) {
-                    if ({}.hasOwnProperty.call(v12, $366)) {
-                      $365[$366] = v12[$366];
+                  var $353 = {};
+                  for (var $354 in v12) {
+                    if ({}.hasOwnProperty.call(v12, $354)) {
+                      $353[$354] = v12[$354];
                     }
                     ;
                   }
                   ;
-                  $365.newCustomerName = "";
-                  $365.searchQuery = "";
-                  $365.customers = snoc(state3.customers)(newCustomer);
-                  $365.lastSyncTime = newCustomer.updated_at;
-                  $365.highlightedCustomerId = new Just(newCustomer.id);
-                  return $365;
+                  $353.newCustomerName = "";
+                  $353.searchQuery = "";
+                  $353.customers = snoc(state3.customers)(newCustomer);
+                  $353.lastSyncTime = newCustomer.updated_at;
+                  $353.highlightedCustomerId = new Just(newCustomer.id);
+                  return $353;
                 }))(function() {
                   return handleAction(dictMonadAff)(db)(new RenderAroundAndScrollTo(newCustomer.id));
                 });
@@ -9541,20 +9536,20 @@
         if (v2 instanceof ShowDeleteConfirmation) {
           return bind3(liftEffect7(generateRandomCode))(function(randomCode) {
             return discard2(modify_3(function(v12) {
-              var $369 = {};
-              for (var $370 in v12) {
-                if ({}.hasOwnProperty.call(v12, $370)) {
-                  $369[$370] = v12[$370];
+              var $357 = {};
+              for (var $358 in v12) {
+                if ({}.hasOwnProperty.call(v12, $358)) {
+                  $357[$358] = v12[$358];
                 }
                 ;
               }
               ;
-              $369.deleteConfirmation = new Just({
+              $357.deleteConfirmation = new Just({
                 customerId: v2.value0,
                 confirmCode: randomCode,
                 inputValue: ""
               });
-              return $369;
+              return $357;
             }))(function() {
               return handleAction(dictMonadAff)(db)(FocusDeleteInput.value);
             });
@@ -9565,27 +9560,27 @@
           return bind3(get2)(function(state3) {
             if (state3.deleteConfirmation instanceof Just) {
               return modify_3(function(v12) {
-                var $377 = {};
-                for (var $378 in v12) {
-                  if ({}.hasOwnProperty.call(v12, $378)) {
-                    $377[$378] = v12[$378];
+                var $365 = {};
+                for (var $366 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $366)) {
+                    $365[$366] = v12[$366];
                   }
                   ;
                 }
                 ;
-                $377.deleteConfirmation = new Just((function() {
-                  var $374 = {};
-                  for (var $375 in state3.deleteConfirmation.value0) {
-                    if ({}.hasOwnProperty.call(state3.deleteConfirmation.value0, $375)) {
-                      $374[$375] = state3["deleteConfirmation"]["value0"][$375];
+                $365.deleteConfirmation = new Just((function() {
+                  var $362 = {};
+                  for (var $363 in state3.deleteConfirmation.value0) {
+                    if ({}.hasOwnProperty.call(state3.deleteConfirmation.value0, $363)) {
+                      $362[$363] = state3["deleteConfirmation"]["value0"][$363];
                     }
                     ;
                   }
                   ;
-                  $374.inputValue = v2.value0;
-                  return $374;
+                  $362.inputValue = v2.value0;
+                  return $362;
                 })());
-                return $377;
+                return $365;
               });
             }
             ;
@@ -9593,49 +9588,49 @@
               return pure1(unit);
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 1898, column 5 - line 1901, column 27): " + [state3.deleteConfirmation.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 1868, column 5 - line 1871, column 27): " + [state3.deleteConfirmation.constructor.name]);
           });
         }
         ;
         if (v2 instanceof ConfirmDelete) {
           return bind3(get2)(function(state3) {
             if (state3.deleteConfirmation instanceof Just && state3.deleteConfirmation.value0.customerId === v2.value0) {
-              var $383 = state3.deleteConfirmation.value0.inputValue === show4(state3.deleteConfirmation.value0.confirmCode);
-              if ($383) {
+              var $371 = state3.deleteConfirmation.value0.inputValue === show4(state3.deleteConfirmation.value0.confirmCode);
+              if ($371) {
                 return discard2(lift1(db.deleteCustomer(v2.value0)))(function() {
                   var newCustomers = filter(function(c2) {
                     return c2.id !== v2.value0;
                   })(state3.customers);
                   return discard2(modify_3(function(v12) {
-                    var $384 = {};
-                    for (var $385 in v12) {
-                      if ({}.hasOwnProperty.call(v12, $385)) {
-                        $384[$385] = v12[$385];
+                    var $372 = {};
+                    for (var $373 in v12) {
+                      if ({}.hasOwnProperty.call(v12, $373)) {
+                        $372[$373] = v12[$373];
                       }
                       ;
                     }
                     ;
-                    $384.customers = newCustomers;
-                    $384.highlightedCustomerId = Nothing.value;
-                    $384.deleteConfirmation = Nothing.value;
-                    return $384;
+                    $372.customers = newCustomers;
+                    $372.highlightedCustomerId = Nothing.value;
+                    $372.deleteConfirmation = Nothing.value;
+                    return $372;
                   }))(function() {
                     return $$void5(fork(bind3(liftEffect7(getCustomerListElement))(function(mbContainer) {
                       if (mbContainer instanceof Just) {
                         return bind3(liftEffect7(getScrollTop(mbContainer.value0)))(function(scrollTop2) {
                           return bind3(liftEffect7(getClientHeight(mbContainer.value0)))(function(clientHeight2) {
                             return discard2(modify_3(function(v12) {
-                              var $388 = {};
-                              for (var $389 in v12) {
-                                if ({}.hasOwnProperty.call(v12, $389)) {
-                                  $388[$389] = v12[$389];
+                              var $376 = {};
+                              for (var $377 in v12) {
+                                if ({}.hasOwnProperty.call(v12, $377)) {
+                                  $376[$377] = v12[$377];
                                 }
                                 ;
                               }
                               ;
-                              $388.scrollTop = scrollTop2;
-                              $388.containerHeight = clientHeight2;
-                              return $388;
+                              $376.scrollTop = scrollTop2;
+                              $376.containerHeight = clientHeight2;
+                              return $376;
                             }))(function() {
                               return handleAction(dictMonadAff)(db)(MeasureRenderedRows.value);
                             });
@@ -9647,7 +9642,7 @@
                         return pure1(unit);
                       }
                       ;
-                      throw new Error("Failed pattern match at Component.CustomerList (line 1919, column 13 - line 1928, column 35): " + [mbContainer.constructor.name]);
+                      throw new Error("Failed pattern match at Component.CustomerList (line 1889, column 13 - line 1898, column 35): " + [mbContainer.constructor.name]);
                     })));
                   });
                 });
@@ -9662,16 +9657,16 @@
         ;
         if (v2 instanceof CancelDelete) {
           return modify_3(function(v12) {
-            var $394 = {};
-            for (var $395 in v12) {
-              if ({}.hasOwnProperty.call(v12, $395)) {
-                $394[$395] = v12[$395];
+            var $382 = {};
+            for (var $383 in v12) {
+              if ({}.hasOwnProperty.call(v12, $383)) {
+                $382[$383] = v12[$383];
               }
               ;
             }
             ;
-            $394.deleteConfirmation = Nothing.value;
-            return $394;
+            $382.deleteConfirmation = Nothing.value;
+            return $382;
           });
         }
         ;
@@ -9686,7 +9681,7 @@
         if (v2 instanceof SortBy) {
           return bind3(get2)(function(state3) {
             var newSortState = (function() {
-              if (state3.sortState.field instanceof Just && eq5(state3.sortState.field.value0)(v2.value0)) {
+              if (state3.sortState.field instanceof Just && eq4(state3.sortState.field.value0)(v2.value0)) {
                 return {
                   field: new Just(v2.value0),
                   direction: toggleDirection(state3.sortState.direction)
@@ -9699,16 +9694,16 @@
               };
             })();
             return modify_3(function(v12) {
-              var $399 = {};
-              for (var $400 in v12) {
-                if ({}.hasOwnProperty.call(v12, $400)) {
-                  $399[$400] = v12[$400];
+              var $387 = {};
+              for (var $388 in v12) {
+                if ({}.hasOwnProperty.call(v12, $388)) {
+                  $387[$388] = v12[$388];
                 }
                 ;
               }
               ;
-              $399.sortState = newSortState;
-              return $399;
+              $387.sortState = newSortState;
+              return $387;
             });
           });
         }
@@ -9720,17 +9715,17 @@
             return bind3(liftEffect7(getScrollTop(v1.value0)))(function(scrollTop2) {
               return bind3(liftEffect7(getClientHeight(v1.value0)))(function(clientHeight2) {
                 return discard2(modify_3(function(v22) {
-                  var $404 = {};
-                  for (var $405 in v22) {
-                    if ({}.hasOwnProperty.call(v22, $405)) {
-                      $404[$405] = v22[$405];
+                  var $392 = {};
+                  for (var $393 in v22) {
+                    if ({}.hasOwnProperty.call(v22, $393)) {
+                      $392[$393] = v22[$393];
                     }
                     ;
                   }
                   ;
-                  $404.scrollTop = scrollTop2;
-                  $404.containerHeight = clientHeight2;
-                  return $404;
+                  $392.scrollTop = scrollTop2;
+                  $392.containerHeight = clientHeight2;
+                  return $392;
                 }))(function() {
                   return handleAction(dictMonadAff)(db)(MeasureRenderedRows.value);
                 });
@@ -9742,7 +9737,7 @@
             return pure1(unit);
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 1957, column 5 - line 1966, column 27): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 1927, column 5 - line 1936, column 27): " + [v1.constructor.name]);
         }
         ;
         if (v2 instanceof MeasureRenderedRows) {
@@ -9773,20 +9768,20 @@
                   return customer;
                 }
                 ;
-                throw new Error("Failed pattern match at Component.CustomerList (line 1975, column 9 - line 1977, column 30): " + [v12.constructor.name]);
+                throw new Error("Failed pattern match at Component.CustomerList (line 1945, column 9 - line 1947, column 30): " + [v12.constructor.name]);
               };
               var updatedCustomers = map17(updateCustomer)(state3.customers);
               return modify_3(function(v12) {
-                var $411 = {};
-                for (var $412 in v12) {
-                  if ({}.hasOwnProperty.call(v12, $412)) {
-                    $411[$412] = v12[$412];
+                var $399 = {};
+                for (var $400 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $400)) {
+                    $399[$400] = v12[$400];
                   }
                   ;
                 }
                 ;
-                $411.customers = updatedCustomers;
-                return $411;
+                $399.customers = updatedCustomers;
+                return $399;
               });
             });
           });
@@ -9794,19 +9789,19 @@
         ;
         if (v2 instanceof UpdateRenderedRange) {
           return modify_3(function(v12) {
-            var $414 = {};
-            for (var $415 in v12) {
-              if ({}.hasOwnProperty.call(v12, $415)) {
-                $414[$415] = v12[$415];
+            var $402 = {};
+            for (var $403 in v12) {
+              if ({}.hasOwnProperty.call(v12, $403)) {
+                $402[$403] = v12[$403];
               }
               ;
             }
             ;
-            $414.renderedRange = {
+            $402.renderedRange = {
               start: v2.value0,
               end: v2.value1
             };
-            return $414;
+            return $402;
           });
         }
         ;
@@ -9828,19 +9823,19 @@
                     return pure1(state3.containerHeight);
                   }
                   ;
-                  throw new Error("Failed pattern match at Component.CustomerList (line 2011, column 27 - line 2013, column 50): " + [mbContainer.constructor.name]);
+                  throw new Error("Failed pattern match at Component.CustomerList (line 1981, column 27 - line 1983, column 50): " + [mbContainer.constructor.name]);
                 })())(function(actualHeight) {
                   return discard2(when2(actualHeight !== state3.containerHeight)(modify_3(function(v22) {
-                    var $422 = {};
-                    for (var $423 in v22) {
-                      if ({}.hasOwnProperty.call(v22, $423)) {
-                        $422[$423] = v22[$423];
+                    var $410 = {};
+                    for (var $411 in v22) {
+                      if ({}.hasOwnProperty.call(v22, $411)) {
+                        $410[$411] = v22[$411];
                       }
                       ;
                     }
                     ;
-                    $422.containerHeight = actualHeight;
-                    return $422;
+                    $410.containerHeight = actualHeight;
+                    return $410;
                   })))(function() {
                     var roughYPosition = calculateHeightRange(sortedCustomers)(0)(v12.value0);
                     var roughScrollTop = max1(0)(roughYPosition - actualHeight + 100);
@@ -9863,7 +9858,7 @@
               return pure1(unit);
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 2007, column 7 - line 2034, column 29): " + [v12.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 1977, column 7 - line 2004, column 29): " + [v12.constructor.name]);
           })));
         }
         ;
@@ -9882,7 +9877,7 @@
               return pure1(unit);
             }
             ;
-            throw new Error("Failed pattern match at Component.CustomerList (line 2040, column 5 - line 2042, column 27): " + [v12.constructor.name]);
+            throw new Error("Failed pattern match at Component.CustomerList (line 2010, column 5 - line 2012, column 27): " + [v12.constructor.name]);
           });
         }
         ;
@@ -9892,20 +9887,20 @@
         ;
         if (v2 instanceof UpdateSearchQuery) {
           return modify_3(function(v12) {
-            var $431 = {};
-            for (var $432 in v12) {
-              if ({}.hasOwnProperty.call(v12, $432)) {
-                $431[$432] = v12[$432];
+            var $419 = {};
+            for (var $420 in v12) {
+              if ({}.hasOwnProperty.call(v12, $420)) {
+                $419[$420] = v12[$420];
               }
               ;
             }
             ;
-            $431.searchQuery = v2.value0;
-            return $431;
+            $419.searchQuery = v2.value0;
+            return $419;
           });
         }
         ;
-        throw new Error("Failed pattern match at Component.CustomerList (line 1743, column 19 - line 2048, column 40): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Component.CustomerList (line 1713, column 19 - line 2018, column 40): " + [v2.constructor.name]);
       };
     };
   };
@@ -9921,19 +9916,19 @@
             return false;
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 871, column 23 - line 873, column 23): " + [state3.deleteConfirmation.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 841, column 23 - line 843, column 23): " + [state3.deleteConfirmation.constructor.name]);
         })();
-        var isHighlighted = eq4(state3.highlightedCustomerId)(new Just(customer.id));
+        var isHighlighted = eq3(state3.highlightedCustomerId)(new Just(customer.id));
         var isEditingField = function(field) {
           if (state3.editing instanceof Just) {
-            return state3.editing.value0.customerId === customer.id && eq6(state3.editing.value0.field)(field);
+            return state3.editing.value0.customerId === customer.id && eq5(state3.editing.value0.field)(field);
           }
           ;
           if (state3.editing instanceof Nothing) {
             return false;
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 867, column 28 - line 869, column 23): " + [state3.editing.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 837, column 28 - line 839, column 23): " + [state3.editing.constructor.name]);
         };
         var filteredCustomers = filterCustomers(state3.searchQuery)(state3.customers);
         var sortedCustomers = applySorting(state3.sortState)(filteredCustomers);
@@ -9949,7 +9944,7 @@
             return 0;
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 877, column 21 - line 879, column 19): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 847, column 21 - line 849, column 19): " + [v2.constructor.name]);
         })();
         var isEvenRow = mod2(customerIndex)(2) === 0;
         var rowClasses = (function() {
@@ -9976,7 +9971,7 @@
             return "";
           }
           ;
-          throw new Error("Failed pattern match at Component.CustomerList (line 959, column 23 - line 961, column 28): " + [customer.updated_at.constructor.name]);
+          throw new Error("Failed pattern match at Component.CustomerList (line 929, column 23 - line 931, column 28): " + [customer.updated_at.constructor.name]);
         })())]), div2([class_("customer-actions")])([button([class_("btn btn-delete"), onClick(function(v2) {
           return new ShowDeleteConfirmation(customer.id);
         }), title("Delete")])([deleteIcon])])]);
@@ -10548,10 +10543,10 @@
       };
     }
   };
-  var eq3 = /* @__PURE__ */ eq(eqRoute);
+  var eq6 = /* @__PURE__ */ eq(eqRoute);
   var renderDropdown = function(state3) {
     return div2([class_("app-nav-dropdown")])([div2([class_("app-nav-item" + (function() {
-      var $49 = eq3(state3.currentRoute)(POSRoute.value);
+      var $49 = eq6(state3.currentRoute)(POSRoute.value);
       if ($49) {
         return " active";
       }
@@ -10560,7 +10555,7 @@
     })()), onClick(function(v2) {
       return new Navigate(POSRoute.value);
     })])([text("POS")]), div2([class_("app-nav-item" + (function() {
-      var $50 = eq3(state3.currentRoute)(CustomersRoute.value);
+      var $50 = eq6(state3.currentRoute)(CustomersRoute.value);
       if ($50) {
         return " active";
       }
