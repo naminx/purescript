@@ -12,6 +12,7 @@ You can edit this file as you like.
   , "argonaut-core"
   , "arrays"
   , "console"
+  , "const"
   , "effect"
   , "either"
   , "exceptions"

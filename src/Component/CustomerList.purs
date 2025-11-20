@@ -183,8 +183,9 @@ gramsPerBahtBar99 = 15.244
 -- - Measures actual DOM heights rather than estimates
 --
 -- Height Cache Management:
--- - Cache is cleared when array indices change (add/delete/edit operations)
--- - This prevents using stale measurements for wrong rows
+-- - Each customer stores its own rowHeight in the record
+-- - Cache is preserved across add/delete operations (stored per customer, not per index)
+-- - Cache is cleared only when customer name changes (may affect text wrapping)
 -- - Cache is rebuilt on-demand as rows are rendered and measured
 --
 -- Real-time Updates:
@@ -327,30 +328,6 @@ defaultRowHeight = 37.0 -- Default height estimate for unmeasured rows (measured
 
 overscan :: Int
 overscan = 5 -- Number of extra rows to render above and below visible area
-
--- Helper functions for displaying balances
-formatMoney :: Number -> String
-formatMoney n = 
-  let absN = if n < 0.0 then -n else n
-      intPart = floor absN
-      fracPart = (absN - toNumber intPart) * 100.0
-      fracStr = if fracPart < 10.0 then "0" <> show (floor fracPart) else show (floor fracPart)
-  in show intPart <> "." <> fracStr
-
-formatGrams :: Number -> String
-formatGrams n =
-  let absN = if n < 0.0 then -n else n
-  in if absN == 0.0 then "" else show absN <> textConstants.unitGrams
-
-formatBaht :: Number -> String
-formatBaht n =
-  let absN = if n < 0.0 then -n else n
-  in if absN == 0.0 then "" else show absN <> textConstants.unitBaht
-
--- Format date: DD/MM if this year, DD/MM/YYYY if previous year
-formatDate :: Maybe String -> String
-formatDate Nothing = ""
-formatDate (Just _) = "" -- Will be formatted via FFI in render
 
 -- Helper function to merge changes into existing customers
 mergeCustomers :: Array Customer -> Array Customer -> Array Customer
@@ -2047,7 +2024,7 @@ handleAction db = case _ of
   UpdateSearchQuery query -> do
     H.modify_ _ { searchQuery = query }
 
--- FFI helpers for getting scroll properties
+-- FFI helpers for DOM manipulation, measurements, and formatting
 foreign import getScrollTop :: HTMLElement -> Effect Number
 foreign import getClientHeight :: HTMLElement -> Effect Number
 foreign import scrollToPosition :: Number -> Effect Unit
