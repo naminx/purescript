@@ -25,19 +25,9 @@ pool.query('SELECT NOW()', (err, res) => {
   }
 });
 
-// Helper function to convert NUMERIC strings to numbers
-function convertNumericFields(row) {
-  return {
-    ...row,
-    money: parseFloat(row.money) || 0,
-    gram_jewelry: parseFloat(row.gram_jewelry) || 0,
-    baht_jewelry: parseFloat(row.baht_jewelry) || 0,
-    gram_bar96: parseFloat(row.gram_bar96) || 0,
-    baht_bar96: parseFloat(row.baht_bar96) || 0,
-    gram_bar99: parseFloat(row.gram_bar99) || 0,
-    baht_bar99: parseFloat(row.baht_bar99) || 0
-  };
-}
+// Note: Numeric fields are kept as strings to preserve precision
+// PostgreSQL NUMERIC -> pg driver (string) -> JSON (string) -> PureScript Decimal
+// This prevents floating-point rounding errors
 
 // MIME types
 const mimeTypes = {
@@ -84,9 +74,9 @@ const server = http.createServer(async (req, res) => {
           ORDER BY id
         `);
         console.log(`Retrieved ${result.rows.length} customers`);
-        const customers = result.rows.map(convertNumericFields);
+        // Keep numeric fields as strings (no conversion)
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(customers));
+        res.end(JSON.stringify(result.rows));
         return;
       }
 
@@ -111,9 +101,9 @@ const server = http.createServer(async (req, res) => {
         `, [since]);
         
         console.log(`Found ${result.rows.length} changes`);
-        const changes = result.rows.map(convertNumericFields);
+        // Keep numeric fields as strings (no conversion)
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(changes));
+        res.end(JSON.stringify(result.rows));
         return;
       }
 
@@ -136,9 +126,9 @@ const server = http.createServer(async (req, res) => {
           res.writeHead(404, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Customer not found' }));
         } else {
-          const customer = convertNumericFields(result.rows[0]);
+          // Keep numeric fields as strings (no conversion)
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(customer));
+          res.end(JSON.stringify(result.rows[0]));
         }
         return;
       }
@@ -160,9 +150,9 @@ const server = http.createServer(async (req, res) => {
               created_at, updated_at,
               NULL as row_height
           `, [name]);
-          const customer = convertNumericFields(result.rows[0]);
+          // Keep numeric fields as strings (no conversion)
           res.writeHead(201, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(customer));
+          res.end(JSON.stringify(result.rows[0]));
         });
         return;
       }
@@ -206,9 +196,9 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Customer not found' }));
           } else {
-            const customer = convertNumericFields(result.rows[0]);
+            // Keep numeric fields as strings (no conversion)
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(customer));
+            res.end(JSON.stringify(result.rows[0]));
           }
         });
         return;

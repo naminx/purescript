@@ -19,6 +19,7 @@
     "spago": "^0.21.0"
   },
   "dependencies": {
+    "decimal.js": "^10.6.0",
     "pg": "^8.16.3"
   }
 }

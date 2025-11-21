@@ -6,6 +6,7 @@ import Component.CustomerList as CustomerList
 import Component.POS as POS
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
+import TextConstants (routerConstants)
 import Database.Types (DatabaseInterface)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
@@ -26,12 +27,13 @@ type State m =
   { currentRoute :: Route
   , database :: DatabaseInterface m
   , showMenu :: Boolean
+  , customerCount :: Int
   }
 
 -- Component slots
 type Slots =
   ( pos :: H.Slot (Const Void) POS.Output Unit
-  , customers :: H.Slot (Const Void) Void Unit
+  , customers :: H.Slot (Const Void) CustomerList.Output Unit
   )
 
 _pos :: Proxy "pos"
@@ -45,12 +47,13 @@ data Action
   = Navigate Route
   | ToggleMenu
   | HandlePOSOutput POS.Output
+  | HandleCustomerListOutput CustomerList.Output
 
 -- Component definition
 component :: forall query input output m. MonadAff m => DatabaseInterface m -> H.Component query input output m
 component database =
   H.mkComponent
-    { initialState: \_ -> { currentRoute: POSRoute, database, showMenu: false }
+    { initialState: \_ -> { currentRoute: POSRoute, database, showMenu: false, customerCount: 0 }
     , render
     , eval: H.mkEval $ H.defaultEval { handleAction = handleAction }
     }
@@ -74,6 +77,9 @@ renderNav state =
             border-bottom: 1px solid #dee2e6;
             padding: 0;
             margin: 0;
+            display: flex;
+            align-items: center;
+            height: 38px;
           }
           
           .app-nav-menu {
@@ -81,13 +87,24 @@ renderNav state =
             display: inline-block;
           }
           
+          .app-nav-title {
+            font-size: 20px;
+            color: #333;
+            padding: 0 16px;
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+          }
+          
           .app-nav-toggle {
             background: none;
             border: none;
-            font-size: 24px;
-            padding: 12px 20px;
+            font-size: 20px;
+            padding: 8px 16px;
             cursor: pointer;
             color: #333;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
           }
           
           .app-nav-toggle:hover {
@@ -110,6 +127,7 @@ renderNav state =
             padding: 12px 20px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
           }
           
           .app-nav-item:last-child {
@@ -133,10 +151,16 @@ renderNav state =
             , HP.title "Menu"
             , HE.onClick \_ -> ToggleMenu
             ]
-            [ HH.text ("☰ " <> routeName state.currentRoute) ]
+            [ HH.text "☰" ]
         , if state.showMenu
             then renderDropdown state
             else HH.text ""
+        ]
+    , HH.span
+        [ HP.class_ (HH.ClassName "app-nav-title") ]
+        [ HH.text $ case state.currentRoute of
+            POSRoute -> routerConstants.routePOS
+            CustomersRoute -> routerConstants.routeCustomers <> " (" <> show state.customerCount <> " ราย)"
         ]
     ]
 
@@ -148,17 +172,17 @@ renderDropdown state =
         [ HP.class_ (HH.ClassName $ "app-nav-item" <> if state.currentRoute == POSRoute then " active" else "")
         , HE.onClick \_ -> Navigate POSRoute
         ]
-        [ HH.text "POS" ]
+        [ HH.text routerConstants.routePOS ]
     , HH.div
         [ HP.class_ (HH.ClassName $ "app-nav-item" <> if state.currentRoute == CustomersRoute then " active" else "")
         , HE.onClick \_ -> Navigate CustomersRoute
         ]
-        [ HH.text "Customers" ]
+        [ HH.text routerConstants.routeCustomers ]
     ]
 
 routeName :: Route -> String
-routeName POSRoute = "POS"
-routeName CustomersRoute = "Customers"
+routeName POSRoute = routerConstants.routePOS
+routeName CustomersRoute = routerConstants.routeCustomers
 
 renderPage :: forall m. MonadAff m => State m -> H.ComponentHTML Action Slots m
 renderPage state =
@@ -166,7 +190,7 @@ renderPage state =
     POSRoute ->
       HH.slot _pos unit (POS.component state.database) unit HandlePOSOutput
     CustomersRoute ->
-      HH.slot_ _customers unit (CustomerList.component state.database) unit
+      HH.slot _customers unit (CustomerList.component state.database) unit HandleCustomerListOutput
 
 -- Action handler
 handleAction :: forall output m. MonadAff m => Action -> H.HalogenM (State m) Action Slots output m Unit
@@ -181,3 +205,8 @@ handleAction = case _ of
     case output of
       POS.NavigateToCustomers -> do
         H.modify_ _ { currentRoute = CustomersRoute }
+  
+  HandleCustomerListOutput output -> do
+    case output of
+      CustomerList.CustomerCountChanged count -> do
+        H.modify_ _ { customerCount = count }

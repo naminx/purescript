@@ -1,6 +1,7 @@
 module Component.CustomerList where
 
 import Prelude
+import TextConstants (customerListConstants)
 
 import Component.Icons as Icons
 import Data.Array (drop, filter, find, findIndex, length, slice, snoc, sortBy, take, (!!), replicate, foldl, last, catMaybes, (..))
@@ -15,6 +16,8 @@ import Data.String (Pattern(..), contains, toLower)
 import Data.Number as Number
 import Data.String.CodeUnits (dropRight, takeRight, length) as SCU
 import Database.Types (Customer, DatabaseInterface)
+import Decimal as D
+import Decimal (Decimal)
 import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
 import Control.Promise (Promise, toAff)
@@ -124,10 +127,10 @@ parseFieldValue FieldGoldBar99Baht value = parseNumber value 3
 -- Parse a number with max decimal places
 parseNumber :: String -> Int -> Maybe String
 parseNumber value maxDecimals =
-  case Number.fromString value of
+  case D.fromString value of
     Nothing -> Nothing
-    Just n ->
-      if n < 0.0 then Nothing
+    Just d ->
+      if D.isNegative d then Nothing
       else
         let parts = String.split (Pattern ".") value
         in case parts of
@@ -148,14 +151,14 @@ extractDatePart (Just timestamp) =
     _ -> timestamp  -- Fallback to full timestamp if format is unexpected
 
 -- Gold conversion rates (grams per baht)
-gramsPerBahtJewelry :: Number
-gramsPerBahtJewelry = 15.24
+gramsPerBahtJewelry :: Decimal
+gramsPerBahtJewelry = D.unsafeFromString "15.24"
 
-gramsPerBahtBar96 :: Number
-gramsPerBahtBar96 = 15.244
+gramsPerBahtBar96 :: Decimal
+gramsPerBahtBar96 = D.unsafeFromString "15.244"
 
-gramsPerBahtBar99 :: Number
-gramsPerBahtBar99 = 15.244
+gramsPerBahtBar99 :: Decimal
+gramsPerBahtBar99 = D.unsafeFromString "15.244"
 
 -- ============================================================================
 -- CUSTOMER LIST COMPONENT WITH VIRTUAL SCROLLING
@@ -220,28 +223,7 @@ type TextConstants =
   }
 
 textConstants :: TextConstants
-textConstants =
-  { appTitle: "รายชื่อลูกค้า"
-  , customersCount: \n -> show n <> " ราย"
-  , columnId: "รหัส"
-  , columnName: "ชื่อ"
-  , columnMoney: "เงิน"
-  , columnGoldJewelry: "รูปพรรณ"
-  , columnGoldBar96: "แท่ง 96.5%"
-  , columnGoldBar99: "แท่ง 99.99%"
-  , columnUpdated: "ปรับปรุง"
-  , columnActions: "ลบ"
-  , headerDebit: "ค้าง"
-  , headerCredit: "เหลือ"
-  , newCustomerPlaceholder: "ชื่อลูกค้ารายใหม่"
-  , searchPlaceholder: "ค้นหาชื่อลูกค้า ..."
-  , deleteConfirmTitle: "ยืนยันการลบ"
-  , deleteConfirmPrompt: "โปรดใส่รหัสเพื่อยืนยัน:"
-  , buttonConfirm: "ยืนยัน"
-  , buttonCancel: "ยกเลิก"
-  , unitGrams: "g"
-  , unitBaht: "บ"
-  }
+textConstants = customerListConstants
 
 type State =
   { customers :: Array Customer
@@ -289,7 +271,7 @@ data Action
   | UpdateRenderedRange Int Int
   | RenderAroundAndScrollTo Int
 
-type Output = Void
+data Output = CustomerCountChanged Int
 
 type Slots :: forall k. Row k
 type Slots = ()
@@ -327,7 +309,7 @@ defaultRowHeight :: Number
 defaultRowHeight = 37.0 -- Default height estimate for unmeasured rows (measured actual height)
 
 overscan :: Int
-overscan = 5 -- Number of extra rows to render above and below visible area
+overscan = 10 -- Number of extra rows to render above and below visible area
 
 -- Helper function to merge changes into existing customers
 mergeCustomers :: Array Customer -> Array Customer -> Array Customer
@@ -417,11 +399,11 @@ calculateVisibleRange state customers =
             let rowHeight = getCustomerHeight customer
                 nextHeight = accHeight + rowHeight
             in
-              if nextHeight > (state.containerHeight + toNumber overscan * defaultRowHeight) then idx + 1
+              if nextHeight > state.containerHeight then idx + 1
               else findEndRow (idx + 1) nextHeight
           Nothing -> totalRows
     
-    end = min totalRows (findEndRow start 0.0)
+    end = min totalRows (findEndRow start 0.0 + overscan)
     
     -- Calculate top spacer height (sum of heights before start)
     topSpacerHeight = calculateHeightRange customers 0 start
@@ -452,69 +434,69 @@ applySorting { field: Just SortByName, direction } customers =
 applySorting { field: Just SortByMoneyDebit, direction } customers =
   let 
     -- For debit: more negative = larger debit (e.g., -30 > -20 in debit terms)
-    debitValue c = if c.money < 0.0 then -c.money else 0.0
-    sorted = sortBy (\a b -> compare (debitValue a) (debitValue b)) customers
+    debitValue c = if D.isNegative c.money then D.negate c.money else D.zero
+    sorted = sortBy (\a b -> D.compare (debitValue a) (debitValue b)) customers
   in case direction of
       Ascending -> sorted  -- Smallest debit first
-      Descending -> sortBy (\a b -> compare (debitValue b) (debitValue a)) customers  -- Largest debit first
+      Descending -> sortBy (\a b -> D.compare (debitValue b) (debitValue a)) customers  -- Largest debit first
 applySorting { field: Just SortByMoneyCredit, direction } customers =
   let 
-    creditValue c = if c.money > 0.0 then c.money else 0.0
-    sorted = sortBy (\a b -> compare (creditValue a) (creditValue b)) customers
+    creditValue c = if D.isPositive c.money then c.money else D.zero
+    sorted = sortBy (\a b -> D.compare (creditValue a) (creditValue b)) customers
   in case direction of
       Ascending -> sorted  -- Smallest credit first
-      Descending -> sortBy (\a b -> compare (creditValue b) (creditValue a)) customers  -- Largest credit first
+      Descending -> sortBy (\a b -> D.compare (creditValue b) (creditValue a)) customers  -- Largest credit first
 -- Gold Jewelry sorting
 applySorting { field: Just SortByGoldJewelryDebit, direction } customers =
   let 
-    netWeight c = c.gram_jewelry + (c.baht_jewelry * gramsPerBahtJewelry)
-    debitValue c = if netWeight c < 0.0 then -(netWeight c) else 0.0
-    sorted = sortBy (\a b -> compare (debitValue a) (debitValue b)) customers
+    netWeight c = D.add c.gram_jewelry (D.multiply c.baht_jewelry gramsPerBahtJewelry)
+    debitValue c = if D.isNegative (netWeight c) then D.negate (netWeight c) else D.zero
+    sorted = sortBy (\a b -> D.compare (debitValue a) (debitValue b)) customers
   in case direction of
       Ascending -> sorted
-      Descending -> sortBy (\a b -> compare (debitValue b) (debitValue a)) customers
+      Descending -> sortBy (\a b -> D.compare (debitValue b) (debitValue a)) customers
 applySorting { field: Just SortByGoldJewelryCredit, direction } customers =
   let 
-    netWeight c = c.gram_jewelry + (c.baht_jewelry * gramsPerBahtJewelry)
-    creditValue c = if netWeight c > 0.0 then netWeight c else 0.0
-    sorted = sortBy (\a b -> compare (creditValue a) (creditValue b)) customers
+    netWeight c = D.add c.gram_jewelry (D.multiply c.baht_jewelry gramsPerBahtJewelry)
+    creditValue c = if D.isPositive (netWeight c) then netWeight c else D.zero
+    sorted = sortBy (\a b -> D.compare (creditValue a) (creditValue b)) customers
   in case direction of
       Ascending -> sorted
-      Descending -> sortBy (\a b -> compare (creditValue b) (creditValue a)) customers
+      Descending -> sortBy (\a b -> D.compare (creditValue b) (creditValue a)) customers
 -- 96.5% Gold Bar sorting
 applySorting { field: Just SortByGoldBar96Debit, direction } customers =
   let 
-    netWeight c = c.gram_bar96 + (c.baht_bar96 * gramsPerBahtBar96)
-    debitValue c = if netWeight c < 0.0 then -(netWeight c) else 0.0
-    sorted = sortBy (\a b -> compare (debitValue a) (debitValue b)) customers
+    netWeight c = D.add c.gram_bar96 (D.multiply c.baht_bar96 gramsPerBahtBar96)
+    debitValue c = if D.isNegative (netWeight c) then D.negate (netWeight c) else D.zero
+    sorted = sortBy (\a b -> D.compare (debitValue a) (debitValue b)) customers
   in case direction of
       Ascending -> sorted
-      Descending -> sortBy (\a b -> compare (debitValue b) (debitValue a)) customers
+      Descending -> sortBy (\a b -> D.compare (debitValue b) (debitValue a)) customers
 applySorting { field: Just SortByGoldBar96Credit, direction } customers =
   let 
-    netWeight c = c.gram_bar96 + (c.baht_bar96 * gramsPerBahtBar96)
-    creditValue c = if netWeight c > 0.0 then netWeight c else 0.0
-    sorted = sortBy (\a b -> compare (creditValue a) (creditValue b)) customers
+    netWeight c = D.add c.gram_bar96 (D.multiply c.baht_bar96 gramsPerBahtBar96)
+    creditValue c = if D.isPositive (netWeight c) then netWeight c else D.zero
+    sorted = sortBy (\a b -> D.compare (creditValue a) (creditValue b)) customers
   in case direction of
       Ascending -> sorted
-      Descending -> sortBy (\a b -> compare (creditValue b) (creditValue a)) customers
+      Descending -> sortBy (\a b -> D.compare (creditValue b) (creditValue a)) customers
 -- 99.99% Gold Bar sorting
 applySorting { field: Just SortByGoldBar99Debit, direction } customers =
   let 
-    netWeight c = c.gram_bar99 + (c.baht_bar99 * gramsPerBahtBar99)
-    debitValue c = if netWeight c < 0.0 then -(netWeight c) else 0.0
-    sorted = sortBy (\a b -> compare (debitValue a) (debitValue b)) customers
+    netWeight c = D.add c.gram_bar99 (D.multiply c.baht_bar99 gramsPerBahtBar99)
+    debitValue c = if D.isNegative (netWeight c) then D.negate (netWeight c) else D.zero
+    sorted = sortBy (\a b -> D.compare (debitValue a) (debitValue b)) customers
   in case direction of
       Ascending -> sorted
-      Descending -> sortBy (\a b -> compare (debitValue b) (debitValue a)) customers
+      Descending -> sortBy (\a b -> D.compare (debitValue b) (debitValue a)) customers
 applySorting { field: Just SortByGoldBar99Credit, direction } customers =
   let 
-    netWeight c = c.gram_bar99 + (c.baht_bar99 * gramsPerBahtBar99)
-    creditValue c = if netWeight c > 0.0 then netWeight c else 0.0
-    sorted = sortBy (\a b -> compare (creditValue a) (creditValue b)) customers
+    netWeight c = D.add c.gram_bar99 (D.multiply c.baht_bar99 gramsPerBahtBar99)
+    creditValue c = if D.isPositive (netWeight c) then netWeight c else D.zero
+    sorted = sortBy (\a b -> D.compare (creditValue a) (creditValue b)) customers
   in case direction of
       Ascending -> sorted
-      Descending -> sortBy (\a b -> compare (creditValue b) (creditValue a)) customers
+      Descending -> sortBy (\a b -> D.compare (creditValue b) (creditValue a)) customers
 applySorting { field: Just SortByUpdated, direction } customers =
   let 
     -- Compare only date part (YYYY-MM-DD), ignoring time
@@ -550,14 +532,7 @@ render state =
       ]
       [ HH.div
           [ HP.class_ (HH.ClassName "customer-app") ]
-          [ HH.h1
-              [ HP.class_ (HH.ClassName "app-title") ] 
-              [ HH.text textConstants.appTitle
-              , HH.span 
-                  [ HP.class_ (HH.ClassName "customer-count") ]
-                  [ HH.text $ " (" <> textConstants.customersCount (length sortedCustomers) <> ")" ]
-              ]
-      , HH.div
+          [ HH.div
           [ HP.class_ (HH.ClassName "customer-list-container") ]
           [ renderTableHeader state
           , HH.div
@@ -588,10 +563,7 @@ renderTableHeader state =
   HH.div [ HP.class_ (HH.ClassName "table-header-container") ]
     [ -- Row 1: Category headers with merged columns
       HH.div [ HP.class_ (HH.ClassName "table-header-row1") ]
-        [ HH.div [ HP.class_ (HH.ClassName "header-cell header-id-row1") ]
-            [ HH.button [ HP.class_ (HH.ClassName "sort-button"), HE.onClick \_ -> SortBy SortById ]
-                [ HH.text $ textConstants.columnId <> " ", renderSortIcon SortById state.sortState ]
-            ]
+        [ HH.div [ HP.class_ (HH.ClassName "header-cell header-id-row1") ] []
         , HH.div [ HP.class_ (HH.ClassName "header-cell header-name-row1") ]
             [ HH.button [ HP.class_ (HH.ClassName "sort-button"), HE.onClick \_ -> SortBy SortByName ]
                 [ HH.text $ textConstants.columnName <> " ", renderSortIcon SortByName state.sortState ]
@@ -604,17 +576,16 @@ renderTableHeader state =
             [ HH.text textConstants.columnGoldBar96 ]
         , HH.div [ HP.class_ (HH.ClassName "header-cell header-gold-9999-merged") ]
             [ HH.text textConstants.columnGoldBar99 ]
-        , HH.button 
-            [ HP.class_ (HH.ClassName "header-cell sort-button")
-            , HE.onClick \_ -> SortBy SortByUpdated
-            ]
-            [ HH.text textConstants.columnUpdated, renderSortIcon SortByUpdated state.sortState ]
+        , HH.div [ HP.class_ (HH.ClassName "header-cell header-updated-row1") ] []
         , HH.div [ HP.class_ (HH.ClassName "header-cell header-actions-row1") ]
             [ HH.text textConstants.columnActions ]
         ]
     , -- Row 2: Debit/Credit sub-headers with search
       HH.div [ HP.class_ (HH.ClassName "table-header-row2") ]
-        [ HH.div [ HP.class_ (HH.ClassName "header-cell header-id-row2") ] []
+        [ HH.div [ HP.class_ (HH.ClassName "header-cell header-id-row2") ]
+            [ HH.button [ HP.class_ (HH.ClassName "sort-button"), HE.onClick \_ -> SortBy SortById ]
+                [ HH.text $ textConstants.columnId <> " ", renderSortIcon SortById state.sortState ]
+            ]
         , HH.div [ HP.class_ (HH.ClassName "header-cell header-name-row2") ]
             [ HH.input
                 [ HP.type_ HP.InputText, HP.class_ (HH.ClassName "search-input")
@@ -638,7 +609,11 @@ renderTableHeader state =
             [ HH.text (textConstants.headerDebit <> " "), renderSortIcon SortByGoldBar99Debit state.sortState ]
         , HH.button [ HP.class_ (HH.ClassName "header-cell header-credit sort-button"), HE.onClick \_ -> SortBy SortByGoldBar99Credit ]
             [ HH.text (textConstants.headerCredit <> " "), renderSortIcon SortByGoldBar99Credit state.sortState ]
-        , HH.div [ HP.class_ (HH.ClassName "header-cell header-updated-row2") ] []
+        , HH.button 
+            [ HP.class_ (HH.ClassName "header-cell sort-button")
+            , HE.onClick \_ -> SortBy SortByUpdated
+            ]
+            [ HH.text textConstants.columnUpdated, renderSortIcon SortByUpdated state.sortState ]
         , HH.div [ HP.class_ (HH.ClassName "header-cell header-actions-row2") ] []
         ]
     ]
@@ -653,10 +628,10 @@ renderSortIcon field { field: currentField, direction } =
     _ -> Icons.sortNeutralIcon
 
 -- Helper to render money with smaller fraction
-renderMoney :: forall w i. Number -> HH.HTML w i
-renderMoney n =
-  let absN = if n < 0.0 then -n else n
-      formatted = formatMoneyValue absN
+renderMoney :: forall w i. Decimal -> HH.HTML w i
+renderMoney d =
+  let absD = D.abs d
+      formatted = formatMoneyValue absD
       isInteger = formatted.fraction == "00"
       decimalClass = if isInteger 
                        then "money-decimal money-decimal-zero"
@@ -671,10 +646,10 @@ renderMoney n =
       ]
 
 -- Helper to render grams weight with smaller fraction
-renderGrams :: forall w i. Number -> HH.HTML w i
-renderGrams n =
-  let absN = if n < 0.0 then -n else n
-      formatted = formatGramsValue absN
+renderGrams :: forall w i. Decimal -> HH.HTML w i
+renderGrams d =
+  let absD = D.abs d
+      formatted = formatGramsValue absD
   in if formatted.integer == "" then HH.text ""
      else HH.span [ HP.class_ (HH.ClassName "grams-value") ]
        [ HH.span [ HP.class_ (HH.ClassName "grams-integer") ] [ HH.text formatted.integer ]
@@ -685,13 +660,17 @@ renderGrams n =
 
 -- Helper to render baht weight with smaller fraction
 -- Note: formatBahtValue now returns special Thai units (½ส, 1ส, 2ส, 3ส, 6สล) or value with "บ" suffix
-renderBaht :: forall w i. Number -> HH.HTML w i
-renderBaht n =
-  let absN = if n < 0.0 then -n else n
-      formatted = formatBahtValue absN
+renderBaht :: forall w i. Decimal -> HH.HTML w i
+renderBaht d =
+  let absD = D.abs d
+      formatted = formatBahtValue absD
   in if formatted.integer == "" then HH.text ""
      else HH.span [ HP.class_ (HH.ClassName "baht-value") ]
             [ HH.span [ HP.class_ (HH.ClassName "baht-integer") ] [ HH.text formatted.integer ]
+            , if formatted.hasFraction
+                then HH.span [ HP.class_ (HH.ClassName "baht-fraction") ] [ HH.text formatted.fraction ]
+                else HH.text ""
+            , HH.span [ HP.class_ (HH.ClassName "baht-unit") ] [ HH.text textConstants.unitBaht ]
             ]
 
 -- Helper to trim trailing zeros from string
@@ -702,10 +681,10 @@ trimTrailingZeros s =
      else if SCU.takeRight 1 s == "0" then trimTrailingZeros (SCU.dropRight 1 s)
      else s
 
--- Format number for editing (remove trailing zeros and decimal point if integer)
-formatNumberForEdit :: Number -> String
-formatNumberForEdit n =
-  let str = show n
+-- Format Decimal for editing (remove trailing zeros and decimal point if integer)
+formatNumberForEdit :: Decimal -> String
+formatNumberForEdit d =
+  let str = D.toString d
       trimmed = trimTrailingZeros str
   in if SCU.takeRight 1 trimmed == "."
        then SCU.dropRight 1 trimmed
@@ -739,7 +718,7 @@ renderEditableField state customer field displayClass inputClass =
         [ HH.text currentValue ]
 
 -- Render gold field (grams or baht) with debit/credit display
-renderGoldField :: forall m. State -> Customer -> EditableField -> Boolean -> String -> (Number -> H.ComponentHTML Action Slots m) -> Number -> H.ComponentHTML Action Slots m
+renderGoldField :: forall m. State -> Customer -> EditableField -> Boolean -> String -> (Decimal -> H.ComponentHTML Action Slots m) -> Decimal -> H.ComponentHTML Action Slots m
 renderGoldField state customer field isDebit unit renderer value =
   let
     -- Check if THIS specific side is being edited
@@ -750,16 +729,16 @@ renderGoldField state customer field isDebit unit renderer value =
     isEditingOppositeSide = case state.editing of
       Just edit -> edit.customerId == customer.id && edit.field == field && edit.isDebitSide /= isDebit
       Nothing -> false
-    absValue = if value < 0.0 then -value else value
+    absValue = D.abs value
     -- Only show value if it's on the correct side, otherwise blank
-    shouldShowValue = if isDebit then value <= 0.0 else value >= 0.0
-    displayValue = if shouldShowValue && absValue > 0.0 then formatNumberForEdit absValue else ""
+    shouldShowValue = if isDebit then D.lte value D.zero else D.gte value D.zero
+    displayValue = if shouldShowValue && D.gt absValue D.zero then formatNumberForEdit absValue else ""
     editValue = case state.editing of
       Just edit | edit.customerId == customer.id && edit.field == field && edit.isDebitSide == isDebit -> edit.value
       _ -> displayValue
     baseClassName = if isDebit then "customer-gold-debit" else "customer-gold-credit"
     -- Add warning class if opposite side is being edited and this side has a value on the correct side
-    className = if isEditingOppositeSide && shouldShowValue && absValue > 0.0
+    className = if isEditingOppositeSide && shouldShowValue && D.gt absValue D.zero
                   then baseClassName <> " field-warning"
                   else baseClassName
   in
@@ -779,7 +758,7 @@ renderGoldField state customer field isDebit unit renderer value =
         [ HP.class_ (HH.ClassName (className <> " editable-field"))
         , HE.onClick \e -> StartEditFieldWithEvent customer.id field displayValue isDebit e
         ]
-        [ if shouldShowValue && absValue > 0.0 
+        [ if shouldShowValue && D.gt absValue D.zero 
             then renderer value 
             else HH.text " "  -- Space to make cell clickable
         ]
@@ -798,16 +777,16 @@ renderMoneyField state customer isDebit =
       Just edit -> edit.customerId == customer.id && edit.field == FieldMoney && edit.isDebitSide /= isDebit
       Nothing -> false
     value = customer.money
-    absValue = if value < 0.0 then -value else value
+    absValue = D.abs value
     -- Only show value if it's on the correct side, otherwise blank
-    shouldShowValue = if isDebit then value <= 0.0 else value >= 0.0
-    displayValue = if shouldShowValue && absValue > 0.0 then formatNumberForEdit absValue else ""
+    shouldShowValue = if isDebit then D.lte value D.zero else D.gte value D.zero
+    displayValue = if shouldShowValue && D.gt absValue D.zero then formatNumberForEdit absValue else ""
     editValue = case state.editing of
       Just edit | edit.customerId == customer.id && edit.field == FieldMoney && edit.isDebitSide == isDebit -> edit.value
       _ -> displayValue
     baseClassName = if isDebit then "customer-money-debit" else "customer-money-credit"
     -- Add warning class if opposite side is being edited and this side has a value on the correct side
-    className = if isEditingOppositeSide && shouldShowValue && absValue > 0.0
+    className = if isEditingOppositeSide && shouldShowValue && D.gt absValue D.zero
                   then baseClassName <> " field-warning"
                   else baseClassName
   in
@@ -826,7 +805,7 @@ renderMoneyField state customer isDebit =
         [ HP.class_ (HH.ClassName (className <> " editable-field"))
         , HE.onClick \e -> StartEditFieldWithEvent customer.id FieldMoney displayValue isDebit e
         ]
-        [ if shouldShowValue && absValue > 0.0 
+        [ if shouldShowValue && D.gt absValue D.zero 
             then renderMoney value 
             else HH.text " "  -- Space to make cell clickable
         ]
@@ -1038,15 +1017,9 @@ renderStyles =
       .customer-app {
         width: 100%;
         padding: 8px;
-        height: 100vh;
+        height: calc(100vh - 38px);
         display: flex;
         flex-direction: column;
-      }
-      
-      h1 {
-        color: #333;
-        margin: 0 0 8px 0;
-        font-size: 20px;
       }
       
       .customer-list-container {
@@ -1074,6 +1047,7 @@ renderStyles =
         color: #495057;
         gap: 8px;
         font-size: 12px;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .table-header-row1 {
@@ -1168,22 +1142,11 @@ renderStyles =
         font-weight: 600;
         font-size: 12px;
         transition: color 0.2s;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .sort-button:hover {
         color: #007bff;
-      }
-      
-      .app-title {
-        display: flex;
-        align-items: baseline;
-        gap: 10px;
-      }
-      
-      .customer-count {
-        font-size: 12px;
-        color: #666;
-        font-weight: normal;
       }
       
       .customer-list {
@@ -1328,6 +1291,7 @@ renderStyles =
         border-radius: 3px;
         font-size: 12px;
         text-align: right;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .gold-input-container {
@@ -1343,6 +1307,7 @@ renderStyles =
         border-radius: 3px;
         font-size: 12px;
         text-align: right;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .gold-unit {
@@ -1662,7 +1627,7 @@ renderStyles =
         color: #dc3545;
         margin-bottom: 16px;
         letter-spacing: 2px;
-        font-family: 'Courier New', monospace;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .modal-input {
@@ -1673,7 +1638,7 @@ renderStyles =
         font-size: 16px;
         margin-bottom: 16px;
         text-align: center;
-        font-family: 'Courier New', monospace;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
         letter-spacing: 1px;
       }
       
@@ -1692,6 +1657,7 @@ renderStyles =
         background-color: #dc3545;
         color: white;
         padding: 10px 20px;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .btn-confirm:hover {
@@ -1702,6 +1668,7 @@ renderStyles =
         background-color: #6c757d;
         color: white;
         padding: 10px 20px;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .btn-cancel:hover {
@@ -1721,6 +1688,7 @@ handleAction db = case _ of
       { customers = customers
       , lastSyncTime = latestTime
       }
+    H.raise $ CustomerCountChanged (length customers)
     handleAction db PollForChanges
   
   PollForChanges -> do
@@ -2030,9 +1998,9 @@ foreign import focusDeleteConfirmInput :: Effect Unit
 foreign import focusEditInput :: Effect Unit
 foreign import requestAnimationFrameAction :: Unit -> Effect (Promise Unit)
 foreign import formatDateString :: String -> String
-foreign import formatMoneyValue :: Number -> { integer :: String, fraction :: String }
-foreign import formatGramsValue :: Number -> { integer :: String, fraction :: String }
-foreign import formatBahtValue :: Number -> { integer :: String, fraction :: String, hasFraction :: Boolean }
+foreign import formatMoneyValue :: Decimal -> { integer :: String, fraction :: String }
+foreign import formatGramsValue :: Decimal -> { integer :: String, fraction :: String }
+foreign import formatBahtValue :: Decimal -> { integer :: String, fraction :: String, hasFraction :: Boolean }
 
 getCustomerListElement :: Effect (Maybe HTMLElement)
 getCustomerListElement = do

@@ -2,9 +2,11 @@ module Component.POS where
 
 import Prelude
 
+import Effect.Class.Console (log)
 import Data.Maybe (Maybe(..))
+import TextConstants (posConstants)
 import Data.String.Common (toLower)
-import Data.String.CodeUnits (contains)
+import Data.String (contains)
 import Data.String.Pattern (Pattern(..))
 import Data.Array (filter)
 import Data.Array (length)
@@ -99,6 +101,7 @@ renderStyles =
         padding: 20px;
         max-width: 1400px;
         margin: 0 auto;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .pos-header {
@@ -120,7 +123,7 @@ renderStyles =
       
       .pos-search-box {
         position: relative;
-        flex: 1;
+        width: 600px;
       }
       
       .pos-search-input {
@@ -129,6 +132,8 @@ renderStyles =
         font-size: 16px;
         border: 1px solid #ddd;
         border-radius: 4px;
+        box-sizing: border-box;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .pos-search-input:focus {
@@ -147,31 +152,21 @@ renderStyles =
         cursor: pointer;
         color: #999;
         padding: 0 8px;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .pos-search-clear:hover {
         color: #333;
       }
       
-      .pos-customer-mgmt-btn {
-        padding: 10px 20px;
-        font-size: 20px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: white;
-        cursor: pointer;
-      }
-      
-      .pos-customer-mgmt-btn:hover {
-        background: #f5f5f5;
-      }
+
       
       /* Search popup */
       .pos-search-popup {
         position: absolute;
         top: 100%;
         left: 0;
-        right: 60px;
+        right: 0;
         background: white;
         border: 1px solid #ddd;
         border-top: none;
@@ -347,6 +342,7 @@ renderStyles =
         cursor: pointer;
         padding: 4px 8px;
         color: #666;
+        font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
       
       .pos-icon-btn:hover {
@@ -361,10 +357,7 @@ renderStyles =
 
 renderHeader :: forall w i. HH.HTML w i
 renderHeader =
-  HH.div
-    [ HP.class_ (HH.ClassName "pos-header") ]
-    [ HH.h1_ [ HH.text "Gold Shop POS" ]
-    ]
+  HH.text ""
 
 renderSearchBox :: forall m. State m -> H.ComponentHTML Action () m
 renderSearchBox state =
@@ -375,7 +368,7 @@ renderSearchBox state =
         [ HH.input
             [ HP.type_ HP.InputText
             , HP.class_ (HH.ClassName "pos-search-input")
-            , HP.placeholder "Search customer"
+            , HP.placeholder posConstants.searchPlaceholder
             , HP.value state.searchQuery
             , HE.onValueInput UpdateSearchQuery
             ]
@@ -386,16 +379,10 @@ renderSearchBox state =
               ]
               [ HH.text "×" ]
             else HH.text ""
+        , if state.showSearchPopup
+            then renderSearchPopup state
+            else HH.text ""
         ]
-    , HH.button
-        [ HP.class_ (HH.ClassName "pos-customer-mgmt-btn")
-        , HE.onClick \_ -> OpenCustomerManagement
-        , HP.title "Customer Management"
-        ]
-        [ HH.text "📋" ]
-    , if state.showSearchPopup
-        then renderSearchPopup state
-        else HH.text ""
     ]
 
 renderSearchPopup :: forall m. State m -> H.ComponentHTML Action () m
@@ -405,7 +392,7 @@ renderSearchPopup state =
     ( if length state.searchResults == 0
         then [ HH.div
                 [ HP.class_ (HH.ClassName "pos-search-no-results") ]
-                [ HH.text "No customers found" ]
+                [ HH.text posConstants.noCustomersFound ]
              ]
         else map renderSearchResult state.searchResults
     )
@@ -431,14 +418,14 @@ renderTodaysBills :: forall m. State m -> H.ComponentHTML Action () m
 renderTodaysBills state =
   HH.div
     [ HP.class_ (HH.ClassName "pos-content") ]
-    [ HH.h2_ [ HH.text $ "Today's Bills (" <> show (length state.todaysBills) <> ")" ]
+    [ HH.h2_ [ HH.text $ posConstants.todaysBillsTitle (length state.todaysBills) ]
     , HH.table
         [ HP.class_ (HH.ClassName "pos-table pos-todays-bills-table") ]
         [ HH.thead_
             [ HH.tr_
-                [ HH.th_ [ HH.text "Time" ]
-                , HH.th_ [ HH.text "Customer Name" ]
-                , HH.th_ [ HH.text "×" ]
+                [ HH.th_ [ HH.text posConstants.columnTime ]
+                , HH.th_ [ HH.text posConstants.columnCustomerName ]
+                , HH.th_ [ HH.text "" ]
                 ]
             ]
         , HH.tbody_ (map renderTodaysBillRow state.todaysBills)
@@ -545,12 +532,14 @@ filterCustomers :: String -> Array Customer -> Array Customer
 filterCustomers query customers =
   if query == ""
     then []
-    else filter matchesQuery customers
-  where
-    lowerQuery = toLower query
-    matchesQuery customer =
-      contains (Pattern lowerQuery) (toLower customer.name) ||
-      contains (Pattern query) (show customer.id)
+    else 
+      let 
+        lowerQuery = toLower query
+        matchesQuery customer =
+          contains (Pattern lowerQuery) (toLower customer.name) ||
+          contains (Pattern query) (show customer.id)
+        results = filter matchesQuery customers
+      in results
 
 -- Action handler
 handleAction :: forall m. MonadAff m => Action -> H.HalogenM (State m) Action () Output m Unit
@@ -559,13 +548,18 @@ handleAction = case _ of
     -- Load all customers for search
     state <- H.get
     customers <- H.lift state.database.getAllCustomers
+    H.lift $ log $ "POS: Loaded " <> show (length customers) <> " customers"
     H.modify_ _ { allCustomers = customers }
     -- TODO: Load today's bills from API
     pure unit
 
   UpdateSearchQuery query -> do
     state <- H.get
+    H.lift $ log $ "Search query: " <> query
+    H.lift $ log $ "Total customers: " <> show (length state.allCustomers)
     let searchResults = filterCustomers query state.allCustomers
+    H.lift $ log $ "Search results: " <> show (length searchResults)
+    H.lift $ log $ "Show popup: " <> show (query /= "")
     H.modify_ _ 
       { searchQuery = query
       , showSearchPopup = query /= ""

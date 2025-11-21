@@ -1,8 +1,36 @@
 Server running on port 8080
 Database: customer_db on localhost:5432
-Database connected successfully at 2025-11-18T06:45:57.804Z
+Database connected successfully at 2025-11-21T14:59:32.287Z
+Server running on port 8080
+Database: customer_db on localhost:5432
+Database connected successfully at 2025-11-21T15:01:36.412Z
+GET /api/customers
+Fetching customers from database...
+Retrieved 4073 customers
+GET /
+GET /app.js
 GET /
 GET /app.js
 GET /api/customers
 Fetching customers from database...
-Retrieved 7 customers
+Retrieved 4073 customers
+GET /api/customers
+Fetching customers from database...
+Retrieved 4073 customers
+GET /
+GET /app.js
+GET /api/customers
+Fetching customers from database...
+Retrieved 4073 customers
+GET /
+GET /app.js
+GET /api/customers
+Fetching customers from database...
+Retrieved 4073 customers
+GET /favicon.ico
+GET /
+GET /app.js
+GET /api/customers
+Fetching customers from database...
+Retrieved 4073 customers
+GET /favicon.ico

@@ -11,6 +11,7 @@ You can edit this file as you like.
   , "argonaut-codecs"
   , "argonaut-core"
   , "arrays"
+  , "bifunctors"
   , "console"
   , "const"
   , "effect"

@@ -206,7 +206,9 @@ export const formatDateString = function(dateStr) {
   }
 };
 
-export const formatMoneyValue = function(n) {
+export const formatMoneyValue = function(d) {
+  // d is a Decimal object, convert to number only for display
+  const n = d.toNumber();
   const absN = Math.abs(n);
   const intPart = Math.floor(absN);
   const fracPart = Math.round((absN - intPart) * 100);
@@ -217,7 +219,9 @@ export const formatMoneyValue = function(n) {
   };
 };
 
-export const formatGramsValue = function(n) {
+export const formatGramsValue = function(d) {
+  // d is a Decimal object, convert to number only for display
+  const n = d.toNumber();
   const absN = Math.abs(n);
   if (absN === 0) return { integer: "", fraction: "" };
   
@@ -231,7 +235,9 @@ export const formatGramsValue = function(n) {
   };
 };
 
-export const formatBahtValue = function(n) {
+export const formatBahtValue = function(d) {
+  // d is a Decimal object, convert to number only for display
+  const n = d.toNumber();
   const absN = Math.abs(n);
   if (absN === 0) return { integer: "", fraction: "", hasFraction: false };
   
