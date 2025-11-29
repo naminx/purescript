@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/javascript-node:24
+    container_name: purescript-dev
+    volumes:
+      - /home/namin/sources:/workspaces:cached
+    command: sleep infinity
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/customer_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

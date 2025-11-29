@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Gold gradient -->
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="darkGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DAA520;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B8860B;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#1a1a1a"/>
+  
+  <!-- Gold bar (left) -->
+  <rect x="8" y="28" width="20" height="12" rx="1" fill="url(#goldGradient)" stroke="url(#darkGold)" stroke-width="1"/>
+  <line x1="10" y1="30" x2="26" y2="30" stroke="#FFED4E" stroke-width="0.5" opacity="0.6"/>
+  <line x1="10" y1="38" x2="26" y2="38" stroke="#B8860B" stroke-width="0.5" opacity="0.6"/>
+  
+  <!-- Ring (right top) -->
+  <circle cx="45" cy="22" r="8" fill="none" stroke="url(#goldGradient)" stroke-width="3"/>
+  <circle cx="45" cy="22" r="5" fill="none" stroke="url(#darkGold)" stroke-width="1.5"/>
+  <ellipse cx="45" cy="18" rx="2" ry="1" fill="#FFED4E" opacity="0.8"/>
+  
+  <!-- Necklace pendant (right bottom) -->
+  <path d="M 40 42 Q 45 38 50 42 L 48 48 Q 45 51 42 48 Z" fill="url(#goldGradient)" stroke="url(#darkGold)" stroke-width="1"/>
+  <circle cx="45" cy="44" r="1.5" fill="#FFED4E" opacity="0.8"/>
+  <path d="M 43 38 Q 45 36 47 38" stroke="url(#goldGradient)" stroke-width="1.5" fill="none"/>
+</svg>

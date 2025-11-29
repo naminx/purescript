@@ -1,0 +1,3 @@
+Server running on port 8080
+Database: customer_db on localhost:5432
+Database connected successfully at 2025-11-23T17:57:24.452Z

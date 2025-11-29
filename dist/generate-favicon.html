@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Favicon</title>
+</head>
+<body>
+    <canvas id="canvas" width="32" height="32"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Background
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, 32, 32);
+        
+        // Gold gradient
+        const gradient = ctx.createLinearGradient(0, 0, 32, 32);
+        gradient.addColorStop(0, '#FFD700');
+        gradient.addColorStop(0.5, '#FFA500');
+        gradient.addColorStop(1, '#FF8C00');
+        
+        // Gold bar
+        ctx.fillStyle = gradient;
+        ctx.fillRect(4, 14, 10, 6);
+        ctx.strokeStyle = '#B8860B';
+        ctx.strokeRect(4, 14, 10, 6);
+        
+        // Ring
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(22, 11, 4, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Pendant
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.moveTo(20, 21);
+        ctx.quadraticCurveTo(22, 19, 24, 21);
+        ctx.lineTo(23, 24);
+        ctx.quadraticCurveTo(22, 25, 21, 24);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#B8860B';
+        ctx.stroke();
+        
+        // Convert to ICO and download
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'favicon.png';
+            a.click();
+        });
+    </script>
+</body>
+</html>
