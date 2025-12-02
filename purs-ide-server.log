@@ -1,0 +1,6 @@
+nohup: ignoring input
+The --editor-mode flag is deprecated and ignored. It's now the default behaviou[Error] Connection was closed before any input arrived @(main:Command.Ide app/Command/Ide.hs:190:22)
+[Error] Connection was closed before any input arrived @(main:Command.Ide app/Command/Ide.hs:190:22)
+[Error] Connection was closed before any input arrived @(main:Command.Ide app/Command/Ide.hs:190:22)
+[Error] Connection was closed before any input arrived @(main:Command.Ide app/Command/Ide.hs:190:22)
+[Error] Connection was closed before any input arrived @(main:Command.Ide app/Command/Ide.hs:190:22)

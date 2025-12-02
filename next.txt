@@ -1,0 +1,100 @@
+Re-implement tray footer section as follows. Keep the 4-column structure (text, number, text, number; align left, right, left, right).
+
+First line:
+  1st column:
+    if settle in gold&money (gold price is not set):
+      if tray is new gold: # buying tray
+        # "ทอง" and "นาก" is defined in predefined_purity.metal_type field
+        # Percent to display is defined in predefined_purity.display_val field
+        switch purity:
+          case 96.5%: # purity == Nothing -- null in database
+            default "ทองหนัก"
+          otherwise:
+            force "" # non 96.5% gold is subject to conversion / extra charge which will be shown in the next line
+      else: # returning tray
+        switch purity:
+          case 96.5%:
+            default "คืนทองหนัก"
+          otherwise:
+            force "" # see above
+    else: # settle in money only (gold price is set)
+      show "" # gold of all purity will be converted to money in the next line
+
+    Default values are subject to click-to-edit. Force values are not editable.
+
+  2st column:
+    The actual weight of the tray. May be null if the user is not input yet. Enable click-to-edit in this column. Show input box (enable edit mode) right away if it is null.
+
+  3st column:
+    if tray is new gold: # buying tray
+      force "ค่าแรง"
+    else: # returning tray
+      force "คืนค่าแรง"
+
+  4st column:
+    Total making charge.
+
+Second line: If purity is 96.5% AND gold price is NOT set, then skip this line.
+  1st column:
+    if tray is new gold: # buying tray
+      switch purity:
+        case 99.99%: # purity == Just 100 -- 100.000 in database
+          default "ทอง ⁹⁹.₉₉﹪ หนัก"
+        case 42.5%:
+          default "นาก ⁴².₅﹪ หนัก"
+        case 53.125%:
+          default "นาก ⁵³.₁₂₅﹪ หนัก"
+        case 90%:
+          default "ทอง ⁹⁰﹪ หนัก"
+    else: # returning tray
+      switch purity:
+        case 99.99%:
+          default "คืนทอง ⁹⁹.₉₉﹪ หนัก"
+        case 42.5%:
+          default "คืนนาก ⁴².₅﹪ หนัก"
+        case 53.125%:
+          default "คืนนาก ⁵³.₁₂₅﹪ หนัก"
+        case 90%:
+          default "คืนทอง ⁹⁰﹪ หนัก"
+
+  2st column:
+    The actual weight of the tray. Display value is always positive, but the actual value in the database will be negative in case of buying tray, and positive in case of returning tray. It may be null if the user has not input yet. Enable click-to-edit in this column. Show input box (enable edit mode) right away if it is null.
+
+  3st column:
+    if settle in gold&money:
+      switch purity:
+        case 99.99%:
+          if tray is new gold: # buying tray
+            force "เพิ่มบาทละ ${extra_charge_per_baht}" // ${extra_charge_per_baht} is defined in tray_data.additional_charge_rate field, subject to click-to-edit
+          else: # returning tray
+            force "เหลือบาทละ ${extra_charge_per_baht}" // see above
+        otherwise: # 42.5%, 53.125%, 90% only, if it is 96.5%, it is already shown in the first line
+          force "× ${purity}% ="
+    else: # settle in money only
+      force "× ${gold_price} =" # ${gold_price} comes from the tray header
+
+  4st column:
+    if settle in gold&money:
+      switch purity:
+        case 99.99%:
+          force ${actual_weight} * 0.0656 * ${extra_charge_per_baht} # rounded to integer
+        otherwise: # 42.5%, 53.125%, 90% only, see above
+          force ${actual_weight} * ${purity}% # rounded to multiple of 0.050g, this is an exception when the 4th column shows a weight, not money
+    else: # settle in money only
+      switch purity:
+        case 99.99%:
+          force ${actual_weight} * 0.0656 * ${gold_price} # rounded to integer, 
+        otherwise: # 42.5%, 53.125%, 90% only, see above
+          force ${actual_weight} * 0.0656 * ${purity} * ${gold_price} # rounded to integer, 
+
+
+1. The sign convention is customer orient. Negative mean he owes us. When a customer buys gold, he takes gold from us, so it is debit against his gold account with us. However, in case of return tray (defective goods), he owes us less.
+2. I look at the json, it is "100.000", "42.500", etc.
+3. PredefinedPurity type is defined in API.purs, `state` has `predefinedPurities :: Array PredefinedPurity` field.
+4. Bill/Costants.purs defined bahtPerGramJewelry = 0.0656, actually you can crush all bahtPerGramXxx to bahtPerGram because they all use the same value.
+5. "if price_rate == Nothing then gold&money else money only" is correct. There are no other field to explicitly indicate settlement mode.
+6. Currently there is no such field. Let's add custom_weight_label :: Maybe String. If it is Nothing then we show a default value for each purity.
+7. Second line weight is stored in the same actual_weight_grams. The effective weight should be calculated on the fly, in order to realize single source of truth.
+8. Always enable edit mode as long as the actual weight is not input, in order to nudge the user to enter the value.
+
+Please ask further if anything is unclear.

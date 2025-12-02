@@ -1,0 +1,21 @@
+{
+  "name": "customer-management",
+  "version": "1.0.0",
+  "description": "Customer management application with PureScript and Halogen",
+  "scripts": {
+    "build": "spago build",
+    "bundle": "spago bundle-app --main Main --to dist/app.js",
+    "dev": "spago build --watch",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "purescript",
+    "halogen"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.11.0",
+    "vscode-jsonrpc": "^8.2.1",
+    "which": "^4.0.0"
+  }
+}

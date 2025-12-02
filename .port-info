@@ -1,0 +1,27 @@
+# Active Ports
+
+## Application Server
+- **Port 8080**: Node.js server (serve.js)
+  - Status: ACTIVE
+  - URL: https://8080--019a570f-232a-7050-a61e-ccef022a8b32.us-east-1-01.gitpod.dev
+  - Process: node serve.js
+
+## Inactive Preview Ports (can be ignored)
+- Port 8000: No process (stale preview registration)
+- Port 8001: No process (stale preview registration)
+- Port 8003: No process (stale preview registration)
+- Port 8004: No process (stale preview registration)
+
+These inactive ports are leftover from earlier server startup attempts.
+They don't consume resources and will be cleaned up by Gitpod automatically.
+
+## To Start the Server
+```bash
+cd /workspaces/purescript
+node serve.js
+```
+
+Or use the preview command:
+```bash
+exec_preview "node /workspaces/purescript/serve.js" 8080
+```

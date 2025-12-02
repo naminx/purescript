@@ -1,0 +1,6 @@
+{
+    "purescript.addNpmPath": true,
+    "purescript.pursExe": "/etc/profiles/per-user/namin/bin/purs",
+    "purescript.formatter": "purs-tidy",
+    "purescript.trace.server": "verbose"
+}

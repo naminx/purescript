@@ -1,0 +1,9 @@
+nohup: ignoring input
+
+> customer-management@1.0.0 start
+> node server.js
+
+Server running on port 8088
+Database: customer_db on localhost:5432
+Database connected successfully at 2025-11-29T03:18:52.463Z
+GET /api/predefined-purities

@@ -1,0 +1,71 @@
+{
+  "name": "PureScript/Halogen Development",
+
+  // PostgreSQL service for local development
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Docker Compose for PostgreSQL
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/purescript",
+
+  // Forward development ports
+  "forwardPorts": [
+    1234, // Parcel dev server (common for PureScript)
+    8080 // Alternative dev server
+  ],
+
+  // Port attributes
+  "portsAttributes": {
+    "1234": {
+      "label": "PureScript Dev Server",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Alt Dev Server",
+      "onAutoForward": "notify"
+    }
+  },
+
+  // VS Code customizations
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "OxfordAbstracts.ide-purescript-oa-hybrid",
+        "nwolverson.language-purescript",
+        "dhall.dhall-lang",
+        "ckolkman.vscode-postgres",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "editorconfig.editorconfig"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "purescript.addSpagoSources": true,
+        "purescript.buildCommand": "spago build",
+        "purescript.censorWarnings": [],
+        "purescript.formatter": "purs-tidy"
+      }
+    }
+  },
+
+  // Install PureScript toolchain after container creation
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+
+  "remoteUser": "node",
+
+  // Environment variables for PostgreSQL connection
+  "containerEnv": {
+    "DATABASE_URL": "postgresql://postgres:postgres@host.docker.internal:5432/customer_db"
+  },
+
+  // Mount node_modules for better performance
+  "mounts": [
+    "source=${localWorkspaceFolder}/node_modules,target=/workspaces/purescript/node_modules,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/.spago,target=/workspaces/purescript/.spago,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/output,target=/workspaces/purescript/output,type=bind,consistency=cached"
+  ]
+}
